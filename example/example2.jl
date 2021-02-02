@@ -28,31 +28,26 @@ n = 11
 A = create_matrix(n, n)
 b = create_vector(n)
 
-# Set the size of the different objects, leaving PETSC to decide how to distribute. Note that we should
-# set the number of preallocated non-zeros to increase performance.
-MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, n, n)
-VecSetSizes(b, PETSC_DECIDE, n)
-
 # We can then use command-line options to set our matrix/vectors.
-MatSetFromOptions(A)
-VecSetFromOptions(b)
+set_from_options!(A)
+set_from_options!(b)
 
 # Finish the set up
-MatSetUp(A)
-VecSetUp(b)
+set_up!(A)
+set_up!(b)
 
 # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
 # The `rstart, rend = *GetOwnershipRange` methods differ a little bit from PETSc API since the two integers it
 # returns are the effective Julia range of rows handled by the local processor. If `n` is the total
 # number of rows, then `rstart ∈ [1,n]` and `rend` is the last row handled by the local processor.
-b_start, b_end = VecGetOwnershipRange(b)
+b_start, b_end = get_range(b)
 
 # Now let's build the right hand side vector. Their are various ways to do this, this is just one.
-n_loc = VecGetLocalSize(b) ## Note that n_loc = b_end - b_start + 1...
-VecSetValues(b, collect(b_start:b_end), 2 * ones(n_loc))
+n_loc = length(b) ## Note that n_loc = b_end - b_start + 1...
+b[b_start:b_end] = 2 * ones(n_loc)
 
 # And here is the differentiation matrix. Rembember that PETSc.MatSetValues simply ignores negatives rows indices.
-A_start, A_end = MatGetOwnershipRange(A)
+A_start, A_end = get_range(A)
 for i in A_start:A_end
     A[i, i-1:i] = [-1. 1.] / Δx
 end
@@ -61,31 +56,27 @@ end
 (b_start == 1) && (b[1] = 0.)
 
 # Assemble matrices
-MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY)
-VecAssemblyBegin(b)
-MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY)
-VecAssemblyEnd(b)
+assemble!(A)
+assemble!(b)
 
 # At this point, you can inspect `A` and `b` using the viewers (only stdout for now), simply call
 # `MatView(A)` and/or `VecView(b)`
 
 # Set up the linear solver
-ksp = KSPCreate()
-KSPSetOperators(ksp, A, A)
-KSPSetFromOptions(ksp)
-KSPSetUp(ksp)
+ksp = create_ksp(A)
+set_from_options!(ksp)
+set_up!(ksp)
 
-# Solve the system. We first allocate the solution using the `VecDuplicate` method.
-x = VecDuplicate(b)
-KSPSolve(ksp, b, x)
+# Solve the system
+x = solve(ksp, b)
 
 # Print the solution
 VecView(x)
 
 # Free memory
-MatDestroy(A)
-VecDestroy(b)
-VecDestroy(x)
+destroy!(A)
+destroy!(b)
+destroy!(x)
 
 # Finalize Petsc
 PetscFinalize()

@@ -26,7 +26,13 @@ export PetscInitialize, PetscFinalize
 include("vec.jl")
 export  PetscVec, CVec,
         assemble!,
+        create_vector,
+        destroy!,
+        duplicate,
+        get_range,
         set_local_size!, set_global_size!,
+        set_from_options!,
+        set_up!,
         vec2array,
         VecAssemble,
         VecAssemblyBegin,
@@ -47,6 +53,7 @@ export  PetscVec, CVec,
 
 include("mat.jl")
 export  PetscMat, CMat,
+        create_matrix,
         MatAssemble,
         MatAssemblyBegin,
         MatAssemblyEnd,
@@ -63,6 +70,9 @@ export  PetscMat, CMat,
 
 include("ksp.jl")
 export  PetscKSP, CKSP,
+        create_ksp,
+        solve, solve!,
+        set_operators!,
         KSPCreate,
         KSPDestroy,
         KSPSetFromOptions,

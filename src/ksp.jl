@@ -31,6 +31,20 @@ function KSPCreate()
     return ksp
 end
 
+create_ksp() = KSPCreate()
+
+function create_ksp(A::PetscMat)
+    ksp = KSPCreate()
+    KSPSetOperators(ksp, A, A)
+    return ksp
+end
+
+function create_ksp(Amat::PetscMat, Pmat::PetscMat)
+    ksp = KSPCreate()
+    KSPSetOperators(ksp, Amat, Pmat)
+    return ksp
+end
+
 """
     KSPSetOperators(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
 
@@ -41,6 +55,10 @@ function KSPSetOperators(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
     @assert iszero(error)
 end
 
+set_operators!(ksp::PetscKSP, A::PetscMat) = KSPSetOperators(ksp, Amat, Amat)
+set_operators!(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat) = KSPSetOperators(ksp, Amat, Pmat)
+
+
 """
     KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
 
@@ -49,6 +67,13 @@ Wrapper for KSPSolve
 function KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
     error = ccall((:KSPSolve, libpetsc), PetscErrorCode, (CKSP, CVec, CVec), ksp, b, x)
     @assert iszero(error)
+end
+solve!(ksp::PetscKSP, b::PetscVec, x::PetscVec) = KSPSolve(ksp, b, x)
+
+function solve(ksp::PetscKSP, b::PetscVec)
+    x = VecDuplicate(b)
+    KSPSolve(ksp, b, x)
+    return x
 end
 
 """
@@ -60,6 +85,7 @@ function KSPSetUp(ksp::PetscKSP)
     error = ccall((:KSPSetUp, libpetsc), PetscErrorCode, (CKSP,), ksp)
     @assert iszero(error)
 end
+set_up!(ksp::PetscKSP) = KSPSetUp(ksp)
 
 """
     KSPSetFromOptions(ksp::PetscKSP)
@@ -70,6 +96,7 @@ function KSPSetFromOptions(ksp::PetscKSP)
     error = ccall((:KSPSetFromOptions, libpetsc), PetscErrorCode, (CKSP,), ksp)
     @assert iszero(error)
 end
+set_from_options!(ksp::PetscKSP) = KSPSetFromOptions(ksp)
 
 """
     KSPDestroy(ksp::PetscKSP)
@@ -80,3 +107,5 @@ function KSPDestroy(ksp::PetscKSP)
     error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
     @assert iszero(error)
 end
+
+destroy!(ksp::PetscKSP) = KSPDestroy(ksp)
