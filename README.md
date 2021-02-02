@@ -1,6 +1,6 @@
 # PetscWrap.jl
 
-PetscWrap.jl is a parallel Julia wrapper for PETSc. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects.
+PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.mcs.anl.gov/petsc/) library. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects.
 
 The main differences with the two aformentionned projects are:
 - parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
