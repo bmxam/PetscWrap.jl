@@ -1,5 +1,5 @@
 # PETSc KSP
 ```@autodocs
-Modules = [JuliaPetsc]
+Modules = [PetscWrap]
 Pages   = ["ksp.jl"]
 ```

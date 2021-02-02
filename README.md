@@ -1,6 +1,6 @@
-# JuliaPetsc.jl
+# PetscWrap.jl
 
-JuliaPetsc.jl is a parallel Julia wrapper for PETSc. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects.
+PetscWrap.jl is a parallel Julia wrapper for PETSc. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects.
 
 The main differences with the two aformentionned projects are:
 - parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
@@ -13,17 +13,17 @@ Note that the primary objective of this project is to enable the wrapper of the 
 ## How to install it
 You must have installed the PETSc library on your computer and set the two following environment variables : `PETSC_DIR` and `PETSC_ARCH`.
 
-At run time, JuliaPetsc.jl looks for the `libpetsc.so` using these environment variables and "load" the library.
+At run time, PetscWrap.jl looks for the `libpetsc.so` using these environment variables and "load" the library.
 
 To install the package, use the Julia package manager:
 ```Julia
-pkg> add JuliaPETSc
+pkg> add PetscWrap
 ```
 ## Contribute
 Any contribution(s) and/or remark(s) are welcome! For now, I don't have any CI procedure because I don't know yet how to run "mpi jobs" on github.
 
 ## How to use it
-You will find examples of use by building the documentation: `julia JuliaPetsc.jl/docs/make.jl`. Here is one of the examples:
+You will find examples of use by building the documentation: `julia PetscWrap.jl/docs/make.jl`. Here is one of the examples:
 ### A first demo
 This example serves as a test since this project doesn't have a "testing" procedure yet. In this example,
 the equation ``u'(x) = 2`` with ``u(0) = 0`` is solved on the domain ``[0,1]`` using a backward finite
@@ -39,7 +39,7 @@ To run this example, execute : `mpirun -n your_favorite_positive_integer julia e
 Import package
 
 ```julia
-using JuliaPetsc
+using PetscWrap
 ```
 
 Initialize PETSc. Either without arguments, calling `PetscInitialize()` or using "command-line" arguments.

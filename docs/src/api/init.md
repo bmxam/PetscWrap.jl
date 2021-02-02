@@ -1,5 +1,5 @@
 # Initialization
 ```@autodocs
-Modules = [JuliaPetsc]
+Modules = [PetscWrap]
 Pages   = ["init.jl"]
 ```

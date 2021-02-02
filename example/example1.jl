@@ -12,7 +12,7 @@ module Example1 #hide
 # To run this example, execute : `mpirun -n your_favorite_positive_integer julia example1.jl`
 
 # Import package
-using JuliaPetsc
+using PetscWrap
 
 # Initialize PETSc. Either without arguments, calling `PetscInitialize()` or using "command-line" arguments.
 # To do so, either provide the arguments as one string, for instance

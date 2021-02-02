@@ -1,6 +1,6 @@
 push!(LOAD_PATH,"../src/")
 
-using JuliaPetsc
+using PetscWrap
 using Documenter
 using Literate
 
@@ -12,13 +12,13 @@ Literate.markdown(joinpath(example_src, "example1.jl"), example_dir; documenter 
 Literate.markdown(joinpath(example_src, "example2.jl"), example_dir; documenter = false, execute = false) # documenter = false to avoid Documenter to execute cells
 
 makedocs(;
-    modules=[JuliaPetsc],
+    modules=[PetscWrap],
     authors="bmxam",
-    sitename="JuliaPetsc.jl",
+    sitename="PetscWrap.jl",
     clean=true,doctest=false,
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://github.com/bmxam/JuliaPetsc.jl",
+        canonical="https://github.com/bmxam/PetscWrap.jl",
         assets=String[],
     ),
     pages=[
@@ -37,6 +37,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com:bmxam/JuliaPetsc.jl.git",
+    repo="github.com:bmxam/PetscWrap.jl.git",
     push_preview = true
 )

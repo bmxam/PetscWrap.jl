@@ -2,7 +2,7 @@
     I have decided to remove all exclamation marks `!` at the end of routines "modifying" their arguments
     when the name is the same as in PETSc API. It was too confusing.
 """
-module JuliaPetsc
+module PetscWrap
 
 using Libdl
 using MPI
