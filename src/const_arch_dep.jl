@@ -29,6 +29,9 @@ end
     Find the Julia type for PetscReal
 """
 function PetscReal2Type()
+    # Workaround for RegistryCI
+    (libpetsc == "JULIA_REGISTRYCI_AUTOMERGE") && (return Cdouble)
+
     PETSC_REAL = DataTypeFromString("Real")
     result =
         PETSC_REAL == PETSC_DOUBLE ? Cdouble :
@@ -41,6 +44,9 @@ end
     Find the Julia type for PetscScalar
 """
 function PetscScalar2Type()
+    # Workaround for RegistryCI
+    (libpetsc == "JULIA_REGISTRYCI_AUTOMERGE") && (return Cdouble)
+
     PETSC_REAL = DataTypeFromString("Real")
     PETSC_SCALAR = DataTypeFromString("Scalar")
     result =
@@ -54,6 +60,9 @@ end
     Find the Julia type for PetscInt
 """
 function PetscInt2Type()
+    # Workaround for RegistryCI
+    (libpetsc == "JULIA_REGISTRYCI_AUTOMERGE") && (return Int32)
+
     PETSC_INT_SIZE = PetscDataTypeGetSize(PETSC_INT)
     result =
         PETSC_INT_SIZE == 4 ? Int32 :

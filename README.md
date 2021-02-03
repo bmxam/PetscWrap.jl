@@ -22,6 +22,9 @@ pkg> add PetscWrap
 ## Contribute
 Any contribution(s) and/or remark(s) are welcome! For now, I don't have any CI procedure because I don't know yet how to run "mpi jobs" on github.
 
+## PETSc compat.
+This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are not supported yet.
+
 ## How to use it
 You will find examples of use by building the documentation: `julia PetscWrap.jl/docs/make.jl`. Here is one of the examples:
 ### A first demo

@@ -20,11 +20,18 @@ function get_petsc_location()
         end
     end
 
-    length(PETSC_LIB) == 0 && throw(ErrorException("PETSc shared library (libpetsc.so) not found. Please check that PETSC_DIR and PETSC_ARCH env. variables are set."))
+    # PETSc lib not found
+    if(length(PETSC_LIB) == 0)
+        # Workaround for automerging on RegistryCI
+        if(haskey(ENV,"JULIA_REGISTRYCI_AUTOMERGE"))
+            PETSC_LIB = "JULIA_REGISTRYCI_AUTOMERGE"
+        else
+            throw(ErrorException("PETSc shared library (libpetsc.so) not found. Please check that PETSC_DIR and PETSC_ARCH env. variables are set."))
+        end
+    end
 
     return PETSC_LIB
 end
 
 # Absolute path to libpetsc.so
 const libpetsc = get_petsc_location()
-#const libpetsc = string(ENV["PETSC_DIR"], "/", ENV["PETSC_ARCH"], "/lib/libpetsc.so")
