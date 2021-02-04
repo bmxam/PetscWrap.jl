@@ -20,7 +20,7 @@ To install the package, use the Julia package manager:
 pkg> add PetscWrap
 ```
 ## Contribute
-Any contribution(s) and/or remark(s) are welcome! For now, I don't have any CI procedure because I don't know yet how to run "mpi jobs" on github.
+Any contribution(s) and/or remark(s) are welcome!
 
 ## PETSc compat.
 This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are not supported yet.

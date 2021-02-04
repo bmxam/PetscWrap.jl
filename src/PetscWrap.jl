@@ -1,4 +1,8 @@
 """
+    This package has been inspired and even sometimes directly copied from two projects:
+    - https://github.com/gridap/GridapPETSc.jl
+    - https://github.com/JuliaParallel/PETSc.jl
+
     I have decided to remove all exclamation marks `!` at the end of routines "modifying" their arguments
     when the name is the same as in PETSc API. It was too confusing.
 """
@@ -8,7 +12,7 @@ using Libdl
 using MPI
 
 include("const_arch_ind.jl")
-export  PetscErrorCode, PETSC_DECIDE
+export  PetscErrorCode, PETSC_DECIDE, PetscViewer
 # export all items of some enums
 for item in Iterators.flatten((instances(InsertMode), instances(MatAssemblyType)))
     @eval export $(Symbol(item))

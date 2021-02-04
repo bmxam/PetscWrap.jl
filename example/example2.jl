@@ -1,4 +1,4 @@
-module Example1 #hide
+module Example #hide
 # # Same with fancy names
 # This example does more or less the same things as the first example, but using non regular API function names.
 #

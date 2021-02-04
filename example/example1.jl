@@ -1,4 +1,4 @@
-module Example1 #hide
+module Example #hide
 # # A first demo
 # This example serves as a test since this project doesn't have a "testing" procedure yet. In this example,
 # the equation ``u'(x) = 2`` with ``u(0) = 0`` is solved on the domain ``[0,1]`` using a backward finite
@@ -81,6 +81,10 @@ KSPSolve(ksp, b, x)
 
 # Print the solution
 VecView(x)
+
+# Access the solution (this part is under development), getting a Julia array; and then restore it
+array, ref = VecGetArray(x) # do something with array
+VecRestoreArray(x, ref)
 
 # Free memory
 MatDestroy(A)
