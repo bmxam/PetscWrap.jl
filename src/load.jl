@@ -23,7 +23,7 @@ function get_petsc_location()
     # PETSc lib not found
     if(length(PETSC_LIB) == 0)
         # Workaround for automerging on RegistryCI or doc deployment
-        if(haskey(ENV,"JULIA_REGISTRYCI_AUTOMERGE") || haskey(ENV, DOC_DEPLOYMENT))
+        if(haskey(ENV,"JULIA_REGISTRYCI_AUTOMERGE") || haskey(ENV, "DOC_DEPLOYMENT"))
             PETSC_LIB = "JULIA_REGISTRYCI_AUTOMERGE"
         else
             throw(ErrorException("PETSc shared library (libpetsc.so) not found. Please check that PETSC_DIR and PETSC_ARCH env. variables are set."))
