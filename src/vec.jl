@@ -208,13 +208,15 @@ end
 duplicate(vec::PetscVec) = VecDuplicate(vec)
 
 """
-    Wrapper for VecGetArray.
+    VecGetArray(vec::PetscVec, own = false)
+
+Wrapper for VecGetArray.
 
 # Warning
 I am not confortable at all with memory management, both on the C side and on the Julia side. Use
 this at you own risk.
 
-According to Julia documentation, "`own` optionally specifies whether Julia should take ownership
+According to Julia documentation, `own` optionally specifies whether Julia should take ownership
 of the memory, calling free on the pointer when the array is no longer referenced."
 
 """
@@ -234,7 +236,9 @@ function VecGetArray(vec::PetscVec, own = false)
 end
 
 """
-    Wrapper for VecRestoreArray. `array_ref` is obtained from `VecGetArray`
+    VecRestoreArray(vec::PetscVec, array_ref)
+
+Wrapper for VecRestoreArray. `array_ref` is obtained from `VecGetArray`
 """
 function VecRestoreArray(vec::PetscVec, array_ref)
     error = ccall((:VecRestoreArray, libpetsc), PetscErrorCode, (CVec, Ref{Ptr{PetscScalar}}), vec, array_ref)
