@@ -173,7 +173,9 @@ Base.length(vec::PetscVec) = VecGetLocalSize(vec)
 Base.size(vec::PetscVec) = (length(vec),)
 
 """
-    Wrapper to VecAssemblyBegin
+    VecAssemblyBegin(vec::PetscVec)
+
+Wrapper to VecAssemblyBegin
 """
 function VecAssemblyBegin(vec::PetscVec)
     error = ccall((:VecAssemblyBegin, libpetsc), PetscErrorCode, (CVec,), vec)
@@ -181,7 +183,9 @@ function VecAssemblyBegin(vec::PetscVec)
 end
 
 """
-    Wrapper to VecAssemblyEnd
+    VecAssemblyEnd(vec::PetscVec)
+
+Wrapper to VecAssemblyEnd
 """
 function VecAssemblyEnd(vec::PetscVec)
     error = ccall((:VecAssemblyEnd, libpetsc), PetscErrorCode, (CVec,), vec)
@@ -230,7 +234,7 @@ function VecGetArray(vec::PetscVec, own = false)
     rstart, rend = VecGetOwnershipRange(vec)
     n = rend - rstart + 1
 
-    array = unsafe_wrap(Array, array_ref[], n; own)
+    array = unsafe_wrap(Array, array_ref[], n; own = own)
 
     return array, array_ref
 end
@@ -260,7 +264,9 @@ function vec2array(vec::PetscVec)
 end
 
 """
-    Wrapper to VecView
+    VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
+
+Wrapper to VecView
 """
 function VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
     error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
@@ -268,7 +274,9 @@ function VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
 end
 
 """
-    Wrapper to VecDestroy
+    VecDestroy(vec::PetscVec)
+
+Wrapper to VecDestroy
 """
 function VecDestroy(vec::PetscVec)
     error = ccall( (:VecDestroy, libpetsc),
