@@ -1,6 +1,6 @@
 # PetscWrap.jl
 
-PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.mcs.anl.gov/petsc/) library. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects.
+PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.mcs.anl.gov/petsc/) library. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects : these two projects have extensively inspired this project, and some code has even been directly copied.
 
 The main differences with the two aformentionned projects are:
 - parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
@@ -20,7 +20,7 @@ To install the package, use the Julia package manager:
 pkg> add PetscWrap
 ```
 ## Contribute
-Any contribution(s) and/or remark(s) are welcome!
+Any contribution(s) and/or remark(s) are welcome! If you need a function that is not wrapped yet but you don't think you are capable of contributing, post an issue with a minimum working example.
 
 ## PETSc compat.
 This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are not supported yet.
