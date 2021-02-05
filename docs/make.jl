@@ -37,6 +37,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com:bmxam/PetscWrap.jl.git",
+    repo="github.com/bmxam/PetscWrap.jl.git",
     push_preview = true
 )
