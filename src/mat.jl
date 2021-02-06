@@ -47,7 +47,9 @@ function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
 end
 
 """
-    Wrapper to MatCreate
+    MatCreate(comm, mat::PetscMat)
+
+Wrapper to MatCreate
 """
 function MatCreate(comm, mat::PetscMat)
     error = ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat.ptr)
