@@ -29,9 +29,9 @@ Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, co
 
 Base.ndims(::Type{PetscMat}) = 2
 """
-    Wrapper to MatSetValues.
+    MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
-    Indexing starts at 1 (Julia)
+Wrapper to MatSetValues. Indexing starts at 1 (Julia)
 """
 function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
     nI = PetscInt(length(I))
