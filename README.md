@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://jump.dev/Convex.jl/stable)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://bmxam.github.io/PetscWrap.jl/stable)
 
 # PetscWrap.jl
 
