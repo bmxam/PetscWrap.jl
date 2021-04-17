@@ -144,7 +144,7 @@ end
 get_range(mat::PetscMat) = MatGetOwnershipRange(mat)
 
 """
-    Wrapper to MatAssemblyBegin
+    Wrapper to `MatAssemblyBegin`
 """
 function MatAssemblyBegin(mat::PetscMat, type::MatAssemblyType)
     error = ccall((:MatAssemblyBegin, libpetsc), PetscErrorCode, (CMat, MatAssemblyType), mat, type)
@@ -152,20 +152,23 @@ function MatAssemblyBegin(mat::PetscMat, type::MatAssemblyType)
 end
 
 """
-    Wrapper to MatAssemblyEnd
+    Wrapper to `MatAssemblyEnd`
 """
 function MatAssemblyEnd(mat::PetscMat, type::MatAssemblyType)
     error = ccall((:MatAssemblyEnd, libpetsc), PetscErrorCode, (CMat, MatAssemblyType), mat, type)
     @assert iszero(error)
 end
 
+"""
+    Wrapper to `MatAssemblyBegin` and `MatAssemblyEnd` successively.
+"""
 function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
     MatAssemblyBegin(mat, type)
     MatAssemblyEnd(mat, type)
 end
 
 """
-    Wrapprt to MatCreateVecs
+    Wrapper to MatCreateVecs
 """
 function MatCreateVecs(mat::PetscMat, vecr::PetscVec, veci::PetscVec)
     error = ccall((:MatCreateVecs, libpetsc), PetscErrorCode, (CMat, Ptr{CVec}, Ptr{CVec}), mat, vecr.ptr, veci.ptr)
@@ -181,7 +184,7 @@ end
 """
     MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
 
-Wrapper to MatView
+Wrapper to `MatView`
 """
 function MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, PetscViewer), mat, viewer)

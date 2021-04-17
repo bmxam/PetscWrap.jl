@@ -71,7 +71,7 @@ set_up!(ksp)
 x = solve(ksp, b)
 
 # Print the solution
-VecView(x)
+@show x
 
 # Free memory
 destroy!(A)
