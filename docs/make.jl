@@ -29,6 +29,7 @@ makedocs(;
         ],
         "API Reference" => Any[
             "api/init.md",
+            "api/viewer.md",
             "api/vec.md",
             "api/mat.md",
             "api/ksp.md",
