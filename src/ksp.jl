@@ -14,20 +14,14 @@ Base.cconvert(::Type{CKSP}, ksp::PetscKSP) = ksp.ptr[]
 
 Wrapper for KSPCreate
 """
-function KSPCreate(comm, ksp::PetscKSP)
+function KSPCreate(comm::MPI.Comm, ksp::PetscKSP)
     error = ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp.ptr)
     @assert iszero(error)
 end
 
-function KSPCreate(comm)
+function KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     ksp = PetscKSP()
     KSPCreate(comm, ksp)
-    return ksp
-end
-
-function KSPCreate()
-    ksp = PetscKSP()
-    KSPCreate(MPI.COMM_WORLD, ksp)
     return ksp
 end
 
@@ -55,7 +49,7 @@ function KSPSetOperators(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
     @assert iszero(error)
 end
 
-set_operators!(ksp::PetscKSP, A::PetscMat) = KSPSetOperators(ksp, Amat, Amat)
+set_operators!(ksp::PetscKSP, Amat::PetscMat) = KSPSetOperators(ksp, Amat, Amat)
 set_operators!(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat) = KSPSetOperators(ksp, Amat, Pmat)
 
 

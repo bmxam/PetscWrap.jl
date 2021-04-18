@@ -46,6 +46,13 @@ VecAssemblyBegin(b)
 MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY)
 VecAssemblyEnd(b)
 
+# Inspect with viewer
+viewer = PetscViewerStdWorld()
+MatView(A, viewer)
+PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_DENSE)
+MatView(A, viewer)
+PetscViewerPopFormat(viewer)
+
 # Set up the linear solver
 ksp = KSPCreate()
 KSPSetOperators(ksp, A, A)

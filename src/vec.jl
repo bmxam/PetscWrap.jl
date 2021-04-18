@@ -10,24 +10,18 @@ end
 Base.cconvert(::Type{CVec}, vec::PetscVec) = vec.ptr[]
 
 """
-    VecCreate(comm, vec::PetscVec)
+    VecCreate(comm::MPI.Comm, vec::PetscVec)
 
 Wrapper to VecCreate
 """
-function VecCreate(comm, vec::PetscVec)
+function VecCreate(comm::MPI.Comm, vec::PetscVec)
     error = ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec.ptr)
     @assert iszero(error)
 end
 
-function VecCreate(comm)
+function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     vec = PetscVec()
     VecCreate(comm, vec)
-    return vec
-end
-
-function VecCreate()
-    vec = PetscVec()
-    VecCreate(MPI.COMM_WORLD, vec)
     return vec
 end
 
@@ -268,7 +262,7 @@ end
 
 Wrapper to VecView
 """
-function VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
+function VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
     error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
     @assert iszero(error)
 end

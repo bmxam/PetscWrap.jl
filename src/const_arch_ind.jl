@@ -2,7 +2,6 @@
 # -> directly copied from https://github.com/JuliaParallel/PETSc.jl.git
 
 const PetscErrorCode = Cint
-const PetscViewer = Ptr{Cvoid}
 
 const PETSC_DEFAULT = -2
 const PETSC_DECIDE  = -1

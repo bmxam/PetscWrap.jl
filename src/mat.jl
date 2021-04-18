@@ -47,24 +47,18 @@ function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
 end
 
 """
-    MatCreate(comm, mat::PetscMat)
+    MatCreate(comm::MPI.Comm, mat::PetscMat)
 
 Wrapper to MatCreate
 """
-function MatCreate(comm, mat::PetscMat)
+function MatCreate(comm::MPI.Comm, mat::PetscMat)
     error = ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat.ptr)
     @assert iszero(error)
 end
 
-function MatCreate(comm)
+function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     mat = PetscMat()
     MatCreate(comm, mat)
-    return mat
-end
-
-function MatCreate()
-    mat = PetscMat()
-    MatCreate(MPI.COMM_WORLD, mat)
     return mat
 end
 
@@ -186,8 +180,8 @@ end
 
 Wrapper to `MatView`
 """
-function MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
-    error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, PetscViewer), mat, viewer)
+function MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
+    error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end
 
