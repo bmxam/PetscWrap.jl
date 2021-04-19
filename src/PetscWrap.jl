@@ -28,12 +28,13 @@ include("init.jl")
 export PetscInitialize, PetscFinalize
 
 include("viewer.jl")
-export PetscViewer, CViewer,
-       PetscViewerCreate,
-       PetscViewerASCIIOpen,
-       PetscViewerPopFormat,
-       PetscViewerPushFormat,
-       PetscViewerStdWorld
+export  PetscViewer, CViewer,
+        PetscViewerASCIIOpen,
+        PetscViewerCreate,
+        PetscViewerDestroy,
+        PetscViewerPopFormat,
+        PetscViewerPushFormat,
+        PetscViewerStdWorld
 
 include("vec.jl")
 export  PetscVec, CVec,

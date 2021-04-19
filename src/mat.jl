@@ -28,10 +28,16 @@ Base.setindex!(mat::PetscMat, values, row::Integer, cols) = MatSetValues(mat, [r
 Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, collect(rows), [col], values, INSERT_VALUES)
 
 Base.ndims(::Type{PetscMat}) = 2
+
 """
     MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
 Wrapper to MatSetValues. Indexing starts at 1 (Julia)
+
+Warning:
+PETSc way to set values does not seem to match SparseArrays : sparse(I,J,V) # PetscMat(I,J,V). According to
+PETSc documentation, "the value to be put in row `I[i]` and column `J[j]` is located in `V[i*n+j]`" (where
+`n = size(J)`)
 """
 function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
     nI = PetscInt(length(I))

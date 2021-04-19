@@ -72,7 +72,7 @@ end
 
 Wrapper for `PetscViewerDestroy`
 
-Warning : from what I understand, all viewers must no be destroyed explicitely using `PetscViewerDestroy`.
+Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
 
 """
 function PetscViewerDestroy(viewer::PetscViewer)
