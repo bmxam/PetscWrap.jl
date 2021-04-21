@@ -26,27 +26,36 @@ function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
-    create_vector(nrows, nrows_loc = PETSC_DECIDE)
+    VecSetValue(vec::PetscVec, i::PetscInt, v::PetscScalar, mode::InsertMode = INSERT_VALUES)
 
-Create a `PetscVec` matrix of global size `(nrows)`.
+Wrapper to `VecSetValue`. Indexing starts at 0 (as in PETSc).
+
+# Implementation
+For an unknow reason, calling PETSc.VecSetValue leads to an "undefined symbol: VecSetValue" error.
+So this wrapper directly call VecSetValues (anyway, this is what is done in PETSc...)
 """
-function create_vector(nrows, nrows_loc = PETSC_DECIDE)
-    vec = VecCreate()
-    VecSetSizes(vec::PetscVec, nrows_loc, nrows)
-    return vec
+function VecSetValue(vec::PetscVec, i::PetscInt, v::PetscScalar, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec, PetscIntOne, [i], [v], mode)
+end
+
+function VecSetValue(vec::PetscVec, i, v, mode::InsertMode = INSERT_VALUES)
+    VecSetValue(vec, PetscInt(i), PetscScalar(v), mode)
 end
 
 """
-    VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
 
 Wrapper to VecSetValues. Indexing starts at 0 (as in PETSc)
 """
-function VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
-    nI = PetscInt(length(I))
+function VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
     error = ccall((:VecSetValues, libpetsc), PetscErrorCode,
         (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
         vec, nI, I, V, mode)
     @assert iszero(error)
+end
+
+function VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec, PetscInt(length(I)), I, V, mode)
 end
 
 function VecSetValues(vec::PetscVec, I, V, mode::InsertMode = INSERT_VALUES)
@@ -93,10 +102,12 @@ end
 """
     VecGetOwnershipRange(vec::PetscVec)
 
-Wrapper to VecGetOwnershipRange
+Wrapper to `VecGetOwnershipRange`
 
-However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
-This is different from the default `PETSc` result where the indexing starts at one and where `rend-1` is last row
+The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
+
+# Warning
+`PETSc` indexing starts at zero (so `rstart` may be zero) and `rend-1` is the last row
 handled by the local processor.
 """
 function VecGetOwnershipRange(vec::PetscVec)
@@ -106,7 +117,7 @@ function VecGetOwnershipRange(vec::PetscVec)
     error = ccall((:VecGetOwnershipRange, libpetsc), PetscErrorCode, (CVec, Ref{PetscInt}, Ref{PetscInt}), vec, rstart, rend)
     @assert iszero(error)
 
-    return rstart[] + 1, rend[]
+    return rstart[], rend[]
 end
 
 """
@@ -191,7 +202,7 @@ function VecGetArray(vec::PetscVec, own = false)
 
     # Get array size
     rstart, rend = VecGetOwnershipRange(vec)
-    n = rend - rstart + 1
+    n = rend - rstart # this is not `rend - rstart + 1` because of VecGetOwnershipRange convention
 
     array = unsafe_wrap(Array, array_ref[], n; own = own)
 
@@ -209,12 +220,24 @@ function VecRestoreArray(vec::PetscVec, array_ref)
 end
 
 """
-    VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
+    VecView(vec::PetscVec, viewer::PetscViewer)
 
-Wrapper to VecView
+Wrapper to `VecView`. Currently leads to a fatal error when using with `viewer = PetscViewerStdWorld()`.
+Use `VecView(vec)` instead.
 """
-function VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
+function VecView(vec::PetscVec, viewer::PetscViewer)
     error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
+    @assert iszero(error)
+end
+
+"""
+    VecView(vec::PetscVec)
+
+Wrapper to `VecView` with the default PETSc viewer. This a fallback for the currently buggy
+`VecView(vec::PetscVec, viewer::PetscViewer)`
+"""
+function VecView(vec::PetscVec)
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
     @assert iszero(error)
 end
 

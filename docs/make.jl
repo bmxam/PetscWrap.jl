@@ -8,8 +8,8 @@ using Literate
 example_src = joinpath(@__DIR__,"..","example")
 example_dir = joinpath(@__DIR__,"src","example")
 Sys.rm(example_dir; recursive=true, force=true)
-Literate.markdown(joinpath(example_src, "example1.jl"), example_dir; documenter = false, execute = false) # documenter = false to avoid Documenter to execute cells
-Literate.markdown(joinpath(example_src, "example2.jl"), example_dir; documenter = false, execute = false) # documenter = false to avoid Documenter to execute cells
+Literate.markdown(joinpath(example_src, "linear_system.jl"), example_dir; documenter = false, execute = false) # documenter = false to avoid Documenter to execute cells
+Literate.markdown(joinpath(example_src, "linear_system_fancy.jl"), example_dir; documenter = false, execute = false) # documenter = false to avoid Documenter to execute cells
 
 makedocs(;
     modules=[PetscWrap],
@@ -24,8 +24,10 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Examples" => Any[
-            "example/example1.md",
-            "example/example2.md",
+            "example/linear_system.md",
+        ],
+        "Fancy examples" => Any[
+            "example/linear_system_fancy.md",
         ],
         "API Reference" => Any[
             "api/init.md",
@@ -33,6 +35,11 @@ makedocs(;
             "api/vec.md",
             "api/mat.md",
             "api/ksp.md",
+        ],
+        "API fancy" => Any[
+            "api/fancy/vec.md",
+            "api/fancy/mat.md",
+            "api/fancy/ksp.md",
         ]
     ],
 )

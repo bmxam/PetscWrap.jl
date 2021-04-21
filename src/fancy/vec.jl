@@ -36,7 +36,19 @@ set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
 
 set_up!(vec::PetscVec) = VecSetUp(vec)
 
-get_range(vec::PetscVec) = VecGetOwnershipRange(vec)
+"""
+    get_range(vec::PetscVec)
+
+Wrapper to `VecGetOwnershipRange`
+
+However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
+This is different from the default `PETSc.VecGetOwnershipRange` result where the indexing starts at zero and where
+`rend-1` is last row handled by the local processor.
+"""
+function get_range(vec::PetscVec)
+    rstart, rend = VecGetOwnershipRange(vec)
+    return (rstart + 1, rend)
+end
 
 
 # Discutable choice

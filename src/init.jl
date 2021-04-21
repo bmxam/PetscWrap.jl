@@ -29,7 +29,9 @@ PetscInitialize(args::Vector{String}) = PetscInitialize(args, "", "")
 PetscInitialize(args::String) = PetscInitialize(convert(Vector{String}, split(args)), "", "")
 
 """
-    Initialize PETSc.
+    PetscInitialize(cmd_line_args::Bool = true)
+
+Initialize PETSc.
 
 If `cmd_line_args == true`, then command line arguments passed to Julia are used as
 arguments for PETSc (leading to a call to `PetscInitializeNoPointers`).
@@ -37,7 +39,7 @@ arguments for PETSc (leading to a call to `PetscInitializeNoPointers`).
 Otherwise, if `cmd_line_args == false`, initialize PETSc without arguments (leading
 to a call to `PetscInitializeNoArguments`).
 """
-function PetscInitialize(cmd_line_args::Bool = false)
+function PetscInitialize(cmd_line_args::Bool = true)
     if (cmd_line_args)
         PetscInitialize(ARGS)
     else

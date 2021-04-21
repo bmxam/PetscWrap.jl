@@ -1,5 +1,5 @@
 module Example #hide
-# # Same with fancy names
+# # A first demo with fancy names
 # This example does more or less the same things as the first example, but using non regular API function names.
 #
 # This example serves as a test since this project doesn't have a "testing" procedure yet. In this example,
@@ -14,9 +14,9 @@ module Example #hide
 # Import package
 using PetscWrap
 
-# Initialize PETSc. Either without arguments, calling `PetscInitialize()` or using "command-line" arguments.
-# To do so, either provide the arguments as one string, for instance
-# `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or provide each argument in
+# Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
+# also provide "command line arguments by defining them in a string, for instance
+# `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
 # separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
 PetscInitialize()
 
@@ -28,7 +28,7 @@ n = 11
 A = create_matrix(n, n)
 b = create_vector(n)
 
-# We can then use command-line options to set our matrix/vectors.
+# We can then use command line options to set our matrix/vectors.
 set_from_options!(A)
 set_from_options!(b)
 
@@ -58,9 +58,6 @@ end
 # Assemble matrices
 assemble!(A)
 assemble!(b)
-
-# At this point, you can inspect `A` and `b` using the viewers (only stdout for now), simply call
-# `MatView(A)` and/or `VecView(b)`
 
 # Set up the linear solver
 ksp = create_ksp(A)

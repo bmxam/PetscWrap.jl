@@ -12,14 +12,13 @@ using Libdl
 using MPI
 
 include("const_arch_ind.jl")
-export  PetscErrorCode, PETSC_DECIDE, PetscViewer
+export  PetscErrorCode, PETSC_DECIDE
 # export all items of some enums
 for item in Iterators.flatten((instances(InsertMode), instances(MatAssemblyType), instances(PetscViewerFormat)))
     @eval export $(Symbol(item))
 end
 
 include("load.jl")
-export petsc_call
 
 include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
@@ -38,15 +37,6 @@ export  PetscViewer, CViewer,
 
 include("vec.jl")
 export  PetscVec, CVec,
-        assemble!,
-        create_vector,
-        destroy!,
-        duplicate,
-        get_range,
-        set_local_size!, set_global_size!,
-        set_from_options!,
-        set_up!,
-        vec2array,
         VecAssemble,
         VecAssemblyBegin,
         VecAssemblyEnd,
@@ -61,12 +51,12 @@ export  PetscVec, CVec,
         VecSetFromOptions,
         VecSetSizes,
         VecSetUp,
+        VecSetValue,
         VecSetValues,
         VecView
 
 include("mat.jl")
 export  PetscMat, CMat,
-        create_matrix,
         MatAssemble,
         MatAssemblyBegin,
         MatAssemblyEnd,
@@ -83,13 +73,36 @@ export  PetscMat, CMat,
 
 include("ksp.jl")
 export  PetscKSP, CKSP,
-        create_ksp,
-        solve, solve!,
-        set_operators!,
         KSPCreate,
         KSPDestroy,
         KSPSetFromOptions,
         KSPSetOperators,
         KSPSetUp,
         KSPSolve
+
+# fancy
+include("fancy/vec.jl")
+export  assemble!,
+        create_vector,
+        destroy!,
+        duplicate,
+        get_range,
+        set_local_size!, set_global_size!,
+        set_from_options!,
+        set_up!,
+        vec2array
+
+include("fancy/mat.jl")
+export  create_matrix
+
+include("fancy/ksp.jl")
+export  create_ksp,
+        solve, solve!,
+        set_operators!
+
+function toto(vec::PetscVec)
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
+    @assert iszero(error)
+end
+export toto
 end

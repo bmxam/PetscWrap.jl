@@ -14,17 +14,19 @@ end
 Base.cconvert(::Type{CMat}, mat::PetscMat) = mat.ptr[]
 
 """
-    MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
+MatSetValues(mat::PetscMat, nI::PetscInt, I::Vector{PetscInt}, nJ::PetscInt, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
 Wrapper to `MatSetValues`. Indexing starts at 0 (as in PETSc)
 """
-function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
-    nI = PetscInt(length(I))
-    nJ = PetscInt(length(J))
+function MatSetValues(mat::PetscMat, nI::PetscInt, I::Vector{PetscInt}, nJ::PetscInt, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
     error = ccall((:MatSetValues, libpetsc), PetscErrorCode,
         (CMat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
         mat, nI, I, nJ, J, V, mode)
     @assert iszero(error)
+end
+
+function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
+    MatSetValues(mat, PetscInt(length(I)), I, PetscInt(length(J)), J, V, mode)
 end
 
 function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
@@ -90,10 +92,12 @@ end
 """
     MatGetOwnershipRange(mat::PetscMat)
 
-Wrapper to MatGetOwnershipRange
+Wrapper to `MatGetOwnershipRange`
 
-However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
-This is different from the default `PETSc` result where the indexing starts at one and where `rend-1` is last row
+The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
+
+# Warning
+`PETSc` indexing starts at zero (so `rstart` may be zero) and `rend-1` is the last row
 handled by the local processor.
 """
 function MatGetOwnershipRange(mat::PetscMat)
@@ -103,7 +107,7 @@ function MatGetOwnershipRange(mat::PetscMat)
     error = ccall((:MatGetOwnershipRange, libpetsc), PetscErrorCode, (CMat, Ref{PetscInt}, Ref{PetscInt}), mat, rstart, rend)
     @assert iszero(error)
 
-    return rstart[] + 1, rend[]
+    return rstart[], rend[]
 end
 
 """

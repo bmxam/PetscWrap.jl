@@ -33,7 +33,19 @@ set_from_options!(mat::PetscMat) = MatSetFromOptions(mat)
 
 set_up!(mat::PetscMat) = MatSetUp(mat)
 
-get_range(mat::PetscMat) = MatGetOwnershipRange(mat)
+"""
+    get_range(mat::PetscMat)
+
+Wrapper to `MatGetOwnershipRange`
+
+However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
+This is different from the default `PETSc.MatGetOwnershipRange` result where the indexing starts at zero and where
+`rend-1` is last row handled by the local processor.
+"""
+function get_range(mat::PetscMat)
+    rstart, rend = MatGetOwnershipRange(mat)
+    return (rstart + 1, rend)
+end
 
 """
     Wrapper to `MatAssemblyBegin` and `MatAssemblyEnd` successively.

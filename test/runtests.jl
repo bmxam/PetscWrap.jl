@@ -14,5 +14,6 @@ end
 
 
 @testset "PetscWrap.jl" begin
-    include("./test1.jl")
+    include("./linear_system.jl")
+    include("./linear_system_fancy.jl")
 end
