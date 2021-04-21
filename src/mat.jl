@@ -14,37 +14,16 @@ end
 Base.cconvert(::Type{CMat}, mat::PetscMat) = mat.ptr[]
 
 """
-`row` and `col` must be in [1,size(mat)], i.e indexing starts at 1 (Julia).
-
-# Implementation
-For some unkwnown reason, calling `MatSetValue` fails.
-"""
-function Base.setindex!(mat::PetscMat, value::Number, row::Integer, col::Integer)
-    MatSetValues(mat, PetscInt[row], PetscInt[col], PetscScalar[value], INSERT_VALUES)
-end
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(mat::PetscMat, values, row::Integer, cols) = MatSetValues(mat, [row], collect(cols), values, INSERT_VALUES)
-Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, collect(rows), [col], values, INSERT_VALUES)
-
-Base.ndims(::Type{PetscMat}) = 2
-
-"""
     MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
-Wrapper to MatSetValues. Indexing starts at 1 (Julia)
-
-Warning:
-PETSc way to set values does not seem to match SparseArrays : sparse(I,J,V) # PetscMat(I,J,V). According to
-PETSc documentation, "the value to be put in row `I[i]` and column `J[j]` is located in `V[i*n+j]`" (where
-`n = size(J)`)
+Wrapper to `MatSetValues`. Indexing starts at 0 (as in PETSc)
 """
 function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
     nI = PetscInt(length(I))
     nJ = PetscInt(length(J))
     error = ccall((:MatSetValues, libpetsc), PetscErrorCode,
         (CMat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
-        mat, nI, I .- PetscIntOne, nJ, J .- PetscIntOne, V, mode)
+        mat, nI, I, nJ, J, V, mode)
     @assert iszero(error)
 end
 
@@ -69,17 +48,6 @@ function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
-    create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
-
-Create a `PetscMat` matrix of global size `(nrows, ncols)`.
-"""
-function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
-    mat = MatCreate()
-    MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows, ncols)
-    return mat
-end
-
-"""
     MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
 
 Wrapper to MatSetSizes
@@ -97,8 +65,6 @@ function MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
     @assert iszero(error)
 end
 
-set_global_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, PETSC_DECIDE, PETSC_DECIDE, nrows, ncols)
-set_local_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, nrows, ncols, PETSC_DECIDE, PETSC_DECIDE)
 
 """
     MatSetUp(mat::PetscMat)
@@ -110,7 +76,6 @@ function MatSetUp(mat::PetscMat)
     @assert iszero(error)
 end
 
-set_up!(mat::PetscMat) = MatSetUp(mat)
 
 """
     MatSetFromOptions(mat::PetscMat)
@@ -121,7 +86,6 @@ function MatSetFromOptions(mat::PetscMat)
     error = ccall((:MatSetFromOptions, libpetsc), PetscErrorCode, (CMat,), mat)
     @assert iszero(error)
 end
-set_from_options!(mat::PetscMat) = MatSetFromOptions(mat)
 
 """
     MatGetOwnershipRange(mat::PetscMat)
@@ -141,7 +105,6 @@ function MatGetOwnershipRange(mat::PetscMat)
 
     return rstart[] + 1, rend[]
 end
-get_range(mat::PetscMat) = MatGetOwnershipRange(mat)
 
 """
     Wrapper to `MatAssemblyBegin`
@@ -159,13 +122,6 @@ function MatAssemblyEnd(mat::PetscMat, type::MatAssemblyType)
     @assert iszero(error)
 end
 
-"""
-    Wrapper to `MatAssemblyBegin` and `MatAssemblyEnd` successively.
-"""
-function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
-    MatAssemblyBegin(mat, type)
-    MatAssemblyEnd(mat, type)
-end
 
 """
     Wrapper to MatCreateVecs
@@ -182,7 +138,7 @@ function MatCreateVecs(mat::PetscMat)
 end
 
 """
-    MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
+    MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
 
 Wrapper to `MatView`
 """
@@ -200,4 +156,3 @@ function MatDestroy(mat::PetscMat)
     error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), mat.ptr)
     @assert iszero(error)
 end
-destroy!(mat::PetscMat) = MatDestroy(mat)

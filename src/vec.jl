@@ -36,35 +36,16 @@ function create_vector(nrows, nrows_loc = PETSC_DECIDE)
     return vec
 end
 
-Base.ndims(::Type{PetscVec}) = 1
-
-"""
-    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-
-`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
-
-# Implementation
-For some unkwnown reason, calling `VecSetValue` fails.
-"""
-function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row], PetscScalar[value], INSERT_VALUES)
-end
-
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows), values, INSERT_VALUES)
-
-
 """
     VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
 
-Wrapper to VecSetValues. Indexing starts at 1 (Julia)
+Wrapper to VecSetValues. Indexing starts at 0 (as in PETSc)
 """
 function VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
     nI = PetscInt(length(I))
     error = ccall((:VecSetValues, libpetsc), PetscErrorCode,
         (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
-        vec, nI, I .- PetscIntOne, V, mode)
+        vec, nI, I, V, mode)
     @assert iszero(error)
 end
 
@@ -89,9 +70,6 @@ function VecSetSizes(vec::PetscVec, nrows_loc, nrows_glo)
     @assert iszero(error)
 end
 
-set_global_size!(vec::PetscVec, nrows) = VecSetSizes(vec, PETSC_DECIDE, nrows)
-set_local_size!(vec::PetscVec, nrows) = VecSetSizes(vec, nrows, PETSC_DECIDE)
-
 """
     VecSetFromOptions(vec::PetscVec)
 
@@ -101,7 +79,6 @@ function VecSetFromOptions(vec::PetscVec)
     error = ccall((:VecSetFromOptions, libpetsc), PetscErrorCode, (CVec,), vec)
     @assert iszero(error)
 end
-set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
 
 """
     VecSetUp(vec::PetscVec)
@@ -112,7 +89,6 @@ function VecSetUp(vec::PetscVec)
     error = ccall((:VecSetUp, libpetsc), PetscErrorCode, (CVec,), vec)
     @assert iszero(error)
 end
-set_up!(vec::PetscVec) = VecSetUp(vec)
 
 """
     VecGetOwnershipRange(vec::PetscVec)
@@ -132,7 +108,6 @@ function VecGetOwnershipRange(vec::PetscVec)
 
     return rstart[] + 1, rend[]
 end
-get_range(vec::PetscVec) = VecGetOwnershipRange(vec)
 
 """
     VecGetSize(vec::PetscVec)
@@ -162,10 +137,6 @@ function VecGetLocalSize(vec::PetscVec)
     return n[]
 end
 
-# Discutable choice
-Base.length(vec::PetscVec) = VecGetLocalSize(vec)
-Base.size(vec::PetscVec) = (length(vec),)
-
 """
     VecAssemblyBegin(vec::PetscVec)
 
@@ -186,11 +157,6 @@ function VecAssemblyEnd(vec::PetscVec)
     @assert iszero(error)
 end
 
-function assemble!(vec::PetscVec)
-    VecAssemblyBegin(vec)
-    VecAssemblyEnd(vec)
-end
-
 """
     VecDuplicate(vec::PetscVec)
 
@@ -203,7 +169,6 @@ function VecDuplicate(vec::PetscVec)
 
     return x
 end
-duplicate(vec::PetscVec) = VecDuplicate(vec)
 
 """
     VecGetArray(vec::PetscVec, own = false)
@@ -244,20 +209,6 @@ function VecRestoreArray(vec::PetscVec, array_ref)
 end
 
 """
-    vec2array(vec::PetscVec)
-
-Convert a `PetscVec` into a Julia `Array`. Allocation is involved in the process since the `PetscVec`
-allocated by PETSC is copied into a freshly allocated array. If you prefer not to allocate memory,
-use `VectGetArray` and `VecRestoreArray`
-"""
-function vec2array(vec::PetscVec)
-    arrayFromC, array_ref = VecGetArray(vec)
-    array = copy(arrayFromC)
-    VecRestoreArray(vec, array_ref)
-    return array
-end
-
-"""
     VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
 
 Wrapper to VecView
@@ -279,4 +230,3 @@ function VecDestroy(vec::PetscVec)
                     vec.ptr)
     @assert iszero(error)
 end
-destroy!(vec::PetscVec) = VecDestroy(vec)
