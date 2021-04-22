@@ -45,7 +45,7 @@ end
 """
     VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
 
-Wrapper to VecSetValues. Indexing starts at 0 (as in PETSc)
+Wrapper to `VecSetValues`. Indexing starts at 0 (as in PETSc)
 """
 function VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
     error = ccall((:VecSetValues, libpetsc), PetscErrorCode,

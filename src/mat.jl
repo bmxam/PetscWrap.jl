@@ -14,6 +14,23 @@ end
 Base.cconvert(::Type{CMat}, mat::PetscMat) = mat.ptr[]
 
 """
+MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
+
+Wrapper to `MatSetValue`. Indexing starts at 0 (as in PETSc).
+
+# Implementation
+For an unknow reason, calling PETSc.MatSetValue leads to an "undefined symbol: MatSetValue" error.
+So this wrapper directly call MatSetValues (anyway, this is what is done in PETSc...)
+"""
+function MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
+    MatSetValues(mat, PetscIntOne, [i], PetscIntOne, [j], [v], mode)
+end
+
+function MatSetValue(mat::PetscMat, i::Integer, j::Integer, v::Number, mode::InsertMode)
+    MatSetValue(mat, PetscInt(i), PetscInt(j), PetscScalar(v), mode)
+end
+
+"""
 MatSetValues(mat::PetscMat, nI::PetscInt, I::Vector{PetscInt}, nJ::PetscInt, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
 Wrapper to `MatSetValues`. Indexing starts at 0 (as in PETSc)

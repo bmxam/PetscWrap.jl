@@ -66,6 +66,20 @@ destroy!(A)
 destroy!(b)
 destroy!(x)
 
+# Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
+M = create_matrix(3,3; auto_setup = true)
+M_start, M_end = get_range(M)
+I = [1, 1, 1, 2, 3]
+J = [1, 3, 1, 3, 2]
+V = [1, 2, 3, 4, 5]
+k = findall(x -> M_start <= x <= M_end, I) # just a stupid trick to allow this example to run in parallel
+set_values!(M, I[k], J[k], V[k], ADD_VALUES)
+assemble!(M)
+@show M
+destroy!(M)
+# This is very convenient in sequential since you can fill the three vectors I, J, V in your code and decide only
+# at the last moment if you'd like to use `SparseArrays` or `PetscMat`.
+
 # Finalize Petsc
 PetscFinalize()
 

@@ -15,13 +15,20 @@ Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, co
 Base.ndims(::Type{PetscMat}) = 2
 
 """
-    create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
+    create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false)
 
 Create a `PetscMat` matrix of global size `(nrows, ncols)`.
+
+Use `auto_setup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
-function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
+function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false)
     mat = MatCreate()
     MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows, ncols)
+
+    if (auto_setup)
+        set_from_options!(mat)
+        set_up!(mat)
+    end
     return mat
 end
 
@@ -54,6 +61,20 @@ function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
     MatAssemblyBegin(mat, type)
     MatAssemblyEnd(mat, type)
 end
+
+"""
+    set_values!(mat::PetscMat, I, J, V, mode = ADD_VALUES)
+
+Set values of `mat` in `SparseArrays` fashion : using COO format:
+`mat[I[k], J[k]] = V[k]`.
+"""
+function set_values!(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Vector{PetscScalar}, mode = ADD_VALUES)
+    for (i,j,v) in zip(I, J, V)
+        MatSetValue(mat, i - 1, j - 1, v, mode)
+    end
+end
+
+set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
 
 Base.show(::IO, mat::PetscMat) = MatView(mat)

@@ -2,9 +2,6 @@
     This package has been inspired and even sometimes directly copied from two projects:
     - https://github.com/gridap/GridapPETSc.jl
     - https://github.com/JuliaParallel/PETSc.jl
-
-    I have decided to remove all exclamation marks `!` at the end of routines "modifying" their arguments
-    when the name is the same as in PETSc API. It was too confusing.
 """
 module PetscWrap
 
@@ -68,6 +65,7 @@ export  PetscMat, CMat,
         MatSetFromOptions,
         MatSetSizes,
         MatSetUp,
+        MatSetValue,
         MatSetValues,
         MatView
 
@@ -93,7 +91,8 @@ export  assemble!,
         vec2array
 
 include("fancy/mat.jl")
-export  create_matrix
+export  create_matrix,
+        set_values!
 
 include("fancy/ksp.jl")
 export  create_ksp,
