@@ -28,4 +28,7 @@ set_up!(ksp::PetscKSP) = KSPSetUp(ksp)
 
 set_from_options!(ksp::PetscKSP) = KSPSetFromOptions(ksp)
 
+
+Base.show(::IO, ksp::PetscKSP) = KSPView(ksp)
+
 destroy!(ksp::PetscKSP) = KSPDestroy(ksp)

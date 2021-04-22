@@ -100,9 +100,4 @@ export  create_ksp,
         solve, solve!,
         set_operators!
 
-function toto(vec::PetscVec)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
-    @assert iszero(error)
-end
-export toto
 end

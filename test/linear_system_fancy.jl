@@ -1,38 +1,40 @@
-@testset "test1" begin
+@testset "linear system fancy" begin
 # Only on one processor...
 
-# Initialize PETSc
+# Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
+# also provide "command line arguments by defining them in a string, for instance
+# `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
+# separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
 PetscInitialize()
 
 # Number of mesh points and mesh step
 n = 11
 Δx = 1. / (n - 1)
 
-# Create a matrix and a vector
-A = MatCreate()
-b = VecCreate()
+# Create a matrix of size `(n,n)` and a vector of size `(n)`
+A = create_matrix(n, n)
+b = create_vector(n)
 
-# Set the size of the different objects
-MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, n, n)
-VecSetSizes(b, PETSC_DECIDE, n)
-
-# We can then use command-line options to set our matrix/vectors.
-MatSetFromOptions(A)
-VecSetFromOptions(b)
+# We can then use command line options to set our matrix/vectors.
+set_from_options!(A)
+set_from_options!(b)
 
 # Finish the set up
-MatSetUp(A)
-VecSetUp(b)
+set_up!(A)
+set_up!(b)
 
-# RHS range
-b_start, b_end = VecGetOwnershipRange(b)
+# Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
+# The `rstart, rend = get_range(*)` methods differ a little bit from PETSc API since the two integers it
+# returns are the effective Julia range of rows handled by the local processor. If `n` is the total
+# number of rows, then `rstart ∈ [1,n]` and `rend` is the last row handled by the local processor.
+b_start, b_end = get_range(b)
 
 # Now let's build the right hand side vector. Their are various ways to do this, this is just one.
-n_loc = VecGetLocalSize(b)
-VecSetValues(b, collect(b_start:b_end), 2 * ones(n_loc))
+n_loc = length(b) ## Note that n_loc = b_end - b_start + 1...
+b[b_start:b_end] = 2 * ones(n_loc)
 
 # And here is the differentiation matrix. Rembember that PETSc.MatSetValues simply ignores negatives rows indices.
-A_start, A_end = MatGetOwnershipRange(A)
+A_start, A_end = get_range(A)
 for i in A_start:A_end
     A[i, i-1:i] = [-1. 1.] / Δx
 end
@@ -40,41 +42,31 @@ end
 # Set boundary condition (only the proc handling index `1` is acting)
 (b_start == 1) && (b[1] = 0.)
 
-# Assemble matrices
-MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY)
-VecAssemblyBegin(b)
-MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY)
-VecAssemblyEnd(b)
-
-# Inspect with viewer
-viewer = PetscViewerStdWorld()
-MatView(A, viewer)
-PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_DENSE)
-MatView(A, viewer)
-PetscViewerPopFormat(viewer)
+# Assemble matrice and vector
+assemble!(A)
+assemble!(b)
 
 # Set up the linear solver
-ksp = KSPCreate()
-KSPSetOperators(ksp, A, A)
-KSPSetFromOptions(ksp)
-KSPSetUp(ksp)
+ksp = create_ksp(A)
+set_from_options!(ksp)
+set_up!(ksp)
 
-# Solve the system. We first allocate the solution using the `VecDuplicate` method.
-x = VecDuplicate(b)
-KSPSolve(ksp, b, x)
+# Solve the system
+x = solve(ksp, b)
 
 # Print the solution
-#VecView(x)
+@show x
 
-# Access the solution (this part is under development), getting a Julia array; and then restore it
-array, ref = VecGetArray(x) # do something with array
+# Convert to Julia array
+array = vec2array(x)
 @test isapprox(array, range(0., 2.; length = n))
-VecRestoreArray(x, ref)
 
 # Free memory
-MatDestroy(A)
-VecDestroy(b)
-VecDestroy(x)
+destroy!(A)
+destroy!(b)
+destroy!(x)
+
+# Finalize Petsc
 PetscFinalize()
 
 # Reach this point?

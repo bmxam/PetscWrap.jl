@@ -5,12 +5,12 @@
 For some unkwnown reason, calling `MatSetValue` fails.
 """
 function Base.setindex!(mat::PetscMat, value::Number, row::Integer, col::Integer)
-    MatSetValues(mat, PetscInt[row], PetscInt[col], PetscScalar[value], INSERT_VALUES)
+    MatSetValues(mat, PetscInt[row - 1], PetscInt[col - 1], PetscScalar[value], INSERT_VALUES)
 end
 
 # This is stupid but I don't know how to do better yet
-Base.setindex!(mat::PetscMat, values, row::Integer, cols) = MatSetValues(mat, [row], collect(cols), values, INSERT_VALUES)
-Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, collect(rows), [col], values, INSERT_VALUES)
+Base.setindex!(mat::PetscMat, values, row::Integer, cols) = MatSetValues(mat, [row-1], collect(cols) .- 1, values, INSERT_VALUES)
+Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, collect(rows) .- 1, [col-1], values, INSERT_VALUES)
 
 Base.ndims(::Type{PetscMat}) = 2
 
@@ -54,5 +54,8 @@ function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
     MatAssemblyBegin(mat, type)
     MatAssemblyEnd(mat, type)
 end
+
+
+Base.show(::IO, mat::PetscMat) = MatView(mat)
 
 destroy!(mat::PetscMat) = MatDestroy(mat)

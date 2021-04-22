@@ -36,11 +36,7 @@ makedocs(;
             "api/mat.md",
             "api/ksp.md",
         ],
-        "API fancy" => Any[
-            "api/fancy/vec.md",
-            "api/fancy/mat.md",
-            "api/fancy/ksp.md",
-        ]
+        "API fancy" => "api/fancy/fancy.md",
     ],
 )
 

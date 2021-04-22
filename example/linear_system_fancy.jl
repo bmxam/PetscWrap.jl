@@ -37,7 +37,7 @@ set_up!(A)
 set_up!(b)
 
 # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
-# The `rstart, rend = *GetOwnershipRange` methods differ a little bit from PETSc API since the two integers it
+# The `rstart, rend = get_range(*)` methods differ a little bit from PETSc API since the two integers it
 # returns are the effective Julia range of rows handled by the local processor. If `n` is the total
 # number of rows, then `rstart ∈ [1,n]` and `rend` is the last row handled by the local processor.
 b_start, b_end = get_range(b)
@@ -55,7 +55,7 @@ end
 # Set boundary condition (only the proc handling index `1` is acting)
 (b_start == 1) && (b[1] = 0.)
 
-# Assemble matrices
+# Assemble matrice and vector
 assemble!(A)
 assemble!(b)
 
@@ -67,8 +67,11 @@ set_up!(ksp)
 # Solve the system
 x = solve(ksp, b)
 
-# Print the solution
+# Print the solution (here x is still a `PetscVec`)
 @show x
+
+# Convert `PetscVec` to Julia `Array` (and play with it!)
+array = vec2array(x)
 
 # Free memory
 destroy!(A)

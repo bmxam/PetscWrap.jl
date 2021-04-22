@@ -76,4 +76,6 @@ function vec2array(vec::PetscVec)
     return array
 end
 
+Base.show(::IO, vec::PetscVec) = VecView(vec)
+
 destroy!(vec::PetscVec) = VecDestroy(vec)
