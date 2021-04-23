@@ -8,10 +8,10 @@ PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.m
 The main differences with the two aformentionned projects are:
 - parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
 - no dependance to other Julia packages except `MPI.jl`;
-- possibility to switch from one PETSc "arch" to another without recompiling the project;
+- possibility to switch from one PETSc "arch" to another;
 - less PETSc API functions wrappers for now.
 
-Note that the primary objective of this project is to enable the wrapper of the SLEPc library through the JuliaSlepc.jl project.
+Note that the primary objective of this project is to enable the wrapper of the SLEPc library through the [SlepcWrap.jl](https://github.com/bmxam/SlepcWrap.jl) project.
 
 ## How to install it
 You must have installed the PETSc library on your computer and set the two following environment variables : `PETSC_DIR` and `PETSC_ARCH`.
@@ -26,16 +26,18 @@ pkg> add PetscWrap
 Any contribution(s) and/or remark(s) are welcome! If you need a function that is not wrapped yet but you don't think you are capable of contributing, post an issue with a minimum working example.
 
 ## PETSc compat.
-This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are not supported yet.
+This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are supported.
 
 ## How to use it
+PETSc methods wrappers share the same name as their C equivalent : for instance `MatCreate` or `MatSetValue`. Furthermore, an optional "higher level" API, referred to as "fancy", is exposed : for instance `create_matrix` or `A[i,j] = v`). Note that this second way of manipulating PETSc will evolve according the package's author needs while the first one will try to follow PETSc official API.
+
 You will find examples of use by building the documentation: `julia PetscWrap.jl/docs/make.jl`. Here is one of the examples:
 ### A first demo
 This example serves as a test since this project doesn't have a "testing" procedure yet. In this example,
 the equation ``u'(x) = 2`` with ``u(0) = 0`` is solved on the domain ``[0,1]`` using a backward finite
 difference scheme.
 
-In this example, PETSc legacy method names are used. For more fancy names, check the next example.
+In this example, PETSc classic method names are used. For more fancy names, check the next example.
 
 Note that the way we achieve things in the document can be highly improved and the purpose of this example
 is only demonstrate some method calls to give an overview.

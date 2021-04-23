@@ -1,5 +1,5 @@
 # PETSc Mat
 ```@autodocs
 Modules = [PetscWrap]
-Pages   = ["mat.jl"]
+Pages   = ["src/mat.jl"]
 ```

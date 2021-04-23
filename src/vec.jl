@@ -10,68 +10,52 @@ end
 Base.cconvert(::Type{CVec}, vec::PetscVec) = vec.ptr[]
 
 """
-    VecCreate(comm, vec::PetscVec)
+    VecCreate(comm::MPI.Comm, vec::PetscVec)
 
 Wrapper to VecCreate
 """
-function VecCreate(comm, vec::PetscVec)
+function VecCreate(comm::MPI.Comm, vec::PetscVec)
     error = ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec.ptr)
     @assert iszero(error)
 end
 
-function VecCreate(comm)
+function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     vec = PetscVec()
     VecCreate(comm, vec)
     return vec
 end
 
-function VecCreate()
-    vec = PetscVec()
-    VecCreate(MPI.COMM_WORLD, vec)
-    return vec
-end
-
 """
-    create_vector(nrows, nrows_loc = PETSC_DECIDE)
+    VecSetValue(vec::PetscVec, i::PetscInt, v::PetscScalar, mode::InsertMode = INSERT_VALUES)
 
-Create a `PetscVec` matrix of global size `(nrows)`.
-"""
-function create_vector(nrows, nrows_loc = PETSC_DECIDE)
-    vec = VecCreate()
-    VecSetSizes(vec::PetscVec, nrows_loc, nrows)
-    return vec
-end
-
-Base.ndims(::Type{PetscVec}) = 1
-
-"""
-    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-
-`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
+Wrapper to `VecSetValue`. Indexing starts at 0 (as in PETSc).
 
 # Implementation
-For some unkwnown reason, calling `VecSetValue` fails.
+For an unknow reason, calling PETSc.VecSetValue leads to an "undefined symbol: VecSetValue" error.
+So this wrapper directly call VecSetValues (anyway, this is what is done in PETSc...)
 """
-function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row], PetscScalar[value], INSERT_VALUES)
+function VecSetValue(vec::PetscVec, i::PetscInt, v::PetscScalar, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec, PetscIntOne, [i], [v], mode)
 end
 
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows), values, INSERT_VALUES)
-
+function VecSetValue(vec::PetscVec, i, v, mode::InsertMode = INSERT_VALUES)
+    VecSetValue(vec, PetscInt(i), PetscScalar(v), mode)
+end
 
 """
-    VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
 
-Wrapper to VecSetValues. Indexing starts at 1 (Julia)
+Wrapper to `VecSetValues`. Indexing starts at 0 (as in PETSc)
 """
-function VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
-    nI = PetscInt(length(I))
+function VecSetValues(vec::PetscVec, nI::PetscInt, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
     error = ccall((:VecSetValues, libpetsc), PetscErrorCode,
         (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
-        vec, nI, I .- PetscIntOne, V, mode)
+        vec, nI, I, V, mode)
     @assert iszero(error)
+end
+
+function VecSetValues(vec::PetscVec, I::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec, PetscInt(length(I)), I, V, mode)
 end
 
 function VecSetValues(vec::PetscVec, I, V, mode::InsertMode = INSERT_VALUES)
@@ -95,9 +79,6 @@ function VecSetSizes(vec::PetscVec, nrows_loc, nrows_glo)
     @assert iszero(error)
 end
 
-set_global_size!(vec::PetscVec, nrows) = VecSetSizes(vec, PETSC_DECIDE, nrows)
-set_local_size!(vec::PetscVec, nrows) = VecSetSizes(vec, nrows, PETSC_DECIDE)
-
 """
     VecSetFromOptions(vec::PetscVec)
 
@@ -107,7 +88,6 @@ function VecSetFromOptions(vec::PetscVec)
     error = ccall((:VecSetFromOptions, libpetsc), PetscErrorCode, (CVec,), vec)
     @assert iszero(error)
 end
-set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
 
 """
     VecSetUp(vec::PetscVec)
@@ -118,15 +98,16 @@ function VecSetUp(vec::PetscVec)
     error = ccall((:VecSetUp, libpetsc), PetscErrorCode, (CVec,), vec)
     @assert iszero(error)
 end
-set_up!(vec::PetscVec) = VecSetUp(vec)
 
 """
     VecGetOwnershipRange(vec::PetscVec)
 
-Wrapper to VecGetOwnershipRange
+Wrapper to `VecGetOwnershipRange`
 
-However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
-This is different from the default `PETSc` result where the indexing starts at one and where `rend-1` is last row
+The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
+
+# Warning
+`PETSc` indexing starts at zero (so `rstart` may be zero) and `rend-1` is the last row
 handled by the local processor.
 """
 function VecGetOwnershipRange(vec::PetscVec)
@@ -136,9 +117,8 @@ function VecGetOwnershipRange(vec::PetscVec)
     error = ccall((:VecGetOwnershipRange, libpetsc), PetscErrorCode, (CVec, Ref{PetscInt}, Ref{PetscInt}), vec, rstart, rend)
     @assert iszero(error)
 
-    return rstart[] + 1, rend[]
+    return rstart[], rend[]
 end
-get_range(vec::PetscVec) = VecGetOwnershipRange(vec)
 
 """
     VecGetSize(vec::PetscVec)
@@ -168,10 +148,6 @@ function VecGetLocalSize(vec::PetscVec)
     return n[]
 end
 
-# Discutable choice
-Base.length(vec::PetscVec) = VecGetLocalSize(vec)
-Base.size(vec::PetscVec) = (length(vec),)
-
 """
     VecAssemblyBegin(vec::PetscVec)
 
@@ -192,11 +168,6 @@ function VecAssemblyEnd(vec::PetscVec)
     @assert iszero(error)
 end
 
-function assemble!(vec::PetscVec)
-    VecAssemblyBegin(vec)
-    VecAssemblyEnd(vec)
-end
-
 """
     VecDuplicate(vec::PetscVec)
 
@@ -209,7 +180,6 @@ function VecDuplicate(vec::PetscVec)
 
     return x
 end
-duplicate(vec::PetscVec) = VecDuplicate(vec)
 
 """
     VecGetArray(vec::PetscVec, own = false)
@@ -232,7 +202,7 @@ function VecGetArray(vec::PetscVec, own = false)
 
     # Get array size
     rstart, rend = VecGetOwnershipRange(vec)
-    n = rend - rstart + 1
+    n = rend - rstart # this is not `rend - rstart + 1` because of VecGetOwnershipRange convention
 
     array = unsafe_wrap(Array, array_ref[], n; own = own)
 
@@ -250,26 +220,24 @@ function VecRestoreArray(vec::PetscVec, array_ref)
 end
 
 """
-    vec2array(vec::PetscVec)
+    VecView(vec::PetscVec, viewer::PetscViewer)
 
-Convert a `PetscVec` into a Julia `Array`. Allocation is involved in the process since the `PetscVec`
-allocated by PETSC is copied into a freshly allocated array. If you prefer not to allocate memory,
-use `VectGetArray` and `VecRestoreArray`
+Wrapper to `VecView`. Currently leads to a fatal error when using with `viewer = PetscViewerStdWorld()`.
+Use `VecView(vec)` instead.
 """
-function vec2array(vec::PetscVec)
-    arrayFromC, array_ref = VecGetArray(vec)
-    array = copy(arrayFromC)
-    VecRestoreArray(vec, array_ref)
-    return array
+function VecView(vec::PetscVec, viewer::PetscViewer)
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
+    @assert iszero(error)
 end
 
 """
-    VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
+    VecView(vec::PetscVec)
 
-Wrapper to VecView
+Wrapper to `VecView` with the default PETSc viewer. This a fallback for the currently buggy
+`VecView(vec::PetscVec, viewer::PetscViewer)`
 """
-function VecView(vec::PetscVec, viewer::PetscViewer = C_NULL)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
+function VecView(vec::PetscVec)
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
     @assert iszero(error)
 end
 
@@ -285,4 +253,3 @@ function VecDestroy(vec::PetscVec)
                     vec.ptr)
     @assert iszero(error)
 end
-destroy!(vec::PetscVec) = VecDestroy(vec)

@@ -26,7 +26,7 @@ function PetscDataTypeGetSize(dtype::PetscDataType)
 end
 
 """
-    Find the Julia type for PetscReal
+    Find the Julia type for `PetscReal`
 """
 function PetscReal2Type()
     # Workaround for RegistryCI
@@ -41,7 +41,8 @@ function PetscReal2Type()
 end
 
 """
-    Find the Julia type for PetscScalar
+    Find the Julia type for PetscScalar. This function must be called after
+    the line `const PetscReal = PetscReal2Type` since it uses `PetscReal`.
 """
 function PetscScalar2Type()
     # Workaround for RegistryCI
@@ -57,7 +58,7 @@ function PetscScalar2Type()
 end
 
 """
-    Find the Julia type for PetscInt
+    Find the Julia type for `PetscInt`
 """
 function PetscInt2Type()
     # Workaround for RegistryCI

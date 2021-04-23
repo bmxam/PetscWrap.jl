@@ -14,32 +14,36 @@ end
 Base.cconvert(::Type{CMat}, mat::PetscMat) = mat.ptr[]
 
 """
-`row` and `col` must be in [1,size(mat)], i.e indexing starts at 1 (Julia).
+MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
+
+Wrapper to `MatSetValue`. Indexing starts at 0 (as in PETSc).
 
 # Implementation
-For some unkwnown reason, calling `MatSetValue` fails.
+For an unknow reason, calling PETSc.MatSetValue leads to an "undefined symbol: MatSetValue" error.
+So this wrapper directly call MatSetValues (anyway, this is what is done in PETSc...)
 """
-function Base.setindex!(mat::PetscMat, value::Number, row::Integer, col::Integer)
-    MatSetValues(mat, PetscInt[row], PetscInt[col], PetscScalar[value], INSERT_VALUES)
+function MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
+    MatSetValues(mat, PetscIntOne, [i], PetscIntOne, [j], [v], mode)
 end
 
-# This is stupid but I don't know how to do better yet
-Base.setindex!(mat::PetscMat, values, row::Integer, cols) = MatSetValues(mat, [row], collect(cols), values, INSERT_VALUES)
-Base.setindex!(mat::PetscMat, values, rows, col::Integer) = MatSetValues(mat, collect(rows), [col], values, INSERT_VALUES)
+function MatSetValue(mat::PetscMat, i::Integer, j::Integer, v::Number, mode::InsertMode)
+    MatSetValue(mat, PetscInt(i), PetscInt(j), PetscScalar(v), mode)
+end
 
-Base.ndims(::Type{PetscMat}) = 2
 """
-    MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
+MatSetValues(mat::PetscMat, nI::PetscInt, I::Vector{PetscInt}, nJ::PetscInt, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
 
-Wrapper to MatSetValues. Indexing starts at 1 (Julia)
+Wrapper to `MatSetValues`. Indexing starts at 0 (as in PETSc)
 """
-function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
-    nI = PetscInt(length(I))
-    nJ = PetscInt(length(J))
+function MatSetValues(mat::PetscMat, nI::PetscInt, I::Vector{PetscInt}, nJ::PetscInt, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
     error = ccall((:MatSetValues, libpetsc), PetscErrorCode,
         (CMat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
-        mat, nI, I .- PetscIntOne, nJ, J .- PetscIntOne, V, mode)
+        mat, nI, I, nJ, J, V, mode)
     @assert iszero(error)
+end
+
+function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Array{PetscScalar}, mode::InsertMode)
+    MatSetValues(mat, PetscInt(length(I)), I, PetscInt(length(J)), J, V, mode)
 end
 
 function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
@@ -47,35 +51,18 @@ function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
 end
 
 """
-    MatCreate(comm, mat::PetscMat)
+    MatCreate(comm::MPI.Comm, mat::PetscMat)
 
 Wrapper to MatCreate
 """
-function MatCreate(comm, mat::PetscMat)
+function MatCreate(comm::MPI.Comm, mat::PetscMat)
     error = ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat.ptr)
     @assert iszero(error)
 end
 
-function MatCreate(comm)
+function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     mat = PetscMat()
     MatCreate(comm, mat)
-    return mat
-end
-
-function MatCreate()
-    mat = PetscMat()
-    MatCreate(MPI.COMM_WORLD, mat)
-    return mat
-end
-
-"""
-    create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
-
-Create a `PetscMat` matrix of global size `(nrows, ncols)`.
-"""
-function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE)
-    mat = MatCreate()
-    MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows, ncols)
     return mat
 end
 
@@ -97,8 +84,6 @@ function MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
     @assert iszero(error)
 end
 
-set_global_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, PETSC_DECIDE, PETSC_DECIDE, nrows, ncols)
-set_local_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, nrows, ncols, PETSC_DECIDE, PETSC_DECIDE)
 
 """
     MatSetUp(mat::PetscMat)
@@ -110,7 +95,6 @@ function MatSetUp(mat::PetscMat)
     @assert iszero(error)
 end
 
-set_up!(mat::PetscMat) = MatSetUp(mat)
 
 """
     MatSetFromOptions(mat::PetscMat)
@@ -121,15 +105,16 @@ function MatSetFromOptions(mat::PetscMat)
     error = ccall((:MatSetFromOptions, libpetsc), PetscErrorCode, (CMat,), mat)
     @assert iszero(error)
 end
-set_from_options!(mat::PetscMat) = MatSetFromOptions(mat)
 
 """
     MatGetOwnershipRange(mat::PetscMat)
 
-Wrapper to MatGetOwnershipRange
+Wrapper to `MatGetOwnershipRange`
 
-However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
-This is different from the default `PETSc` result where the indexing starts at one and where `rend-1` is last row
+The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
+
+# Warning
+`PETSc` indexing starts at zero (so `rstart` may be zero) and `rend-1` is the last row
 handled by the local processor.
 """
 function MatGetOwnershipRange(mat::PetscMat)
@@ -139,12 +124,11 @@ function MatGetOwnershipRange(mat::PetscMat)
     error = ccall((:MatGetOwnershipRange, libpetsc), PetscErrorCode, (CMat, Ref{PetscInt}, Ref{PetscInt}), mat, rstart, rend)
     @assert iszero(error)
 
-    return rstart[] + 1, rend[]
+    return rstart[], rend[]
 end
-get_range(mat::PetscMat) = MatGetOwnershipRange(mat)
 
 """
-    Wrapper to MatAssemblyBegin
+    Wrapper to `MatAssemblyBegin`
 """
 function MatAssemblyBegin(mat::PetscMat, type::MatAssemblyType)
     error = ccall((:MatAssemblyBegin, libpetsc), PetscErrorCode, (CMat, MatAssemblyType), mat, type)
@@ -152,20 +136,16 @@ function MatAssemblyBegin(mat::PetscMat, type::MatAssemblyType)
 end
 
 """
-    Wrapper to MatAssemblyEnd
+    Wrapper to `MatAssemblyEnd`
 """
 function MatAssemblyEnd(mat::PetscMat, type::MatAssemblyType)
     error = ccall((:MatAssemblyEnd, libpetsc), PetscErrorCode, (CMat, MatAssemblyType), mat, type)
     @assert iszero(error)
 end
 
-function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
-    MatAssemblyBegin(mat, type)
-    MatAssemblyEnd(mat, type)
-end
 
 """
-    Wrapprt to MatCreateVecs
+    Wrapper to MatCreateVecs
 """
 function MatCreateVecs(mat::PetscMat, vecr::PetscVec, veci::PetscVec)
     error = ccall((:MatCreateVecs, libpetsc), PetscErrorCode, (CMat, Ptr{CVec}, Ptr{CVec}), mat, vecr.ptr, veci.ptr)
@@ -179,12 +159,12 @@ function MatCreateVecs(mat::PetscMat)
 end
 
 """
-    MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
+    MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
 
-Wrapper to MatView
+Wrapper to `MatView`
 """
-function MatView(mat::PetscMat, viewer::PetscViewer = C_NULL)
-    error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, PetscViewer), mat, viewer)
+function MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
+    error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end
 
@@ -197,4 +177,3 @@ function MatDestroy(mat::PetscMat)
     error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), mat.ptr)
     @assert iszero(error)
 end
-destroy!(mat::PetscMat) = MatDestroy(mat)

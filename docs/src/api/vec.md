@@ -1,5 +1,5 @@
 # PETSc Vec
 ```@autodocs
 Modules = [PetscWrap]
-Pages   = ["vec.jl"]
+Pages   = ["src/vec.jl"]
 ```
