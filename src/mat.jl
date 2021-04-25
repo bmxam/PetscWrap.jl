@@ -47,7 +47,7 @@ function MatSetValues(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V
 end
 
 function MatSetValues(mat::PetscMat, I, J, V, mode::InsertMode)
-    MatSetValues(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
+    MatSetValues(mat, PetscInt.(I), PetscInt.(collect(J)), PetscScalar.(V), mode)
 end
 
 """

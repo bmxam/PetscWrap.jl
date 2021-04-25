@@ -70,7 +70,7 @@ end
 """
     KSPDestroy(ksp::PetscKSP)
 
-Wrapper to KSPDestroy
+Wrapper to `KSPDestroy`
 """
 function KSPDestroy(ksp::PetscKSP)
     error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
