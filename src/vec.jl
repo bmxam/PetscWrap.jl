@@ -220,24 +220,12 @@ function VecRestoreArray(vec::PetscVec, array_ref)
 end
 
 """
-    VecView(vec::PetscVec, viewer::PetscViewer)
+    VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
 
-Wrapper to `VecView`. Currently leads to a fatal error when using with `viewer = PetscViewerStdWorld()`.
-Use `VecView(vec)` instead.
+Wrapper to `VecView`.
 """
-function VecView(vec::PetscVec, viewer::PetscViewer)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
-    @assert iszero(error)
-end
-
-"""
-    VecView(vec::PetscVec)
-
-Wrapper to `VecView` with the default PETSc viewer. This a fallback for the currently buggy
-`VecView(vec::PetscVec, viewer::PetscViewer)`
-"""
-function VecView(vec::PetscVec)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
+function VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer);
     @assert iszero(error)
 end
 
