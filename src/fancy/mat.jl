@@ -21,7 +21,7 @@ Create a `PetscMat` matrix of global size `(nrows, ncols)`.
 
 Use `auto_setup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
-function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false)
+function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false, comm::MPI.Comm = MPI.COMM_WORLD)
     mat = MatCreate()
     MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows, ncols)
 

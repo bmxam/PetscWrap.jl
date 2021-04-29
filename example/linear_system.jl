@@ -24,7 +24,7 @@ PetscInitialize()
 n = 11
 Δx = 1. / (n - 1)
 
-# Create a matrix and a vector
+# Create a matrix and a vector (you can specify the MPI communicator if you want)
 A = MatCreate()
 b = VecCreate()
 

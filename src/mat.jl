@@ -5,8 +5,9 @@ const CMat = Ptr{Cvoid}
 """
 struct PetscMat
     ptr::Ref{CMat}
+    comm::MPI.Comm
 
-    PetscMat() = new(Ref{CMat}())
+    PetscMat(comm::MPI.Comm) = new(Ref{CMat}(), comm)
 end
 
 
@@ -53,16 +54,24 @@ end
 """
     MatCreate(comm::MPI.Comm, mat::PetscMat)
 
-Wrapper to MatCreate
+Wrapper to `MatCreate`
 """
-function MatCreate(comm::MPI.Comm, mat::PetscMat)
+function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+    mat = PetscMat(comm)
     error = ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat.ptr)
     @assert iszero(error)
+    return mat
 end
 
-function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
-    mat = PetscMat()
-    MatCreate(comm, mat)
+"""
+Wrapper to `MatCreateDense`
+"""
+function MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt, data::PetscScalar)
+    mat = PetscMat(comm)
+    error = ccall((:MatCreateDense, libpetsc), PetscErrorCode,
+        (MPI.MPI_Comm, PetscInt, PetscInt, PetscInt, PetscInt, Ptr{PetscScalar}, Ptr{CMat}),
+        comm, m, n, M, N, data, mat.ptr)
+    @assert iszero(error)
     return mat
 end
 
