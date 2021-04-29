@@ -55,6 +55,16 @@ function get_range(mat::PetscMat)
 end
 
 """
+    get_urange(mat::PetscMat)
+
+Provide a `UnitRange` from the method `get_range`.
+"""
+function get_urange(mat::PetscMat)
+    rstart, rend = MatGetOwnershipRange(mat)
+    return rstart+1:rend
+end
+
+"""
     Wrapper to `MatAssemblyBegin` and `MatAssemblyEnd` successively.
 """
 function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)

@@ -4,9 +4,15 @@
 
 Create a `PetscVec` vector of global size `(nrows)`.
 """
-function create_vector(nrows, nrows_loc = PETSC_DECIDE)
-    vec = VecCreate()
+function create_vector(nrows, nrows_loc = PETSC_DECIDE; auto_setup = false, comm::MPI.Comm = MPI.COMM_WORLD)
+    vec = VecCreate(comm)
     VecSetSizes(vec::PetscVec, nrows_loc, nrows)
+
+    if (auto_setup)
+        set_from_options!(vec)
+        set_up!(vec)
+    end
+
     return vec
 end
 

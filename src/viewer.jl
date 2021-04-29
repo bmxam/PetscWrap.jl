@@ -68,6 +68,61 @@ function PetscViewerASCIIOpen(comm::MPI.Comm, filename)
 end
 
 """
+PetscViewerFileSetName(viewer::PetscViewer, filename)
+
+Wrapper for `PetscViewerFileSetName`
+"""
+function PetscViewerFileSetName(viewer::PetscViewer, filename::String)
+    error = ccall((:PetscViewerFileSetName, libpetsc), PetscErrorCode, (CViewer, Cstring), viewer, filename)
+    @assert iszero(error)
+end
+
+"""
+PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
+
+Wrapper for `PetscViewerFileSetMode`
+"""
+function PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
+    error = ccall((:PetscViewerFileSetMode, libpetsc), PetscErrorCode, (CViewer, PetscFileMode), viewer, mode)
+    @assert iszero(error)
+end
+
+"""
+    PetscViewerHDF5Open(comm::MPI.Comm, filename::String, type::PetscFileMode)
+
+Wrapper for `PetscViewerHDF5Open`
+"""
+function PetscViewerHDF5Open(comm::MPI.Comm, filename::String, type::PetscFileMode)
+    viewer = PetscViewer(comm)
+    error = ccall((:PetscViewerHDF5Open, libpetsc), PetscErrorCode,
+        (MPI.MPI_Comm, Cstring, PetscFileMode, Ptr{CViewer}),
+        comm, filename, type, viewer.ptr)
+    @assert iszero(error)
+    return viewer
+end
+
+"""
+    PetscViewerSetType(viewer::PetscViewer, type::String)
+
+Wrapper for `PetscViewerSetType`. Values for `type` alors available here:
+https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Viewer/PetscViewerType.html#PetscViewerType
+"""
+function PetscViewerSetType(viewer::PetscViewer, type::String)
+    error = ccall((:PetscViewerSetType, libpetsc), PetscErrorCode, (CViewer, Cstring), viewer, type)
+    @assert iszero(error)
+end
+
+"""
+    PetscViewerView(v::PetscViewer, viewer::PetscViewer = PetscViewerStdWorld())
+
+Wrapper to `PetscViewerView`
+"""
+function PetscViewerView(v::PetscViewer, viewer::PetscViewer = PetscViewerStdWorld())
+    error = ccall((:PetscViewerView, libpetsc), PetscErrorCode, (CViewer, CViewer), v, viewer)
+    @assert iszero(error)
+end
+
+"""
     PetscViewerDestroy(viewer::PetscViewer)
 
 Wrapper for `PetscViewerDestroy`

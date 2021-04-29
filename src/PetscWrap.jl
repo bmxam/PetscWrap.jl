@@ -11,7 +11,12 @@ using MPI
 include("const_arch_ind.jl")
 export  PetscErrorCode, PETSC_DECIDE
 # export all items of some enums
-for item in Iterators.flatten((instances(InsertMode), instances(MatAssemblyType), instances(PetscViewerFormat)))
+for item in Iterators.flatten((
+    instances(InsertMode),
+    instances(MatAssemblyType),
+    instances(PetscViewerFormat),
+    instances(PetscFileMode),
+    ))
     @eval export $(Symbol(item))
 end
 
@@ -28,9 +33,14 @@ export  PetscViewer, CViewer,
         PetscViewerASCIIOpen,
         PetscViewerCreate,
         PetscViewerDestroy,
+        PetscViewerFileSetMode,
+        PetscViewerFileSetName,
+        PetscViewerHDF5Open,
         PetscViewerPopFormat,
         PetscViewerPushFormat,
-        PetscViewerStdWorld
+        PetscViewerSetType,
+        PetscViewerStdWorld,
+        PetscViewerView
 
 include("vec.jl")
 export  PetscVec, CVec,
@@ -79,12 +89,20 @@ export  PetscKSP, CKSP,
         KSPSolve
 
 # fancy
+include("fancy/viewer.jl")
+export  destroy!,
+        push_format!,
+        set_mode!,
+        set_name!,
+        set_type!
+
 include("fancy/vec.jl")
 export  assemble!,
         create_vector,
         destroy!,
         duplicate,
         get_range,
+        get_urange,
         set_local_size!, set_global_size!,
         set_from_options!,
         set_up!,

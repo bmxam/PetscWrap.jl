@@ -64,33 +64,44 @@ function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
-Wrapper to `MatCreateDense`
+    MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
+
+Wrapper to `MatCreateDense`. Last argument `data` is not supported yet (NULL is passed).
 """
-function MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt, data::PetscScalar)
+function MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
     mat = PetscMat(comm)
     error = ccall((:MatCreateDense, libpetsc), PetscErrorCode,
         (MPI.MPI_Comm, PetscInt, PetscInt, PetscInt, PetscInt, Ptr{PetscScalar}, Ptr{CMat}),
-        comm, m, n, M, N, data, mat.ptr)
+        comm, m, n, M, N, C_NULL, mat.ptr)
     @assert iszero(error)
     return mat
 end
 
+function MatCreateDense(comm::MPI.Comm,
+    m::Integer = PETSC_DECIDE,
+    n::Integer = PETSC_DECIDE,
+    M::Integer = PETSC_DECIDE,
+    N::Integer = PETSC_DECIDE)
+
+    return MatCreateDense(comm, PetscInt(m), PetscInt(n), PetscInt(M), PetscInt(N))
+end
+
 """
-    MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
+    MatSetSizes(mat::PetscMat, nrows_loc::PetscInt, ncols_loc::PetscInt, nrows_glo::PetscInt, ncols_glo::PetscInt)
 
 Wrapper to MatSetSizes
 """
-function MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
-    nr_loc = PetscInt(nrows_loc)
-    nc_loc = PetscInt(ncols_loc)
-    nr_glo = PetscInt(nrows_glo)
-    nc_glo = PetscInt(ncols_glo)
+function MatSetSizes(mat::PetscMat, nrows_loc::PetscInt, ncols_loc::PetscInt, nrows_glo::PetscInt, ncols_glo::PetscInt)
     error = ccall((:MatSetSizes, libpetsc),
                 PetscErrorCode,
                 (CMat, PetscInt, PetscInt, PetscInt, PetscInt),
-                mat, nr_loc, nc_loc, nr_glo, nc_glo
+                mat, nrows_loc, ncols_loc, nrows_glo, ncols_glo
             )
     @assert iszero(error)
+end
+
+function MatSetSizes(mat::PetscMat, nrows_loc::Integer, ncols_loc::Integer, nrows_glo::Integer, ncols_glo::Integer)
+    MatSetSizes(mat, PetscInt(nrows_loc), PetscInt(ncols_loc), PetscInt(nrows_glo), PetscInt(ncols_glo))
 end
 
 
@@ -162,7 +173,7 @@ function MatCreateVecs(mat::PetscMat, vecr::PetscVec, veci::PetscVec)
 end
 
 function MatCreateVecs(mat::PetscMat)
-    vecr = PetscVec(); veci = PetscVec()
+    vecr = PetscVec(mat.comm); veci = PetscVec(mat.comm)
     MatCreateVecs(mat, vecr, veci)
     return vecr, veci
 end
