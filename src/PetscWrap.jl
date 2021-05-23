@@ -110,6 +110,7 @@ export  assemble!,
 
 include("fancy/mat.jl")
 export  create_matrix,
+        mat2file,
         set_values!
 
 include("fancy/ksp.jl")

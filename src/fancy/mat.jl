@@ -86,6 +86,16 @@ end
 
 set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
+"""
+    mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+
+Write a PetscMat to a file.
+"""
+function mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+    viewer = PetscViewer(mat.comm, filename, format, type)
+    MatView(mat, viewer)
+    destroy!(viewer)
+end
 
 Base.show(::IO, mat::PetscMat) = MatView(mat)
 
