@@ -86,6 +86,10 @@ end
 
 set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
+function preallocate_MPIAIJ(mat::PetscMat; dnz::PetscInt = 0, dnnz::Vector{PetscInt} = C_NULL, onz::PetscInt = 0, onnz::Vector{PetscInt} = C_NULL)
+    MatMPIAIJSetPreallocation(mat, dnz, dnnz, onz, onnz)
+end
+
 """
     mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
 

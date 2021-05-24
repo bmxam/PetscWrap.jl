@@ -179,6 +179,29 @@ function MatCreateVecs(mat::PetscMat)
 end
 
 """
+    MatMPIAIJSetPreallocation(mat::PetscMat, dnz::PetscInt, dnnz::Vector{PetscInt}, onz::PetscInt, onnz::Vector{PetscInt})
+
+Wrapper to `MatMPIAIJSetPreallocation`. `dnnz` and `onnz` not tested yet.
+"""
+function MatMPIAIJSetPreallocation(mat::PetscMat, dnz::PetscInt, dnnz::Vector{PetscInt}, onz::PetscInt, onnz::Vector{PetscInt})
+    error = ccall((:MatMPIAIJSetPreallocation, libpetsc), PetscErrorCode,
+        (CMat, PetscInt, Ptr{PetscInt}, PetscInt, Ptr{PetscInt}),
+        mat, dnz, dnnz, onz, onnz)
+    @assert iszero(error)
+end
+
+"""
+    MatSeqAIJSetPreallocation(mat::PetscMat, nz::PetscInt, nnz::Vector{PetscInt})
+
+Wrapper to `MatSeqAIJSetPreallocation`. `nnz` not tested yet.
+"""
+function MatSeqAIJSetPreallocation(mat::PetscMat, nz::PetscInt, nnz::Vector{PetscInt} = C_NULL)
+    error = ccall((:MatSeqAIJSetPreallocation, libpetsc), PetscErrorCode,
+        (CMat, PetscInt, Ptr{PetscInt}), mat, nz, nnz)
+    @assert iszero(error)
+end
+
+"""
     MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
 
 Wrapper to `MatView`

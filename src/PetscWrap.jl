@@ -71,7 +71,9 @@ export  PetscMat, CMat,
         MatCreateDense,
         MatCreateVecs,
         MatDestroy,
+        MatMPIAIJSetPreallocation,
         MatGetOwnershipRange,
+        MatSeqAIJSetPreallocation,
         MatSetFromOptions,
         MatSetSizes,
         MatSetUp,
@@ -111,6 +113,7 @@ export  assemble!,
 include("fancy/mat.jl")
 export  create_matrix,
         mat2file,
+        preallocate_MPIAIJ,
         set_values!
 
 include("fancy/ksp.jl")
