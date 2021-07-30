@@ -64,6 +64,16 @@ function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
+    MatCompositeAddMat(mat::PetscMat, smat::PetscMat)
+
+Wrapper to `MatCompositeAddMat`.
+"""
+function MatCompositeAddMat(mat::PetscMat, smat::PetscMat)
+    error = ccall((:MatCompositeAddMat, libpetsc), PetscErrorCode, (CMat, CMat), mat, smat)
+    @assert iszero(error)
+end
+
+"""
     MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
 
 Wrapper to `MatCreateDense`. Last argument `data` is not supported yet (NULL is passed).
@@ -87,6 +97,46 @@ function MatCreateDense(comm::MPI.Comm,
 end
 
 """
+    MatGetSize(mat::PetscMat)
+
+Wrapper to `MatGetSize`. Return the number of rows and cols of the matrix (global number).
+"""
+function MatGetSize(mat::PetscMat)
+    nrows_glo = Ref{PetscInt}(0)
+    ncols_glo = Ref{PetscInt}(0)
+
+    error = ccall((:MatGetSize, libpetsc), PetscErrorCode, (CMat, Ref{PetscInt}, Ref{PetscInt}), mat, nrows_glo, ncols_glo)
+    @assert iszero(error)
+
+    return nrows_glo[], ncols_glo[]
+end
+
+"""
+    MatGetLocalSize(mat::PetscMat)
+
+Wrapper to `MatGetLocalSize`. Return the number of local rows and cols of the matrix (i.e on the processor).
+"""
+function MatGetLocalSize(mat::PetscMat)
+    nrows_loc = Ref{PetscInt}(0)
+    ncols_loc = Ref{PetscInt}(0)
+
+    error = ccall((:MatGetLocalSize, libpetsc), PetscErrorCode, (CMat, Ref{PetscInt}, Ref{PetscInt}), mat, nrows_loc, ncols_loc)
+    @assert iszero(error)
+
+    return nrows_loc[], ncols_loc[]
+end
+
+"""
+    MatMult(mat::PetscMat, x::PetscVec, y::PetscVec)
+
+Wrapper to `MatMult`
+"""
+function MatMult(mat::PetscMat, x::PetscVec, y::PetscVec)
+    error = ccall((:MatMult, libpetsc), PetscErrorCode, (CMat, CVec, CVec), mat, x, y)
+    @assert iszero(error)
+end
+
+"""
     MatSetSizes(mat::PetscMat, nrows_loc::PetscInt, ncols_loc::PetscInt, nrows_glo::PetscInt, ncols_glo::PetscInt)
 
 Wrapper to MatSetSizes
@@ -102,6 +152,17 @@ end
 
 function MatSetSizes(mat::PetscMat, nrows_loc::Integer, ncols_loc::Integer, nrows_glo::Integer, ncols_glo::Integer)
     MatSetSizes(mat, PetscInt(nrows_loc), PetscInt(ncols_loc), PetscInt(nrows_glo), PetscInt(ncols_glo))
+end
+
+"""
+    MatSetType(mat::PetscMat, type::String)
+
+Wrapper for `MatSetType`. Values for `type` alors available here:
+https://petsc.org/release/docs/manualpages/Mat/MatType.html#MatType
+"""
+function MatSetType(mat::PetscMat, type::String)
+    error = ccall((:MatSetType, libpetsc), PetscErrorCode, (CMat, Cstring), mat, type)
+    @assert iszero(error)
 end
 
 

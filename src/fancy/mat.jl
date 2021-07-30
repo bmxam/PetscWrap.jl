@@ -32,6 +32,21 @@ function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC
     return mat
 end
 
+"""
+Wrapper to `MatCreateComposite` using the "alternative construction" from the PETSc documentation.
+"""
+function create_composite_add(matrices)
+    N, M = MatGetSize(matrices[1])
+    n, m = MatGetLocalSize(matrices[1])
+    mat = create_matrix(N, M, n, m; auto_setup = false, comm = matrices[1].comm)
+    MatSetType(mat, "composite")
+    for m in matrices
+        MatCompositeAddMat(mat, m)
+    end
+    assemble!(mat)
+    return mat
+end
+
 
 set_global_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, PETSC_DECIDE, PETSC_DECIDE, nrows, ncols)
 set_local_size!(mat::PetscMat, nrows, ncols) = MatSetSizes(mat, nrows, ncols, PETSC_DECIDE, PETSC_DECIDE)
