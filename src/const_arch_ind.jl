@@ -118,6 +118,15 @@ end
     PETSC_VIEWER_LOAD_BALANCE
 end
 
+@enum PetscFileMode begin
+    FILE_MODE_UNDEFINED = -1
+    FILE_MODE_READ = 0
+    FILE_MODE_WRITE
+    FILE_MODE_APPEND
+    FILE_MODE_UPDATE
+    FILE_MODE_APPEND_UPDATE
+end
+
 @enum MatOperation begin
     MATOP_SET_VALUES=0
     MATOP_GET_ROW=1

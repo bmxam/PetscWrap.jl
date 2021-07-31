@@ -2,26 +2,23 @@ const CKSP = Ptr{Cvoid}
 
 struct PetscKSP
     ptr::Ref{CKSP}
+    comm::MPI.Comm
 
-    PetscKSP() = new(Ref{CKSP}())
+    PetscKSP(comm::MPI.Comm) = new(Ref{CKSP}(), comm)
 end
 
 # allows us to pass PetscKSP objects directly into CKSP ccall signatures
 Base.cconvert(::Type{CKSP}, ksp::PetscKSP) = ksp.ptr[]
 
 """
-    KSPCreate(comm::MPI.Comm, ksp::PetscKSP)
+    KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 
-Wrapper for KSPCreate
+Wrapper for `KSPCreate`
 """
-function KSPCreate(comm::MPI.Comm, ksp::PetscKSP)
+function KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+    ksp = PetscKSP(comm)
     error = ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp.ptr)
     @assert iszero(error)
-end
-
-function KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
-    ksp = PetscKSP()
-    KSPCreate(comm, ksp)
     return ksp
 end
 

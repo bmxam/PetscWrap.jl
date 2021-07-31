@@ -2,8 +2,9 @@ const CVec = Ptr{Cvoid}
 
 struct PetscVec
     ptr::Ref{CVec}
+    comm::MPI.Comm
 
-    PetscVec() = new(Ref{Ptr{Cvoid}}())
+    PetscVec(comm::MPI.Comm) = new(Ref{Ptr{Cvoid}}(), comm)
 end
 
 # allows us to pass PetscVec objects directly into CVec ccall signatures
@@ -14,14 +15,10 @@ Base.cconvert(::Type{CVec}, vec::PetscVec) = vec.ptr[]
 
 Wrapper to VecCreate
 """
-function VecCreate(comm::MPI.Comm, vec::PetscVec)
+function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+    vec = PetscVec(comm)
     error = ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec.ptr)
     @assert iszero(error)
-end
-
-function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
-    vec = PetscVec()
-    VecCreate(comm, vec)
     return vec
 end
 
@@ -174,7 +171,7 @@ end
 Wrapper for VecDuplicate, except that it returns the new vector instead of taking it as an input.
 """
 function VecDuplicate(vec::PetscVec)
-    x = PetscVec()
+    x = PetscVec(vec.comm)
     error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), vec, x.ptr)
     @assert iszero(error)
 
@@ -220,24 +217,12 @@ function VecRestoreArray(vec::PetscVec, array_ref)
 end
 
 """
-    VecView(vec::PetscVec, viewer::PetscViewer)
+    VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
 
-Wrapper to `VecView`. Currently leads to a fatal error when using with `viewer = PetscViewerStdWorld()`.
-Use `VecView(vec)` instead.
+Wrapper to `VecView`.
 """
-function VecView(vec::PetscVec, viewer::PetscViewer)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, PetscViewer), vec, viewer);
-    @assert iszero(error)
-end
-
-"""
-    VecView(vec::PetscVec)
-
-Wrapper to `VecView` with the default PETSc viewer. This a fallback for the currently buggy
-`VecView(vec::PetscVec, viewer::PetscViewer)`
-"""
-function VecView(vec::PetscVec)
-    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, Ptr{Cvoid}), vec, C_NULL)
+function VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())
+    error = ccall( (:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer);
     @assert iszero(error)
 end
 

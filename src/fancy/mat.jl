@@ -21,7 +21,7 @@ Create a `PetscMat` matrix of global size `(nrows, ncols)`.
 
 Use `auto_setup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
-function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false)
+function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false, comm::MPI.Comm = MPI.COMM_WORLD)
     mat = MatCreate()
     MatSetSizes(mat::PetscMat, nrows_loc, ncols_loc, nrows, ncols)
 
@@ -29,6 +29,21 @@ function create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC
         set_from_options!(mat)
         set_up!(mat)
     end
+    return mat
+end
+
+"""
+Wrapper to `MatCreateComposite` using the "alternative construction" from the PETSc documentation.
+"""
+function create_composite_add(matrices)
+    N, M = MatGetSize(matrices[1])
+    n, m = MatGetLocalSize(matrices[1])
+    mat = create_matrix(N, M, n, m; auto_setup = false, comm = matrices[1].comm)
+    MatSetType(mat, "composite")
+    for m in matrices
+        MatCompositeAddMat(mat, m)
+    end
+    assemble!(mat)
     return mat
 end
 
@@ -55,6 +70,16 @@ function get_range(mat::PetscMat)
 end
 
 """
+    get_urange(mat::PetscMat)
+
+Provide a `UnitRange` from the method `get_range`.
+"""
+function get_urange(mat::PetscMat)
+    rstart, rend = MatGetOwnershipRange(mat)
+    return rstart+1:rend
+end
+
+"""
     Wrapper to `MatAssemblyBegin` and `MatAssemblyEnd` successively.
 """
 function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
@@ -76,6 +101,20 @@ end
 
 set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
+function preallocate_MPIAIJ(mat::PetscMat; dnz::PetscInt = 0, dnnz::Vector{PetscInt} = C_NULL, onz::PetscInt = 0, onnz::Vector{PetscInt} = C_NULL)
+    MatMPIAIJSetPreallocation(mat, dnz, dnnz, onz, onnz)
+end
+
+"""
+    mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+
+Write a PetscMat to a file.
+"""
+function mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+    viewer = PetscViewer(mat.comm, filename, format, type)
+    MatView(mat, viewer)
+    destroy!(viewer)
+end
 
 Base.show(::IO, mat::PetscMat) = MatView(mat)
 
