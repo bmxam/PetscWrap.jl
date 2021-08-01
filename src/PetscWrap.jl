@@ -75,6 +75,7 @@ export  PetscMat, CMat,
         MatGetLocalSize,
         MatGetOwnershipRange,
         MatGetSize,
+        MatGetType,
         MatMPIAIJSetPreallocation,
         MatMult,
         MatSeqAIJSetPreallocation,
@@ -118,6 +119,7 @@ include("fancy/mat.jl")
 export  create_composite_add,
         create_matrix,
         mat2file,
+        preallocate,
         preallocate_MPIAIJ,
         set_values!
 

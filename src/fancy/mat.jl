@@ -101,8 +101,19 @@ end
 
 set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
-function preallocate_MPIAIJ(mat::PetscMat; dnz::PetscInt = 0, dnnz::Vector{PetscInt} = C_NULL, onz::PetscInt = 0, onnz::Vector{PetscInt} = C_NULL)
+function preallocate_MPIAIJ(mat::PetscMat, dnz::PetscInt, dnnz::Vector{PetscInt}, onz::PetscInt, onnz::Vector{PetscInt})
     MatMPIAIJSetPreallocation(mat, dnz, dnnz, onz, onnz)
+end
+
+preallocate(mat::PetscMat, dnz, onz, ::Val{:mpiaij}) = MatMPIAIJSetPreallocation(mat, PetscInt(dnz), PetscInt(onz))
+preallocate(mat::PetscMat, dnz, onz, ::Val{:seqaij}) = MatSeqAIJSetPreallocation(mat, PetscInt(dnz))
+
+"""
+Dispatch preallocation according matrix type. TODO: should use kwargs.
+"""
+function preallocate(mat::PetscMat, dnz, onz = 0, warn = true)
+    preallocate(mat, dnz, onz, Val(Symbol(MatGetType(mat))))
+    MatSetOption(mat, MAT_NEW_NONZERO_ALLOCATION_ERR, warn)
 end
 
 """

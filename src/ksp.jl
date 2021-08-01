@@ -23,23 +23,32 @@ function KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
+    KSPDestroy(ksp::PetscKSP)
+
+Wrapper to `KSPDestroy`
+"""
+function KSPDestroy(ksp::PetscKSP)
+    error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
+    @assert iszero(error)
+end
+
+"""
+    KSPSetFromOptions(ksp::PetscKSP)
+
+Wrapper to KSPSetFromOptions
+"""
+function KSPSetFromOptions(ksp::PetscKSP)
+    error = ccall((:KSPSetFromOptions, libpetsc), PetscErrorCode, (CKSP,), ksp)
+    @assert iszero(error)
+end
+
+"""
     KSPSetOperators(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
 
 Wrapper for KSPSetOperators
 """
 function KSPSetOperators(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
     error = ccall((:KSPSetOperators, libpetsc), PetscErrorCode, (CKSP, CMat, CMat), ksp, Amat, Pmat)
-    @assert iszero(error)
-end
-
-
-"""
-    KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
-
-Wrapper for KSPSolve
-"""
-function KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
-    error = ccall((:KSPSolve, libpetsc), PetscErrorCode, (CKSP, CVec, CVec), ksp, b, x)
     @assert iszero(error)
 end
 
@@ -53,23 +62,12 @@ function KSPSetUp(ksp::PetscKSP)
     @assert iszero(error)
 end
 
-
 """
-    KSPSetFromOptions(ksp::PetscKSP)
+    KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
 
-Wrapper to KSPSetFromOptions
+Wrapper for KSPSolve
 """
-function KSPSetFromOptions(ksp::PetscKSP)
-    error = ccall((:KSPSetFromOptions, libpetsc), PetscErrorCode, (CKSP,), ksp)
-    @assert iszero(error)
-end
-
-"""
-    KSPDestroy(ksp::PetscKSP)
-
-Wrapper to `KSPDestroy`
-"""
-function KSPDestroy(ksp::PetscKSP)
-    error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
+function KSPSolve(ksp::PetscKSP, b::PetscVec, x::PetscVec)
+    error = ccall((:KSPSolve, libpetsc), PetscErrorCode, (CKSP, CVec, CVec), ksp, b, x)
     @assert iszero(error)
 end
