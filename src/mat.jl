@@ -137,6 +137,27 @@ function MatGetOwnershipRange(mat::PetscMat)
 end
 
 """
+    MatGetOwnershipRangeColumn(mat::PetscMat)
+
+Wrapper to `MatGetOwnershipRangeColumn`
+
+The result `(cstart, cend)` is a Tuple indicating the columns handled by the local processor.
+
+# Warning
+`PETSc` indexing starts at zero (so `cstart` may be zero) and `cend-1` is the last column
+handled by the local processor.
+"""
+function MatGetOwnershipRangeColumn(mat::PetscMat)
+    cstart = Ref{PetscInt}(0)
+    cend = Ref{PetscInt}(0)
+
+    error = ccall((:MatGetOwnershipRangeColumn, libpetsc), PetscErrorCode, (CMat, Ref{PetscInt}, Ref{PetscInt}), mat, cstart, cend)
+    @assert iszero(error)
+
+    return cstart[], cend[]
+end
+
+"""
     MatGetSize(mat::PetscMat)
 
 Wrapper to `MatGetSize`. Return the number of rows and cols of the matrix (global number).
