@@ -101,20 +101,22 @@ end
 
 set_values!(mat, I, J, V, mode = ADD_VALUES) = set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 
-function preallocate_MPIAIJ(mat::PetscMat, dnz::PetscInt, dnnz::Vector{PetscInt}, onz::PetscInt, onnz::Vector{PetscInt})
-    MatMPIAIJSetPreallocation(mat, dnz, dnnz, onz, onnz)
-end
-
-preallocate(mat::PetscMat, dnz, onz, ::Val{:mpiaij}) = MatMPIAIJSetPreallocation(mat, PetscInt(dnz), PetscInt(onz))
-preallocate(mat::PetscMat, dnz, onz, ::Val{:seqaij}) = MatSeqAIJSetPreallocation(mat, PetscInt(dnz))
+# Warning : cannot use Vector{Integer} because `[1, 2] isa Vector{Integer}` is `false`
+_preallocate!(mat::PetscMat, dnz::Integer, onz::Integer, ::Val{:mpiaij}) = MatMPIAIJSetPreallocation(mat, PetscInt(dnz), PetscInt(onz))
+_preallocate!(mat::PetscMat, d_nnz::Vector{I}, o_nnz::Vector{I}, ::Val{:mpiaij}) where I = MatMPIAIJSetPreallocation(mat, PetscInt(0), PetscInt.(d_nnz), PetscInt(0), PetscInt.(o_nnz))
+_preallocate!(mat::PetscMat, nz::Integer, ::Integer, ::Val{:seqaij}) = MatSeqAIJSetPreallocation(mat, PetscInt(nz))
+_preallocate!(mat::PetscMat, nnz::Vector{I}, ::Vector{I}, ::Val{:seqaij}) where I = MatSeqAIJSetPreallocation(mat, PetscInt(0), PetscInt.(nnz))
 
 """
-Dispatch preallocation according matrix type. TODO: should use kwargs.
+    preallocate!(mat::PetscMat, dnz, onz, warn::Bool = true)
+
+Dispatch preallocation according matrix type (seq or mpiaij for instance). TODO: should use kwargs.
 """
-function preallocate(mat::PetscMat, dnz, onz = 0, warn = true)
-    preallocate(mat, dnz, onz, Val(Symbol(MatGetType(mat))))
+function preallocate!(mat::PetscMat, dnz, onz, warn::Bool = true)
+    _preallocate!(mat, dnz, onz, Val(Symbol(MatGetType(mat))))
     MatSetOption(mat, MAT_NEW_NONZERO_ALLOCATION_ERR, warn)
 end
+
 
 """
     mat2file(mat::PetscMat, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")

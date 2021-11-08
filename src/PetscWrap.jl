@@ -120,8 +120,7 @@ include("fancy/mat.jl")
 export  create_composite_add,
         create_matrix,
         mat2file,
-        preallocate,
-        preallocate_MPIAIJ,
+        preallocate!,
         set_values!
 
 include("fancy/ksp.jl")
