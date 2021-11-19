@@ -82,6 +82,17 @@ function vec2array(vec::PetscVec)
     return array
 end
 
+"""
+    vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+
+Write a PetscVec to a file.
+"""
+function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+    viewer = PetscViewer(vec.comm, filename, format, type)
+    VecView(vec, viewer)
+    destroy!(viewer)
+end
+
 Base.show(::IO, vec::PetscVec) = VecView(vec)
 
 destroy!(vec::PetscVec) = VecDestroy(vec)

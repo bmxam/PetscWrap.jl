@@ -114,7 +114,8 @@ export  assemble!,
         set_local_size!, set_global_size!,
         set_from_options!,
         set_up!,
-        vec2array
+        vec2array,
+        vec2file
 
 include("fancy/mat.jl")
 export  create_composite_add,
