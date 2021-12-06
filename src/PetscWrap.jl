@@ -21,6 +21,7 @@ for item in Iterators.flatten((
 end
 
 include("load.jl")
+export show_petsc_path
 
 include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
