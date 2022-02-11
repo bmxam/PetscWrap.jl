@@ -47,13 +47,23 @@ set_up!(vec::PetscVec) = VecSetUp(vec)
 
 Wrapper to `VecGetOwnershipRange`
 
-However, the result `(rstart, rend)` is such that `mat[rstart:rend]` are the rows handled by the local processor.
+However, the result `(rstart, rend)` is such that `vec[rstart:rend]` are the rows handled by the local processor.
 This is different from the default `PETSc.VecGetOwnershipRange` result where the indexing starts at zero and where
 `rend-1` is last row handled by the local processor.
 """
 function get_range(vec::PetscVec)
     rstart, rend = VecGetOwnershipRange(vec)
     return (rstart + 1, rend)
+end
+
+"""
+    get_urange(vec::PetscVec)
+
+Provide a `UnitRange` from the method `get_range`.
+"""
+function get_urange(vec::PetscVec)
+    rstart, rend = VecGetOwnershipRange(vec)
+    return rstart+1:rend
 end
 
 
@@ -67,6 +77,8 @@ function assemble!(vec::PetscVec)
 end
 
 duplicate(vec::PetscVec) = VecDuplicate(vec)
+
+set_values!(vec::PetscVec, values) = VecSetValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
 
 """
     vec2array(vec::PetscVec)
