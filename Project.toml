@@ -1,7 +1,7 @@
 name = "PetscWrap"
 uuid = "5be22e1c-01b5-4697-96eb-ef9ccdc854b8"
 authors = ["bmxam <maxime.bouyges@gmail.com>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -9,5 +9,5 @@ MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-MPI = "0.16.1"
+MPI = "0.16, 0.17, 0.18, 0.19"
 julia = "1.5"

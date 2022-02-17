@@ -24,6 +24,18 @@ end
 const PetscViewerStdWorld = PetscViewerASCIIGetStdout
 
 """
+    PetscViewerASCIIOpen(comm::MPI.Comm, filename)
+
+Wrapper for `PetscViewerASCIIOpen`
+"""
+function PetscViewerASCIIOpen(comm::MPI.Comm, filename)
+    viewer = PetscViewer(comm)
+    error = ccall((:PetscViewerASCIIOpen, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Cstring, Ptr{CViewer}), comm, filename, viewer.ptr)
+    @assert iszero(error)
+    return viewer
+end
+
+"""
     PetscViewerCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper for `PetscViewerCreate`
@@ -36,12 +48,15 @@ function PetscViewerCreate(comm::MPI.Comm = MPI.COMM_WORLD)
 end
 
 """
-    PetscViewerPushFormat(viewer::PetscViewer, format::PetscViewerFormat)
+    PetscViewerDestroy(viewer::PetscViewer)
 
-Wrapper for `PetscViewerPushFormat`
+Wrapper for `PetscViewerDestroy`
+
+Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
+
 """
-function PetscViewerPushFormat(viewer::PetscViewer, format::PetscViewerFormat)
-    error = ccall((:PetscViewerPushFormat, libpetsc), PetscErrorCode, (CViewer, PetscViewerFormat), viewer, format)
+function PetscViewerDestroy(viewer::PetscViewer)
+    error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer}, ), viewer.ptr)
     @assert iszero(error)
 end
 
@@ -56,34 +71,33 @@ function PetscViewerPopFormat(viewer::PetscViewer)
 end
 
 """
-    PetscViewerASCIIOpen(comm::MPI.Comm, filename)
+    PetscViewerPushFormat(viewer::PetscViewer, format::PetscViewerFormat)
 
-Wrapper for `PetscViewerASCIIOpen`
+Wrapper for `PetscViewerPushFormat`
 """
-function PetscViewerASCIIOpen(comm::MPI.Comm, filename)
-    viewer = PetscViewer(comm)
-    error = ccall((:PetscViewerASCIIOpen, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Cstring, Ptr{CViewer}), comm, filename, viewer.ptr)
-    @assert iszero(error)
-    return viewer
-end
-
-"""
-PetscViewerFileSetName(viewer::PetscViewer, filename)
-
-Wrapper for `PetscViewerFileSetName`
-"""
-function PetscViewerFileSetName(viewer::PetscViewer, filename::String)
-    error = ccall((:PetscViewerFileSetName, libpetsc), PetscErrorCode, (CViewer, Cstring), viewer, filename)
+function PetscViewerPushFormat(viewer::PetscViewer, format::PetscViewerFormat)
+    error = ccall((:PetscViewerPushFormat, libpetsc), PetscErrorCode, (CViewer, PetscViewerFormat), viewer, format)
     @assert iszero(error)
 end
 
 """
-PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
+    PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
 
 Wrapper for `PetscViewerFileSetMode`
 """
 function PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
     error = ccall((:PetscViewerFileSetMode, libpetsc), PetscErrorCode, (CViewer, PetscFileMode), viewer, mode)
+    @assert iszero(error)
+end
+
+
+"""
+    PetscViewerFileSetName(viewer::PetscViewer, filename)
+
+Wrapper for `PetscViewerFileSetName`
+"""
+function PetscViewerFileSetName(viewer::PetscViewer, filename::String)
+    error = ccall((:PetscViewerFileSetName, libpetsc), PetscErrorCode, (CViewer, Cstring), viewer, filename)
     @assert iszero(error)
 end
 
@@ -119,18 +133,5 @@ Wrapper to `PetscViewerView`
 """
 function PetscViewerView(v::PetscViewer, viewer::PetscViewer = PetscViewerStdWorld())
     error = ccall((:PetscViewerView, libpetsc), PetscErrorCode, (CViewer, CViewer), v, viewer)
-    @assert iszero(error)
-end
-
-"""
-    PetscViewerDestroy(viewer::PetscViewer)
-
-Wrapper for `PetscViewerDestroy`
-
-Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
-
-"""
-function PetscViewerDestroy(viewer::PetscViewer)
-    error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer}, ), viewer.ptr)
     @assert iszero(error)
 end

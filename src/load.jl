@@ -36,3 +36,5 @@ end
 
 # Absolute path to libpetsc.so
 const libpetsc = get_petsc_location()
+
+show_petsc_path() = return libpetsc

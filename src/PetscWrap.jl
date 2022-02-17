@@ -21,6 +21,7 @@ for item in Iterators.flatten((
 end
 
 include("load.jl")
+export show_petsc_path
 
 include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
@@ -74,7 +75,9 @@ export  PetscMat, CMat,
         MatDestroy,
         MatGetLocalSize,
         MatGetOwnershipRange,
+        MatGetOwnershipRangeColumn,
         MatGetSize,
+        MatGetType,
         MatMPIAIJSetPreallocation,
         MatMult,
         MatSeqAIJSetPreallocation,
@@ -112,13 +115,14 @@ export  assemble!,
         set_local_size!, set_global_size!,
         set_from_options!,
         set_up!,
-        vec2array
+        vec2array,
+        vec2file
 
 include("fancy/mat.jl")
 export  create_composite_add,
         create_matrix,
         mat2file,
-        preallocate_MPIAIJ,
+        preallocate!,
         set_values!
 
 include("fancy/ksp.jl")
