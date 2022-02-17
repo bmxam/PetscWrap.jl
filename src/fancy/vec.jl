@@ -81,6 +81,13 @@ duplicate(vec::PetscVec) = VecDuplicate(vec)
 set_values!(vec::PetscVec, values) = VecSetValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
 
 """
+Wrapper to `VecSetValues`, using julia 1-based indexing.
+"""
+function set_values!(vec::PetscVec, rows::Vector{PetscInt}, values::Vector{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+    VecSetValues(vec, rows .- PetscIntOne, values, mode)
+end
+
+"""
     vec2array(vec::PetscVec)
 
 Convert a `PetscVec` into a Julia `Array`. Allocation is involved in the process since the `PetscVec`

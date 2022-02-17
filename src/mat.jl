@@ -305,6 +305,11 @@ function MatSetOption(mat::PetscMat, option::MatOption, value::Bool)
     @assert iszero(error)
 end
 
+# Avoid allocating an array of size 1 for each call to MatSetValue
+const _ivec = zeros(PetscInt,1)
+const _jvec = zeros(PetscInt,1)
+const _vvec = zeros(PetscScalar,1)
+
 """
 MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
 
@@ -315,7 +320,11 @@ For an unknow reason, calling PETSc.MatSetValue leads to an "undefined symbol: M
 So this wrapper directly call MatSetValues (anyway, this is what is done in PETSc...)
 """
 function MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
-    MatSetValues(mat, PetscIntOne, [i], PetscIntOne, [j], [v], mode)
+    # Convert to arrays
+    _ivec[1] = i; _jvec[1] = j; _vvec[1] = v
+
+    MatSetValues(mat, PetscIntOne, _ivec, PetscIntOne, _jvec, _vvec, mode)
+    #MatSetValues(mat, PetscIntOne, [i], PetscIntOne, [j], [v], mode)
 end
 
 function MatSetValue(mat::PetscMat, i::Integer, j::Integer, v::Number, mode::InsertMode)
