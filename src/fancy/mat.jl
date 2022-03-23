@@ -88,6 +88,15 @@ function assemble!(mat::PetscMat, type::MatAssemblyType = MAT_FINAL_ASSEMBLY)
 end
 
 """
+    set_value!(mat::PetscMat, I, J, V, mode = ADD_VALUES)
+
+Set value of `mat`
+`mat[i, j] = v`.
+"""
+set_value!(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode = ADD_VALUES) = MatSetValue(mat, i - 1, j - 1, v, mode)
+set_value!(mat, i, j, v, mode = ADD_VALUES) = set_value!(mat, PetscInt(i), PetscInt(j), PetscScalar(v), mode)
+
+"""
     set_values!(mat::PetscMat, I, J, V, mode = ADD_VALUES)
 
 Set values of `mat` in `SparseArrays` fashion : using COO format:

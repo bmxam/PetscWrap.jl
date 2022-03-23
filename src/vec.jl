@@ -11,6 +11,29 @@ end
 Base.cconvert(::Type{CVec}, vec::PetscVec) = vec.ptr[]
 
 """
+    VecCopy(x::PetscVec, y::PetscVec)
+
+Wrapper to `VecCopy`.
+
+https://petsc.org/main/docs/manualpages/Vec/VecCopy.html
+"""
+function VecCopy(x::PetscVec, y::PetscVec)
+    error = ccall((:VecCopy, libpetsc), PetscErrorCode, (CVec, CVec), x, y)
+    @assert iszero(error)
+end
+
+"""
+    VecCopy(x::PetscVec)
+
+Wrapper to `VecCopy`, expect that `y` is first obtained by `VecDuplicate`
+"""
+function VecCopy(x::PetscVec)
+    y = VecDuplicate(x)
+    VecCopy(x,y)
+    return y
+end
+
+"""
     VecCreate(comm::MPI.Comm, vec::PetscVec)
 
 Wrapper to VecCreate
@@ -20,6 +43,21 @@ function VecCreate(comm::MPI.Comm = MPI.COMM_WORLD)
     error = ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec.ptr)
     @assert iszero(error)
     return vec
+end
+
+"""
+    VecDuplicate(vec::PetscVec)
+
+Wrapper for VecDuplicate, except that it returns the new vector instead of taking it as an input.
+
+https://petsc.org/main/docs/manualpages/Vec/VecDuplicate.html
+"""
+function VecDuplicate(vec::PetscVec)
+    x = PetscVec(vec.comm)
+    error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), vec, x.ptr)
+    @assert iszero(error)
+
+    return x
 end
 
 """
@@ -166,19 +204,6 @@ function VecAssemblyEnd(vec::PetscVec)
 end
 
 """
-    VecDuplicate(vec::PetscVec)
-
-Wrapper for VecDuplicate, except that it returns the new vector instead of taking it as an input.
-"""
-function VecDuplicate(vec::PetscVec)
-    x = PetscVec(vec.comm)
-    error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), vec, x.ptr)
-    @assert iszero(error)
-
-    return x
-end
-
-"""
     VecGetArray(vec::PetscVec, own = false)
 
 Wrapper for VecGetArray.
@@ -215,6 +240,20 @@ function VecRestoreArray(vec::PetscVec, array_ref)
     error = ccall((:VecRestoreArray, libpetsc), PetscErrorCode, (CVec, Ref{Ptr{PetscScalar}}), vec, array_ref)
     @assert iszero(error)
 end
+
+"""
+    VecScale(vec::PetscVec, alpha::PetscScalar)
+
+Wrapper for  `VecScale`
+
+https://petsc.org/main/docs/manualpages/Vec/VecScale.html
+"""
+function VecScale(vec::PetscVec, alpha::PetscScalar)
+    error = ccall((:VecScale, libpetsc), PetscErrorCode, (CVec, PetscScalar), vec, alpha)
+    @assert iszero(error)
+end
+
+VecScale(vec::PetscVec, alpha::Number) = VecScale(vec, PetscScalar(alpha))
 
 """
     VecView(vec::PetscVec, viewer::PetscViewer = PetscViewerStdWorld())

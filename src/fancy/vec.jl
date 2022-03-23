@@ -1,4 +1,16 @@
 
+function Base.:*(x::PetscVec, alpha::Number)
+    y = VecCopy(x)
+    scale!(y, alpha)
+    return y
+end
+Base.:*(alpha::Number, vec::PetscVec) = vec * alpha
+
+function assemble!(vec::PetscVec)
+    VecAssemblyBegin(vec)
+    VecAssemblyEnd(vec)
+end
+
 """
     create_vector(nrows, nrows_loc = PETSC_DECIDE)
 
@@ -16,31 +28,10 @@ function create_vector(nrows, nrows_loc = PETSC_DECIDE; auto_setup = false, comm
     return vec
 end
 
-Base.ndims(::Type{PetscVec}) = 1
+destroy!(vec::PetscVec) = VecDestroy(vec)
 
-"""
-    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-
-`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
-
-# Implementation
-For some unkwnown reason, calling `VecSetValue` fails.
-"""
-function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row .- 1], PetscScalar[value], INSERT_VALUES)
-end
-
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows .- 1), values, INSERT_VALUES)
-
-
-set_global_size!(vec::PetscVec, nrows) = VecSetSizes(vec, PETSC_DECIDE, nrows)
-set_local_size!(vec::PetscVec, nrows) = VecSetSizes(vec, nrows, PETSC_DECIDE)
-
-set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
-
-set_up!(vec::PetscVec) = VecSetUp(vec)
+duplicate(vec::PetscVec) = VecDuplicate(vec)
+duplicate(vec::PetscVec, n::Int) = ntuple(i -> VecDuplicate(vec), n)
 
 """
     get_range(vec::PetscVec)
@@ -66,19 +57,35 @@ function get_urange(vec::PetscVec)
     return rstart+1:rend
 end
 
+Base.ndims(::Type{PetscVec}) = 1
 
-# Discutable choice
-Base.length(vec::PetscVec) = VecGetLocalSize(vec)
-Base.size(vec::PetscVec) = (length(vec),)
+scale!(vec::PetscVec, alpha::Number) = VecScale(vec, alpha)
 
-function assemble!(vec::PetscVec)
-    VecAssemblyBegin(vec)
-    VecAssemblyEnd(vec)
+"""
+    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
+
+`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
+
+# Implementation
+For some unkwnown reason, calling `VecSetValue` fails.
+"""
+function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
+    VecSetValues(vec, PetscInt[row .- 1], PetscScalar[value], INSERT_VALUES)
 end
 
-duplicate(vec::PetscVec) = VecDuplicate(vec)
+# This is stupid but I don't know how to do better yet
+Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows .- 1), values, INSERT_VALUES)
+
+set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
+
+set_global_size!(vec::PetscVec, nrows) = VecSetSizes(vec, PETSC_DECIDE, nrows)
+set_local_size!(vec::PetscVec, nrows) = VecSetSizes(vec, nrows, PETSC_DECIDE)
+
+set_up!(vec::PetscVec) = VecSetUp(vec)
 
 set_values!(vec::PetscVec, values) = VecSetValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
+
+Base.show(::IO, vec::PetscVec) = VecView(vec)
 
 """
     vec2array(vec::PetscVec)
@@ -105,6 +112,6 @@ function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = P
     destroy!(viewer)
 end
 
-Base.show(::IO, vec::PetscVec) = VecView(vec)
-
-destroy!(vec::PetscVec) = VecDestroy(vec)
+# Discutable choice(s)
+Base.length(vec::PetscVec) = VecGetLocalSize(vec)
+Base.size(vec::PetscVec) = (length(vec),)

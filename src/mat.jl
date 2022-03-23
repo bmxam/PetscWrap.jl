@@ -176,7 +176,7 @@ end
     MatGetType(mat::PetscMat)
 
 Wrapper to `MatGetType`. Return the matrix type as a string. See matrix types here:
-https://petsc.org/release/docs/manualpages/Mat/MatType.html#MatType
+https://petsc.org/release/docs/manualpages/Mat/MatType.html
 """
 function MatGetType(mat::PetscMat)
     type = Ref{Cstring}()
@@ -191,10 +191,24 @@ end
 """
     MatMult(mat::PetscMat, x::PetscVec, y::PetscVec)
 
-Wrapper to `MatMult`
+Wrapper to `MatMult`. Computes `y = Ax`
+
+https://petsc.org/main/docs/manualpages/Mat/MatMult.html
 """
 function MatMult(mat::PetscMat, x::PetscVec, y::PetscVec)
     error = ccall((:MatMult, libpetsc), PetscErrorCode, (CMat, CVec, CVec), mat, x, y)
+    @assert iszero(error)
+end
+
+"""
+    MatMultAdd(A::PetscMat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+
+Wrapper to `MatMultAdd`. Computes `v3 = v2 + A * v1`.
+
+https://petsc.org/main/docs/manualpages/Mat/MatMultAdd.html
+"""
+function MatMultAdd(A::PetscMat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+    error = ccall((:MatMultAdd, libpetsc), PetscErrorCode, (CMat, CVec, CVec, CVec), A, v1, v2, v3)
     @assert iszero(error)
 end
 
