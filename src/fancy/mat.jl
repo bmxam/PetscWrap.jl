@@ -104,7 +104,7 @@ Set values of `mat` in `SparseArrays` fashion : using COO format:
 """
 function set_values!(mat::PetscMat, I::Vector{PetscInt}, J::Vector{PetscInt}, V::Vector{PetscScalar}, mode = ADD_VALUES)
     for (i,j,v) in zip(I, J, V)
-        MatSetValue(mat, i - 1, j - 1, v, mode)
+        MatSetValue(mat, i - PetscIntOne, j - PetscIntOne, v, mode)
     end
 end
 
