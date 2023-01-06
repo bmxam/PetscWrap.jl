@@ -8,7 +8,7 @@ const set_type! = PetscViewerSetType
 
 Constructor for a PetscViewer intended to read/write a matrix or a vector with the supplied type and format.
 """
-function PetscViewer(comm::MPI.Comm, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii", mode::PetscFileMode = FILE_MODE_WRITE)
+function PetscViewer(comm::MPI.Comm, filename::String, format::PetscViewerFormat=PETSC_VIEWER_ASCII_CSV, type::String="ascii", mode::PetscFileMode=FILE_MODE_WRITE)
     viewer = PetscViewerCreate(comm)
     set_type!(viewer, type)
     set_mode!(viewer, FILE_MODE_WRITE)

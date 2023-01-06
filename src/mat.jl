@@ -46,7 +46,7 @@ end
 
 Wrapper to `MatCreate`
 """
-function MatCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+function MatCreate(comm::MPI.Comm=MPI.COMM_WORLD)
     mat = PetscMat(comm)
     error = ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat.ptr)
     @assert iszero(error)
@@ -68,10 +68,10 @@ function MatCreateDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N
 end
 
 function MatCreateDense(comm::MPI.Comm,
-    m::Integer = PETSC_DECIDE,
-    n::Integer = PETSC_DECIDE,
-    M::Integer = PETSC_DECIDE,
-    N::Integer = PETSC_DECIDE)
+    m::Integer=PETSC_DECIDE,
+    n::Integer=PETSC_DECIDE,
+    M::Integer=PETSC_DECIDE,
+    N::Integer=PETSC_DECIDE)
 
     return MatCreateDense(comm, PetscInt(m), PetscInt(n), PetscInt(M), PetscInt(N))
 end
@@ -85,7 +85,8 @@ function MatCreateVecs(mat::PetscMat, vecr::PetscVec, veci::PetscVec)
 end
 
 function MatCreateVecs(mat::PetscMat)
-    vecr = PetscVec(mat.comm); veci = PetscVec(mat.comm)
+    vecr = PetscVec(mat.comm)
+    veci = PetscVec(mat.comm)
     MatCreateVecs(mat, vecr, veci)
     return vecr, veci
 end
@@ -229,10 +230,10 @@ Wrapper to MatSetSizes
 """
 function MatSetSizes(mat::PetscMat, nrows_loc::PetscInt, ncols_loc::PetscInt, nrows_glo::PetscInt, ncols_glo::PetscInt)
     error = ccall((:MatSetSizes, libpetsc),
-                PetscErrorCode,
-                (CMat, PetscInt, PetscInt, PetscInt, PetscInt),
-                mat, nrows_loc, ncols_loc, nrows_glo, ncols_glo
-            )
+        PetscErrorCode,
+        (CMat, PetscInt, PetscInt, PetscInt, PetscInt),
+        mat, nrows_loc, ncols_loc, nrows_glo, ncols_glo
+    )
     @assert iszero(error)
 end
 
@@ -320,9 +321,9 @@ function MatSetOption(mat::PetscMat, option::MatOption, value::Bool)
 end
 
 # Avoid allocating an array of size 1 for each call to MatSetValue
-const _ivec = zeros(PetscInt,1)
-const _jvec = zeros(PetscInt,1)
-const _vvec = zeros(PetscScalar,1)
+const _ivec = zeros(PetscInt, 1)
+const _jvec = zeros(PetscInt, 1)
+const _vvec = zeros(PetscScalar, 1)
 
 """
 MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
@@ -335,7 +336,9 @@ So this wrapper directly call MatSetValues (anyway, this is what is done in PETS
 """
 function MatSetValue(mat::PetscMat, i::PetscInt, j::PetscInt, v::PetscScalar, mode::InsertMode)
     # Convert to arrays
-    _ivec[1] = i; _jvec[1] = j; _vvec[1] = v
+    _ivec[1] = i
+    _jvec[1] = j
+    _vvec[1] = v
 
     MatSetValues(mat, PetscIntOne, _ivec, PetscIntOne, _jvec, _vvec, mode)
     #MatSetValues(mat, PetscIntOne, [i], PetscIntOne, [j], [v], mode)
@@ -370,7 +373,7 @@ end
 
 Wrapper to `MatView`
 """
-function MatView(mat::PetscMat, viewer::PetscViewer = PetscViewerStdWorld())
+function MatView(mat::PetscMat, viewer::PetscViewer=PetscViewerStdWorld())
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end

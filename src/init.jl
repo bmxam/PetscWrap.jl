@@ -7,13 +7,13 @@ I don't know if I am supposed to use PetscInt or not...
 function PetscInitialize(args::Vector{String}, filename::String, help::String)
     args2 = ["julia"; args]
     nargs = Cint(length(args2))
-    error = ccall( (:PetscInitializeNoPointers, libpetsc),
-            PetscErrorCode,
-            (Cint,
+    error = ccall((:PetscInitializeNoPointers, libpetsc),
+        PetscErrorCode,
+        (Cint,
             Ptr{Ptr{UInt8}},
             Cstring,
             Cstring),
-            nargs, args2, filename, help
+        nargs, args2, filename, help
     )
     @assert iszero(error)
 end
@@ -39,7 +39,7 @@ arguments for PETSc (leading to a call to `PetscInitializeNoPointers`).
 Otherwise, if `cmd_line_args == false`, initialize PETSc without arguments (leading
 to a call to `PetscInitializeNoArguments`).
 """
-function PetscInitialize(cmd_line_args::Bool = true)
+function PetscInitialize(cmd_line_args::Bool=true)
     if (cmd_line_args)
         PetscInitialize(ARGS)
     else
@@ -52,6 +52,6 @@ end
     Wrapper to PetscFinalize
 """
 function PetscFinalize()
-    error = ccall( (:PetscFinalize, libpetsc), PetscErrorCode, ())
+    error = ccall((:PetscFinalize, libpetsc), PetscErrorCode, ())
     @assert iszero(error)
 end

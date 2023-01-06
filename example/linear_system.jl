@@ -22,7 +22,7 @@ PetscInitialize()
 
 # Number of mesh points and mesh step
 n = 11
-Δx = 1. / (n - 1)
+Δx = 1.0 / (n - 1)
 
 # Create a matrix and a vector (you can specify the MPI communicator if you want)
 A = MatCreate()
@@ -54,11 +54,11 @@ VecSetValues(b, collect(b_start:b_end-1), 2 * ones(n_loc))
 # And here is the differentiation matrix. Rembember that PETSc.MatSetValues simply ignores negatives rows indices.
 A_start, A_end = MatGetOwnershipRange(A)
 for i in A_start:A_end-1
-    MatSetValues(A, [i], [i-1, i], [-1. 1.] / Δx, INSERT_VALUES) # MatSetValues(A, I, J, V, INSERT_VALUES)
+    MatSetValues(A, [i], [i - 1, i], [-1.0 1.0] / Δx, INSERT_VALUES) # MatSetValues(A, I, J, V, INSERT_VALUES)
 end
 
 # Set boundary condition (only the proc handling index `0` is acting)
-(b_start == 0) && VecSetValue(b, 0, 0.)
+(b_start == 0) && VecSetValue(b, 0, 0.0)
 
 # Assemble matrices
 MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY)

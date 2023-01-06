@@ -15,7 +15,7 @@ Base.cconvert(::Type{CKSP}, ksp::PetscKSP) = ksp.ptr[]
 
 Wrapper for `KSPCreate`
 """
-function KSPCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+function KSPCreate(comm::MPI.Comm=MPI.COMM_WORLD)
     ksp = PetscKSP(comm)
     error = ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp.ptr)
     @assert iszero(error)

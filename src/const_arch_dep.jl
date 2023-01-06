@@ -8,8 +8,8 @@ function DataTypeFromString(name::AbstractString)
     dtype_ref = Ref{PetscDataType}()
     found_ref = Ref{PetscBool}()
     ccall((:PetscDataTypeFromString, libpetsc), PetscErrorCode,
-             (Cstring, Ptr{PetscDataType}, Ptr{PetscBool}),
-             name, dtype_ref, found_ref)
+        (Cstring, Ptr{PetscDataType}, Ptr{PetscBool}),
+        name, dtype_ref, found_ref)
     @assert found_ref[] == PETSC_TRUE
     return dtype_ref[]
 end
@@ -20,8 +20,8 @@ end
 function PetscDataTypeGetSize(dtype::PetscDataType)
     datasize_ref = Ref{Csize_t}()
     ccall((:PetscDataTypeGetSize, libpetsc), PetscErrorCode,
-             (PetscDataType, Ptr{Csize_t}),
-             dtype, datasize_ref)
+        (PetscDataType, Ptr{Csize_t}),
+        dtype, datasize_ref)
     return datasize_ref[]
 end
 

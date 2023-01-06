@@ -14,7 +14,7 @@ Base.cconvert(::Type{CViewer}, viewer::PetscViewer) = viewer.ptr[]
 
 Wrapper for `PetscViewerASCIIGetStdout`
 """
-function PetscViewerASCIIGetStdout(comm::MPI.Comm = MPI.COMM_WORLD)
+function PetscViewerASCIIGetStdout(comm::MPI.Comm=MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
     error = ccall((:PetscViewerASCIIGetStdout, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CViewer}), comm, viewer.ptr)
     @assert iszero(error)
@@ -40,7 +40,7 @@ end
 
 Wrapper for `PetscViewerCreate`
 """
-function PetscViewerCreate(comm::MPI.Comm = MPI.COMM_WORLD)
+function PetscViewerCreate(comm::MPI.Comm=MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
     error = ccall((:PetscViewerCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CViewer}), comm, viewer.ptr)
     @assert iszero(error)
@@ -56,7 +56,7 @@ Warning : from what I understand, all viewers must not be destroyed explicitely 
 
 """
 function PetscViewerDestroy(viewer::PetscViewer)
-    error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer}, ), viewer.ptr)
+    error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer},), viewer.ptr)
     @assert iszero(error)
 end
 
@@ -85,7 +85,7 @@ end
 
 Wrapper for `PetscViewerFileSetMode`
 """
-function PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode = FILE_MODE_WRITE)
+function PetscViewerFileSetMode(viewer::PetscViewer, mode::PetscFileMode=FILE_MODE_WRITE)
     error = ccall((:PetscViewerFileSetMode, libpetsc), PetscErrorCode, (CViewer, PetscFileMode), viewer, mode)
     @assert iszero(error)
 end
@@ -131,7 +131,7 @@ end
 
 Wrapper to `PetscViewerView`
 """
-function PetscViewerView(v::PetscViewer, viewer::PetscViewer = PetscViewerStdWorld())
+function PetscViewerView(v::PetscViewer, viewer::PetscViewer=PetscViewerStdWorld())
     error = ccall((:PetscViewerView, libpetsc), PetscErrorCode, (CViewer, CViewer), v, viewer)
     @assert iszero(error)
 end

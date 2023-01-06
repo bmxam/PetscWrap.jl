@@ -16,7 +16,7 @@ end
 
 Create a `PetscVec` vector of global size `(nrows)`.
 """
-function create_vector(nrows, nrows_loc = PETSC_DECIDE; auto_setup = false, comm::MPI.Comm = MPI.COMM_WORLD)
+function create_vector(nrows, nrows_loc=PETSC_DECIDE; auto_setup=false, comm::MPI.Comm=MPI.COMM_WORLD)
     vec = VecCreate(comm)
     VecSetSizes(vec::PetscVec, nrows_loc, nrows)
 
@@ -70,7 +70,7 @@ scale!(vec::PetscVec, alpha::Number) = VecScale(vec, alpha)
 For some unkwnown reason, calling `VecSetValue` fails.
 """
 function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row .- 1], PetscScalar[value], INSERT_VALUES)
+    VecSetValues(vec, PetscInt[row.-1], PetscScalar[value], INSERT_VALUES)
 end
 
 # This is stupid but I don't know how to do better yet
@@ -90,7 +90,7 @@ Base.show(::IO, vec::PetscVec) = VecView(vec)
 """
 Wrapper to `VecSetValues`, using julia 1-based indexing.
 """
-function set_values!(vec::PetscVec, rows::Vector{PetscInt}, values::Vector{PetscScalar}, mode::InsertMode = INSERT_VALUES)
+function set_values!(vec::PetscVec, rows::Vector{PetscInt}, values::Vector{PetscScalar}, mode::InsertMode=INSERT_VALUES)
     VecSetValues(vec, rows .- PetscIntOne, values, mode)
 end
 
@@ -113,7 +113,7 @@ end
 
 Write a PetscVec to a file.
 """
-function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat=PETSC_VIEWER_ASCII_CSV, type::String="ascii")
     viewer = PetscViewer(vec.comm, filename, format, type)
     VecView(vec, viewer)
     destroy!(viewer)
