@@ -6,6 +6,7 @@
 PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.mcs.anl.gov/petsc/) library. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects : these two projects have extensively inspired this project, and some code has even been directly copied.
 
 The main differences with the two aformentionned projects are:
+
 - parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
 - no dependance to other Julia packages except `MPI.jl`;
 - possibility to switch from one PETSc "arch" to another;
@@ -14,27 +15,42 @@ The main differences with the two aformentionned projects are:
 Note that the primary objective of this project is to enable the wrapper of the SLEPc library through the [SlepcWrap.jl](https://github.com/bmxam/SlepcWrap.jl) project.
 
 ## How to install it
+
 You must have installed the PETSc library on your computer and set the two following environment variables : `PETSC_DIR` and `PETSC_ARCH`.
 
 At run time, PetscWrap.jl looks for the `libpetsc.so` using these environment variables and "load" the library.
 
 To install the package, use the Julia package manager:
+
 ```Julia
 pkg> add PetscWrap
 ```
+
 ## Contribute
+
 Any contribution(s) and/or remark(s) are welcome! If you need a function that is not wrapped yet but you don't think you are capable of contributing, post an issue with a minimum working example.
 
+Conventions to be applied in future versions ("fancy" stuff is not concerned):
+
+- all PETSc types should have the exact same name in Julia, but with the prefix `Petsc`. For instance : `Vec` becomes `PetscVec`. And `ISLocalToGlobalMapping` should be `PetscISLocalToGlobalMapping`. Alternatively, we could decide to avoid the `Petsc` prefix and not to export the names. Then the user could use something like `P.Vec` etc.
+- all PETSc functions should have the exact same name in julia, without the prefix `Petsc`. Hence, functions will start with a capital letter : `VecCreate`, `MatDestroy` etc;
+- all PETSc functions must have the same number of arguments in julia, except for out-of-place arguments.
+- functions arguments must all be typed. Additional functions, without type or with fewer args, can be defined if the original version is present.
+
 ## PETSc compat.
+
 This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are supported.
 
 ## How to use it
+
 PETSc methods wrappers share the same name as their C equivalent : for instance `MatCreate` or `MatSetValue`. Furthermore, an optional "higher level" API, referred to as "fancy", is exposed : for instance `create_matrix` or `A[i,j] = v`). Note that this second way of manipulating PETSc will evolve according the package's author needs while the first one will try to follow PETSc official API.
 
 You will find examples of use by building the documentation: `julia PetscWrap.jl/docs/make.jl`. Here is one of the examples:
+
 ### A first demo
+
 This example serves as a test since this project doesn't have a "testing" procedure yet. In this example,
-the equation ``u'(x) = 2`` with ``u(0) = 0`` is solved on the domain ``[0,1]`` using a backward finite
+the equation `u'(x) = 2` with `u(0) = 0` is solved on the domain `[0,1]` using a backward finite
 difference scheme.
 
 In this example, PETSc classic method names are used. For more fancy names, check the fancy version.
