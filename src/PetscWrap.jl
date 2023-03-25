@@ -8,14 +8,17 @@ module PetscWrap
 using Libdl
 using MPI
 
+include("utils.jl")
+
 include("const_arch_ind.jl")
-export PetscErrorCode, PETSC_DECIDE
+export PetscErrorCode
 # export all items of some enums
 for item in Iterators.flatten((
     instances(InsertMode),
     instances(MatAssemblyType),
     instances(PetscViewerFormat),
     instances(PetscFileMode),
+    instances(ScatterMode),
 ))
     @eval export $(Symbol(item))
 end
@@ -24,7 +27,7 @@ include("load.jl")
 export show_petsc_path
 
 include("const_arch_dep.jl")
-export PetscReal, PetscScalar, PetscInt, PetscIntOne
+export PetscReal, PetscScalar, PetscInt, PetscIntOne, PETSC_DECIDE
 
 include("init.jl")
 export PetscInitialize, PetscFinalize
@@ -50,12 +53,17 @@ export PetscVec, CVec,
     VecAssemblyEnd,
     VecCopy,
     VecCreate,
+    VecCreateGhost,
     VecDestroy,
     VecDuplicate,
     VecGetArray,
     VecGetLocalSize,
     VecGetOwnershipRange,
     VecGetSize,
+    VecGhostGetLocalForm,
+    VecGhostRestoreLocalForm,
+    VecGhostUpdateBegin,
+    VecGhostUpdateEnd,
     VecRestoreArray,
     VecScale,
     VecSetFromOptions,
@@ -107,6 +115,8 @@ export destroy!,
     set_mode!,
     set_name!,
     set_type!
+
+include("fancy/abstract_vector_interface.jl")
 
 include("fancy/vec.jl")
 export assemble!,

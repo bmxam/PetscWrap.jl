@@ -3,9 +3,6 @@
 
 const PetscErrorCode = Cint
 
-const PETSC_DEFAULT = -2
-const PETSC_DECIDE = -1
-
 """
     Macro to automatically export all items of an enum
 """
@@ -170,4 +167,12 @@ end
     MATOP_SOLVE_ADD = 8
     MATOP_SOLVE_TRANSPOSE = 9
     MATOP_SOLVE_TRANSPOSE_ADD = 10
+end
+
+@enum ScatterMode begin
+    SCATTER_FORWARD = 0
+    SCATTER_REVERSE = 1
+    SCATTER_FORWARD_LOCAL = 2
+    SCATTER_REVERSE_LOCAL = 3
+    # SCATTER_LOCAL = 2 # not supported
 end

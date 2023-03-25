@@ -77,3 +77,6 @@ const PetscScalar = PetscScalar2Type()
 const PetscInt = PetscInt2Type()
 
 const PetscIntOne = PetscInt(1) # Integer `1` with the type of PetscInt, usefull to go back and forth with julia/petsc indexing
+
+const PETSC_DEFAULT = PetscInt(-2)
+const PETSC_DECIDE = PetscInt(-1)

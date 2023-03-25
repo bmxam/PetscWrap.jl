@@ -1,11 +1,4 @@
 
-function Base.:*(x::PetscVec, alpha::Number)
-    y = VecCopy(x)
-    scale!(y, alpha)
-    return y
-end
-Base.:*(alpha::Number, vec::PetscVec) = vec * alpha
-
 function assemble!(vec::PetscVec)
     VecAssemblyBegin(vec)
     VecAssemblyEnd(vec)
@@ -57,24 +50,7 @@ function get_urange(vec::PetscVec)
     return rstart+1:rend
 end
 
-Base.ndims(::Type{PetscVec}) = 1
-
 scale!(vec::PetscVec, alpha::Number) = VecScale(vec, alpha)
-
-"""
-    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-
-`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
-
-# Implementation
-For some unkwnown reason, calling `VecSetValue` fails.
-"""
-function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row.-1], PetscScalar[value], INSERT_VALUES)
-end
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows .- 1), values, INSERT_VALUES)
 
 set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
 
@@ -118,7 +94,3 @@ function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat=PET
     VecView(vec, viewer)
     destroy!(viewer)
 end
-
-# Discutable choice(s)
-Base.length(vec::PetscVec) = VecGetLocalSize(vec)
-Base.size(vec::PetscVec) = (length(vec),)
