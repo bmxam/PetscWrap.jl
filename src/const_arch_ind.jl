@@ -21,6 +21,12 @@ end
 @enum PetscBool PETSC_FALSE PETSC_TRUE
 Base.Bool(x::PetscBool) = x == PETSC_TRUE
 
+@enum PetscCopyMode begin
+    PETSC_COPY_VALUES
+    PETSC_OWN_POINTER
+    PETSC_USE_POINTER
+end
+
 @enum PetscDataType begin
     PETSC_DATATYPE_UNKNOWN = 0
     PETSC_DOUBLE = 1

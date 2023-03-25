@@ -277,3 +277,11 @@ function VecDestroy(vec::PetscVec)
                     vec.ptr)
     @assert iszero(error)
 end
+
+function VecSetLocalToGlobalMapping(vec::PetscVec, l2g::ISLocalToGlobalMapping)
+    error = ccall( (:VecSetLocalToGlobalMapping, libpetsc),
+                    PetscErrorCode,
+                    (CVec,CISLocalToGlobalMapping),
+                    vec, l2g)
+    @assert iszero(error)
+end

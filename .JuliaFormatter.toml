@@ -1,0 +1,22 @@
+# https://github.com/domluna/JuliaFormatter.jl
+
+# Annotates fields in a type definitions with ::Any if no type annotation is provided
+annotate_untyped_fields_with_any = false
+
+# Transforms a short function definition to a long function definition if the short
+# function definition exceeds the maximum margin.
+short_to_long_function_def = true
+
+# Transforms a long function definition to a short function definition if the short
+# function definition does not exceed the maximum margin.
+long_to_short_function_def = true
+
+# Format code docstrings with the same options used for the code source.
+format_docstrings = true
+
+# If true, Markdown files are also formatted. Julia code blocks will be formatted
+# in addition to the Markdown being normalized.
+format_markdown = true
+
+# If true, whitespace is added for binary operations in indices
+whitespace_ops_in_indices = true

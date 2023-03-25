@@ -30,7 +30,8 @@ include("init.jl")
 export PetscInitialize, PetscInitialized, PetscFinalize
 
 include("viewer.jl")
-export PetscViewer, CViewer,
+export PetscViewer,
+    CViewer,
     PetscViewerASCIIOpen,
     PetscViewerCreate,
     PetscViewerDestroy,
@@ -43,8 +44,12 @@ export PetscViewer, CViewer,
     PetscViewerStdWorld,
     PetscViewerView
 
+include("local2global.jl")
+export ISLocalToGlobalMappingCreate, ISLocalToGlobalMappingDestroy
+
 include("vec.jl")
-export PetscVec, CVec,
+export PetscVec,
+    CVec,
     VecAssemble,
     VecAssemblyBegin,
     VecAssemblyEnd,
@@ -66,7 +71,8 @@ export PetscVec, CVec,
     VecView
 
 include("mat.jl")
-export PetscMat, CMat,
+export PetscMat,
+    CMat,
     MatAssemble,
     MatAssemblyBegin,
     MatAssemblyEnd,
@@ -92,21 +98,12 @@ export PetscMat, CMat,
     MatView
 
 include("ksp.jl")
-export PetscKSP, CKSP,
-    KSPCreate,
-    KSPDestroy,
-    KSPSetFromOptions,
-    KSPSetOperators,
-    KSPSetUp,
-    KSPSolve
+export PetscKSP,
+    CKSP, KSPCreate, KSPDestroy, KSPSetFromOptions, KSPSetOperators, KSPSetUp, KSPSolve
 
 # fancy
 include("fancy/viewer.jl")
-export destroy!,
-    push_format!,
-    set_mode!,
-    set_name!,
-    set_type!
+export destroy!, push_format!, set_mode!, set_name!, set_type!
 
 include("fancy/vec.jl")
 export assemble!,
@@ -115,23 +112,17 @@ export assemble!,
     duplicate,
     get_range,
     get_urange,
-    set_local_size!, set_global_size!,
+    set_local_size!,
+    set_global_size!,
     set_from_options!,
     set_up!,
     vec2array,
     vec2file
 
 include("fancy/mat.jl")
-export create_composite_add,
-    create_matrix,
-    mat2file,
-    preallocate!,
-    set_value!,
-    set_values!
+export create_composite_add, create_matrix, mat2file, preallocate!, set_value!, set_values!
 
 include("fancy/ksp.jl")
-export create_ksp,
-    solve, solve!,
-    set_operators!
+export create_ksp, solve, solve!, set_operators!
 
 end
