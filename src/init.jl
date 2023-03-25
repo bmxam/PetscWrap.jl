@@ -55,3 +55,13 @@ function PetscFinalize()
     error = ccall((:PetscFinalize, libpetsc), PetscErrorCode, ())
     @assert iszero(error)
 end
+
+"""
+    Wrapper to PetscInitialized
+"""
+function PetscInitialized()
+    isInitialized = Ref{PetscBool}()
+    error = ccall((:PetscInitialized, libpetsc), PetscErrorCode, (Ref{PetscBool},), isInitialized)
+    @assert iszero(error)
+    return Bool(isInitialized[])
+end

@@ -27,7 +27,7 @@ include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
 include("init.jl")
-export PetscInitialize, PetscFinalize
+export PetscInitialize, PetscInitialized, PetscFinalize
 
 include("viewer.jl")
 export PetscViewer, CViewer,

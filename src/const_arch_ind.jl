@@ -19,6 +19,7 @@ end
 
 
 @enum PetscBool PETSC_FALSE PETSC_TRUE
+Base.Bool(x::PetscBool) = x == PETSC_TRUE
 
 @enum PetscDataType begin
     PETSC_DATATYPE_UNKNOWN = 0
