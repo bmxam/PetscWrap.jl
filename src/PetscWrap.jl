@@ -29,77 +29,57 @@ export PetscReal, PetscScalar, PetscInt, PetscIntOne
 include("init.jl")
 export PetscInitialize, PetscInitialized, PetscFinalize
 
-include("viewer.jl")
+include("PetscViewer.jl")
 export PetscViewer,
     CViewer,
-    PetscViewerASCIIOpen,
-    PetscViewerCreate,
-    PetscViewerDestroy,
-    PetscViewerFileSetMode,
-    PetscViewerFileSetName,
-    PetscViewerHDF5Open,
-    PetscViewerPopFormat,
-    PetscViewerPushFormat,
-    PetscViewerSetType,
-    PetscViewerStdWorld,
-    PetscViewerView
+    ASCIIOpen,
+    create,
+    destroy,
+    fileSetMode,
+    fileSetName,
+    HDF5Open,
+    popFormat,
+    pushFormat,
+    setType,
+    stdWorld,
+    view
 
-include("local2global.jl")
-export ISLocalToGlobalMappingCreate, ISLocalToGlobalMappingDestroy
-
-include("vec.jl")
-export PetscVec,
+include("ISLocalToGlobalMapping.jl")
+include("Vec.jl")
+export Vec,
     CVec,
-    VecAssemble,
-    VecAssemblyBegin,
-    VecAssemblyEnd,
-    VecCopy,
-    VecCreate,
-    VecDestroy,
-    VecDuplicate,
-    VecGetArray,
-    VecGetLocalSize,
-    VecGetOwnershipRange,
-    VecGetSize,
-    VecRestoreArray,
-    VecScale,
-    VecSetFromOptions,
-    VecSetSizes,
-    VecSetUp,
-    VecSetValue,
-    VecSetValues,
-    VecView
+    assemblyBegin,
+    assemblyEnd,
+    copy,
+    duplicate,
+    getArray,
+    getLocalSize,
+    getOwnershipRange,
+    getSize,
+    restoreArray,
+    scale,
+    setFromOptions,
+    setSizes,
+    setUp,
+    setValue,
+    setValues,
+    view
 
-include("mat.jl")
-export PetscMat,
+include("Mat.jl")
+export Mat,
     CMat,
-    MatAssemble,
-    MatAssemblyBegin,
-    MatAssemblyEnd,
-    MatCreate,
-    MatCreateComposite,
-    MatCreateDense,
-    MatCreateVecs,
-    MatDestroy,
-    MatGetLocalSize,
-    MatGetOwnershipRange,
-    MatGetOwnershipRangeColumn,
-    MatGetSize,
-    MatGetType,
-    MatMPIAIJSetPreallocation,
-    MatMult,
-    MatMultAdd,
-    MatSeqAIJSetPreallocation,
-    MatSetFromOptions,
-    MatSetSizes,
-    MatSetUp,
-    MatSetValue,
-    MatSetValues,
-    MatView
+    createComposite,
+    createDense,
+    createVecs,
+    getOwnershipRangeColumn,
+    getType,
+    MPIAIJSetPreallocation,
+    mult,
+    multAdd,
+    SeqAIJSetPreallocation
 
-include("ksp.jl")
-export PetscKSP,
-    CKSP, KSPCreate, KSPDestroy, KSPSetFromOptions, KSPSetOperators, KSPSetUp, KSPSolve
+include("KSP.jl")
+export KSP, CKSP, setOperators, solve
 
 # fancy
 include("fancy/viewer.jl")
