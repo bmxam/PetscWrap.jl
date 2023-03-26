@@ -84,34 +84,6 @@ function destroy(viewer::PetscViewer)
 end
 
 """
-    popFormat(viewer::PetscViewer)
-
-Wrapper for `PetscViewerPopFormat`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPopFormat/
-"""
-function popFormat(viewer::PetscViewer)
-    error = ccall((:PetscViewerPopFormat, libpetsc), PetscErrorCode, (CViewer,), viewer)
-    @assert iszero(error)
-end
-
-"""
-    pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
-
-Wrapper for `PetscViewerPushFormat`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPushFormat/
-"""
-function pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
-    error = ccall(
-        (:PetscViewerPushFormat, libpetsc),
-        PetscErrorCode,
-        (CViewer, PetscViewerFormat),
-        viewer,
-        format,
-    )
-    @assert iszero(error)
-end
-
-"""
     fileSetMode(viewer::PetscViewer, mode::PetscFileMode)
 
 Wrapper for `PetscViewerFileSetMode`
@@ -127,7 +99,6 @@ function fileSetMode(viewer::PetscViewer, mode::PetscFileMode)
     )
     @assert iszero(error)
 end
-
 
 """
     fileSetName(viewer::PetscViewer, name::String)
@@ -165,6 +136,34 @@ function HDF5Open(comm::MPI.Comm, name::String, type::PetscFileMode)
     )
     @assert iszero(error)
     return viewer
+end
+
+"""
+    popFormat(viewer::PetscViewer)
+
+Wrapper for `PetscViewerPopFormat`
+https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPopFormat/
+"""
+function popFormat(viewer::PetscViewer)
+    error = ccall((:PetscViewerPopFormat, libpetsc), PetscErrorCode, (CViewer,), viewer)
+    @assert iszero(error)
+end
+
+"""
+    pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
+
+Wrapper for `PetscViewerPushFormat`
+https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPushFormat/
+"""
+function pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
+    error = ccall(
+        (:PetscViewerPushFormat, libpetsc),
+        PetscErrorCode,
+        (CViewer, PetscViewerFormat),
+        viewer,
+        format,
+    )
+    @assert iszero(error)
 end
 
 """

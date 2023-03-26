@@ -2,18 +2,20 @@
     Wrapper to `PetscInitializeNoPointers`. Initialize PETCs with arguments.
 
 # Implementation
+
 I don't know if I am supposed to use PetscInt or not...
 """
 function PetscInitialize(args::Vector{String}, filename::String, help::String)
     args2 = ["julia"; args]
     nargs = Cint(length(args2))
-    error = ccall((:PetscInitializeNoPointers, libpetsc),
+    error = ccall(
+        (:PetscInitializeNoPointers, libpetsc),
         PetscErrorCode,
-        (Cint,
-            Ptr{Ptr{UInt8}},
-            Cstring,
-            Cstring),
-        nargs, args2, filename, help
+        (Cint, Ptr{Ptr{UInt8}}, Cstring, Cstring),
+        nargs,
+        args2,
+        filename,
+        help,
     )
     @assert iszero(error)
 end
@@ -26,7 +28,9 @@ PetscInitialize(args::Vector{String}) = PetscInitialize(args, "", "")
 """
     Initialize PETSc with arguments concatenated in a unique string.
 """
-PetscInitialize(args::String) = PetscInitialize(convert(Vector{String}, split(args)), "", "")
+function PetscInitialize(args::String)
+    PetscInitialize(convert(Vector{String}, split(args)), "", "")
+end
 
 """
     PetscInitialize(cmd_line_args::Bool = true)
@@ -39,7 +43,7 @@ arguments for PETSc (leading to a call to `PetscInitializeNoPointers`).
 Otherwise, if `cmd_line_args == false`, initialize PETSc without arguments (leading
 to a call to `PetscInitializeNoArguments`).
 """
-function PetscInitialize(cmd_line_args::Bool=true)
+function PetscInitialize(cmd_line_args::Bool = true)
     if (cmd_line_args)
         PetscInitialize(ARGS)
     else
@@ -61,7 +65,12 @@ end
 """
 function PetscInitialized()
     isInitialized = Ref{PetscBool}()
-    error = ccall((:PetscInitialized, libpetsc), PetscErrorCode, (Ref{PetscBool},), isInitialized)
+    error = ccall(
+        (:PetscInitialized, libpetsc),
+        PetscErrorCode,
+        (Ref{PetscBool},),
+        isInitialized,
+    )
     @assert iszero(error)
     return Bool(isInitialized[])
 end

@@ -10,7 +10,6 @@ struct Mat
     Mat(comm::MPI.Comm) = new(Ref{CMat}(), comm)
 end
 
-
 # allows us to pass Mat objects directly into CMat ccall signatures
 Base.cconvert(::Type{CMat}, mat::Mat) = mat.ptr[]
 
@@ -47,7 +46,6 @@ function assemblyEnd(mat::Mat, type::MatAssemblyType)
     )
     @assert iszero(error)
 end
-
 
 """
     compositeAddMat(mat::Mat, smat::Mat)
@@ -119,7 +117,6 @@ function createDense(
     M::Integer = PETSC_DECIDE,
     N::Integer = PETSC_DECIDE,
 )
-
     return createDense(comm, PetscInt(m), PetscInt(n), PetscInt(M), PetscInt(N))
 end
 
@@ -289,120 +286,6 @@ function getType(mat::Mat)
 end
 
 """
-    mult(mat::Mat, x::PetscVec, y::PetscVec)
-
-Wrapper to `MatMult`
-https://petsc.org/release/docs/manualpages/Mat/MatMult/
-
-Compute `y = Ax`
-"""
-function mult(mat::Mat, x::PetscVec, y::PetscVec)
-    error = ccall((:MatMult, libpetsc), PetscErrorCode, (CMat, CVec, CVec), mat, x, y)
-    @assert iszero(error)
-end
-
-"""
-    multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
-
-Wrapper to `MatMultAdd`
-https://petsc.org/release/docs/manualpages/Mat/MatMultAdd/
-
-Compute `v3 = v2 + A * v1`.
-"""
-function multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
-    error = ccall(
-        (:MatMultAdd, libpetsc),
-        PetscErrorCode,
-        (CMat, CVec, CVec, CVec),
-        A,
-        v1,
-        v2,
-        v3,
-    )
-    @assert iszero(error)
-end
-
-"""
-    setFromOptions(mat::Mat)
-
-Wrapper to `MatSetFromOptions`
-https://petsc.org/release/docs/manualpages/Mat/MatSetFromOptions/
-"""
-function setFromOptions(mat::Mat)
-    error = ccall((:MatSetFromOptions, libpetsc), PetscErrorCode, (CMat,), mat)
-    @assert iszero(error)
-end
-
-"""
-    setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
-    setSizes(
-        mat::Mat,
-        nrows_loc::Integer,
-        ncols_loc::Integer,
-        nrows_glo::Integer,
-        ncols_glo::Integer,
-    )
-
-Wrapper to `MatSetSizes`
-https://petsc.org/release/docs/manualpages/Mat/MatSetSizes/
-"""
-function setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
-    error = ccall(
-        (:MatSetSizes, libpetsc),
-        PetscErrorCode,
-        (CMat, PetscInt, PetscInt, PetscInt, PetscInt),
-        mat,
-        m,
-        n,
-        M,
-        N,
-    )
-    @assert iszero(error)
-end
-
-function setSizes(
-    mat::Mat,
-    nrows_loc::Integer,
-    ncols_loc::Integer,
-    nrows_glo::Integer,
-    ncols_glo::Integer,
-)
-    setSizes(
-        mat,
-        PetscInt(nrows_loc),
-        PetscInt(ncols_loc),
-        PetscInt(nrows_glo),
-        PetscInt(ncols_glo),
-    )
-end
-
-"""
-    setType(mat::Mat, type::String)
-
-Wrapper for `MatSetType`
-https://petsc.org/release/docs/manualpages/Mat/MatSetType/
-
-Values for `type` alors available here:
-https://petsc.org/release/docs/manualpages/Mat/MatType.html#MatType
-"""
-function setType(mat::Mat, type::String)
-    error = ccall((:MatSetType, libpetsc), PetscErrorCode, (CMat, Cstring), mat, type)
-    @assert iszero(error)
-end
-
-
-"""
-    setUp(mat::Mat)
-
-Wrapper to `MatSetUp`
-https://petsc.org/release/docs/manualpages/Mat/MatSetUp/
-"""
-function setUp(mat::Mat)
-    error = ccall((:MatSetUp, libpetsc), PetscErrorCode, (CMat,), mat)
-    @assert iszero(error)
-end
-
-"""
     MPIAIJSetPreallocation(
         B::Mat,
         d_nz::PetscInt,
@@ -466,6 +349,40 @@ function MPIAIJSetPreallocation(mat::Mat, dnz::PetscInt, onz::PetscInt)
 end
 
 """
+    mult(mat::Mat, x::PetscVec, y::PetscVec)
+
+Wrapper to `MatMult`
+https://petsc.org/release/docs/manualpages/Mat/MatMult/
+
+Compute `y = Ax`
+"""
+function mult(mat::Mat, x::PetscVec, y::PetscVec)
+    error = ccall((:MatMult, libpetsc), PetscErrorCode, (CMat, CVec, CVec), mat, x, y)
+    @assert iszero(error)
+end
+
+"""
+    multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+
+Wrapper to `MatMultAdd`
+https://petsc.org/release/docs/manualpages/Mat/MatMultAdd/
+
+Compute `v3 = v2 + A * v1`.
+"""
+function multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+    error = ccall(
+        (:MatMultAdd, libpetsc),
+        PetscErrorCode,
+        (CMat, CVec, CVec, CVec),
+        A,
+        v1,
+        v2,
+        v3,
+    )
+    @assert iszero(error)
+end
+
+"""
     SeqAIJSetPreallocation(mat::Mat, nz::PetscInt, nnz::Vector{PetscInt})
     SeqAIJSetPreallocation(mat::Mat, nz::PetscInt)
 
@@ -497,6 +414,17 @@ function SeqAIJSetPreallocation(mat::Mat, nz::PetscInt)
 end
 
 """
+    setFromOptions(mat::Mat)
+
+Wrapper to `MatSetFromOptions`
+https://petsc.org/release/docs/manualpages/Mat/MatSetFromOptions/
+"""
+function setFromOptions(mat::Mat)
+    error = ccall((:MatSetFromOptions, libpetsc), PetscErrorCode, (CMat,), mat)
+    @assert iszero(error)
+end
+
+"""
     setOption(mat::Mat, op::MatOption, flg::PetscBool)
 
 Wrapper for `MatSetOption`
@@ -515,6 +443,74 @@ function setOption(mat::Mat, op::MatOption, flg::PetscBool)
 end
 
 setOption(mat::Mat, op::MatOption, flg::Bool) = setOption(mat, op, bool2petsc(flg))
+
+"""
+    setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
+    setSizes(
+        mat::Mat,
+        nrows_loc::Integer,
+        ncols_loc::Integer,
+        nrows_glo::Integer,
+        ncols_glo::Integer,
+    )
+
+Wrapper to `MatSetSizes`
+https://petsc.org/release/docs/manualpages/Mat/MatSetSizes/
+"""
+function setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
+    error = ccall(
+        (:MatSetSizes, libpetsc),
+        PetscErrorCode,
+        (CMat, PetscInt, PetscInt, PetscInt, PetscInt),
+        mat,
+        m,
+        n,
+        M,
+        N,
+    )
+    @assert iszero(error)
+end
+
+function setSizes(
+    mat::Mat,
+    nrows_loc::Integer,
+    ncols_loc::Integer,
+    nrows_glo::Integer,
+    ncols_glo::Integer,
+)
+    setSizes(
+        mat,
+        PetscInt(nrows_loc),
+        PetscInt(ncols_loc),
+        PetscInt(nrows_glo),
+        PetscInt(ncols_glo),
+    )
+end
+
+"""
+    setType(mat::Mat, type::String)
+
+Wrapper for `MatSetType`
+https://petsc.org/release/docs/manualpages/Mat/MatSetType/
+
+Values for `type` alors available here:
+https://petsc.org/release/docs/manualpages/Mat/MatType.html#MatType
+"""
+function setType(mat::Mat, type::String)
+    error = ccall((:MatSetType, libpetsc), PetscErrorCode, (CMat, Cstring), mat, type)
+    @assert iszero(error)
+end
+
+"""
+    setUp(mat::Mat)
+
+Wrapper to `MatSetUp`
+https://petsc.org/release/docs/manualpages/Mat/MatSetUp/
+"""
+function setUp(mat::Mat)
+    error = ccall((:MatSetUp, libpetsc), PetscErrorCode, (CMat,), mat)
+    @assert iszero(error)
+end
 
 # Avoid allocating an array of size 1 for each call to MatSetValue
 const _ivec = zeros(PetscInt, 1)

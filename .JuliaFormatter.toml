@@ -20,3 +20,6 @@ format_markdown = true
 
 # If true, whitespace is added for binary operations in indices
 whitespace_ops_in_indices = true
+
+# If true, superfluous newlines will be removed
+remove_extra_newlines = true

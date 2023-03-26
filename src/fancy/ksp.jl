@@ -13,8 +13,9 @@ function create_ksp(Amat::PetscMat, Pmat::PetscMat)
 end
 
 set_operators!(ksp::PetscKSP, Amat::PetscMat) = KSPSetOperators(ksp, Amat, Amat)
-set_operators!(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat) = KSPSetOperators(ksp, Amat, Pmat)
-
+function set_operators!(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat)
+    KSPSetOperators(ksp, Amat, Pmat)
+end
 
 solve!(ksp::PetscKSP, b::PetscVec, x::PetscVec) = KSPSolve(ksp, b, x)
 
@@ -27,7 +28,6 @@ end
 set_up!(ksp::PetscKSP) = KSPSetUp(ksp)
 
 set_from_options!(ksp::PetscKSP) = KSPSetFromOptions(ksp)
-
 
 Base.show(::IO, ksp::PetscKSP) = KSPView(ksp)
 

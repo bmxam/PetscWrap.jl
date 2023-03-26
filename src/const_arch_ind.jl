@@ -17,7 +17,6 @@ macro exported_enum(name, args...)
     end)
 end
 
-
 @enum PetscBool PETSC_FALSE PETSC_TRUE
 Base.Bool(x::PetscBool) = x == PETSC_TRUE
 bool2petsc(x::Bool) = x ? PETSC_TRUE : PETSC_FALSE
