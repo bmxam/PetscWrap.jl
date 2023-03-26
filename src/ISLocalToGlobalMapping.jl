@@ -10,8 +10,20 @@ end
 # allows us to pass ISLocalToGlobalMapping objects directly into CISLocalToGlobalMapping ccall signatures
 Base.cconvert(::Type{CISLocalToGlobalMapping}, l2g::ISLocalToGlobalMapping) = l2g.ptr[]
 
+"""
+    localToGlobalMappingCreate(
+        comm::MPI.Comm,
+        bs::PetscInt,
+        n::PetscInt,
+        indices::Vector{PetscInt},
+        mode::PetscCopyMode,
+    )
 
-function ISLocalToGlobalMappingCreate(
+Wrapper to `ISLocalToGlobalMappingCreate`
+https://petsc.org/release/docs/manualpages/IS/ISLocalToGlobalMappingCreate/
+"""
+function create(
+    ::Type{ISLocalToGlobalMapping},
     comm::MPI.Comm,
     bs::PetscInt,
     n::PetscInt,
@@ -41,12 +53,18 @@ function ISLocalToGlobalMappingCreate(
     return l2g
 end
 
-function ISLocalToGlobalMappingDestroy(l2g::ISLocalToGlobalMapping)
+"""
+    destroy(mapping::ISLocalToGlobalMapping)
+
+Wrapper to `ISLocalToGlobalMappingDestroy`
+https://petsc.org/release/docs/manualpages/IS/ISLocalToGlobalMappingDestroy/
+"""
+function destroy(mapping::ISLocalToGlobalMapping)
     error = ccall(
         (:ISLocalToGlobalMappingDestroy, libpetsc),
         PetscErrorCode,
         (Ptr{CISLocalToGlobalMapping},),
-        l2g.ptr,
+        mapping.ptr,
     )
     @assert iszero(error)
 end
