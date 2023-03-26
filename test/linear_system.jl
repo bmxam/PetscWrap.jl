@@ -71,7 +71,7 @@
     solve(ksp, b, x)
 
     # Print the solution
-    PetscWrap.iew(x)
+    PetscWrap.view(x)
 
     # Access the solution (this part is under development), getting a Julia array; and then restore it
     array, ref = getArray(x) # do something with array
