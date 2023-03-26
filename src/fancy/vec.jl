@@ -12,20 +12,25 @@ function assemble!(vec::Vec)
 end
 
 """
-    create_vector(nrows, nrows_loc = PETSC_DECIDE)
+    create_vector(
+        comm::MPI.Comm = MPI.COMM_WORLD;
+        nrows_loc = PETSC_DECIDE,
+        nrows_glo = PETSC_DECIDE,
+        auto_setup = false,
+    )
 
-Create a `Vec` vector of global size `(nrows)`.
+Create a `Vec` vector of global size `(nrows_glo)`.
 """
 function create_vector(
-    nrows,
-    nrows_loc = PETSC_DECIDE;
+    comm::MPI.Comm = MPI.COMM_WORLD;
+    nrows_loc = PETSC_DECIDE,
+    nrows_glo = PETSC_DECIDE,
     auto_setup = false,
-    comm::MPI.Comm = MPI.COMM_WORLD,
 )
     vec = create(Vec, comm)
-    setSizes(vec, nrows_loc, nrows)
+    setSizes(vec, nrows_loc, nrows_glo)
 
-    if (auto_setup)
+    if auto_setup
         set_from_options!(vec)
         set_up!(vec)
     end
@@ -82,25 +87,30 @@ function Base.setindex!(vec::Vec, values, rows)
 end
 
 set_global_size!(vec::Vec, nrows) = setSizes(vec, PETSC_DECIDE, nrows)
+
+function set_local_to_global!(vec::Vec, lid2gid::Vector{Integer})
+    mapping = create(ISLocalToGlobalMapping, lid2gid)
+    setLocalToGlobalMapping(vec, mapping)
+    destroy(mapping)
+end
+
 set_local_size!(vec::Vec, nrows) = setSizes(vec, nrows, PETSC_DECIDE)
+
+"""
+    set_values!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    set_values!(vec::Vec, values)
+
+Wrapper to `VecSetValues`, using julia 1-based indexing.
+"""
+function set_values!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    setValues(vec, rows .- 1, values, mode)
+end
 
 function set_values!(vec::Vec, values)
     setValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
 end
 
 Base.show(::IO, vec::Vec) = view(vec)
-
-"""
-Wrapper to `VecSetValues`, using julia 1-based indexing.
-"""
-function set_values!(
-    vec::Vec,
-    rows::Vector{PetscInt},
-    values::Vector{PetscScalar},
-    mode::InsertMode = INSERT_VALUES,
-)
-    setValues(vec, rows .- PetscIntOne, values, mode)
-end
 
 """
     vec2array(vec::Vec)

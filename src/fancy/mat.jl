@@ -20,22 +20,27 @@ end
 Base.ndims(::Type{Mat}) = 2
 
 """
-    create_matrix(nrows, ncols, nrows_loc = PETSC_DECIDE, ncols_loc = PETSC_DECIDE; auto_setup = false)
-
-Create a `Mat` matrix of global size `(nrows, ncols)`.
+    create_matrix(
+        comm::MPI.Comm = MPI.COMM_WORLD;
+        nrows_loc = PETSC_DECIDE,
+        ncols_loc = PETSC_DECIDE,
+        nrows_glo = PETSC_DECIDE,
+        ncols_glo = PETSC_DECIDE,
+        auto_setup = false,
+    )
 
 Use `auto_setup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
 function create_matrix(
-    nrows,
-    ncols,
+    comm::MPI.Comm = MPI.COMM_WORLD;
     nrows_loc = PETSC_DECIDE,
-    ncols_loc = PETSC_DECIDE;
+    ncols_loc = PETSC_DECIDE,
+    nrows_glo = PETSC_DECIDE,
+    ncols_glo = PETSC_DECIDE,
     auto_setup = false,
-    comm::MPI.Comm = MPI.COMM_WORLD,
 )
-    mat = create(Mat)
-    setSizes(mat::Mat, nrows_loc, ncols_loc, nrows, ncols)
+    mat = create(Mat, comm)
+    setSizes(mat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
 
     if (auto_setup)
         set_from_options!(mat)
@@ -48,12 +53,19 @@ end
 Wrapper to `MatCreateComposite` using the "alternative construction" from the PETSc documentation.
 """
 function create_composite_add(matrices)
-    N, M = getSize(matrices[1])
-    n, m = getLocalSize(matrices[1])
-    mat = create_matrix(N, M, n, m; auto_setup = false, comm = matrices[1].comm)
+    M, N = getSize(matrices[1])
+    m, n = getLocalSize(matrices[1])
+    mat = create_matrix(
+        matrices[1].comm;
+        nrows_loc = m,
+        ncols_loc = n,
+        nrows_glo = M,
+        nrows_glo = N,
+        auto_setup = false,
+    )
     setType(mat, "composite")
-    for m in matrices
-        compositeAddMat(mat, m)
+    for _mat in matrices
+        compositeAddMat(mat, _mat)
     end
     assemble!(mat)
     return mat
@@ -62,6 +74,18 @@ end
 function set_global_size!(mat::Mat, nrows, ncols)
     setSizes(mat, PETSC_DECIDE, PETSC_DECIDE, nrows, ncols)
 end
+
+function set_local_to_global!(
+    mat::Mat,
+    rlid2gid::Vector{Integer},
+    clid2gid::Vector{Integer},
+)
+    rmapping = create(ISLocalToGlobalMapping, rlid2gid)
+    cmapping = create(ISLocalToGlobalMapping, clid2gid)
+    setLocalToGlobalMapping(mat, rmapping, cmapping)
+    destroy.(rmapping, cmapping)
+end
+
 function set_local_size!(mat::Mat, nrows, ncols)
     setSizes(mat, nrows, ncols, PETSC_DECIDE, PETSC_DECIDE)
 end

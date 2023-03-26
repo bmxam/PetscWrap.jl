@@ -426,6 +426,32 @@ function setFromOptions(mat::Mat)
 end
 
 """
+    setLocalToGlobalMapping(
+        x::Mat,
+        rmapping::ISLocalToGlobalMapping,
+        cmapping::ISLocalToGlobalMapping,
+    )
+
+Wrapper to `MatSetLocalToGlobalMapping`
+https://petsc.org/release/docs/manualpages/Mat/MatSetLocalToGlobalMapping/
+"""
+function setLocalToGlobalMapping(
+    x::Mat,
+    rmapping::ISLocalToGlobalMapping,
+    cmapping::ISLocalToGlobalMapping,
+)
+    error = ccall(
+        (:MatSetLocalToGlobalMapping, libpetsc),
+        PetscErrorCode,
+        (CMat, CISLocalToGlobalMapping, CISLocalToGlobalMapping),
+        x,
+        rmapping,
+        cmapping,
+    )
+    @assert iszero(error)
+end
+
+"""
     setOption(mat::Mat, op::MatOption, flg::PetscBool)
 
 Wrapper for `MatSetOption`

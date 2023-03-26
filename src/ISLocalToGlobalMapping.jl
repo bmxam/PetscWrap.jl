@@ -11,12 +11,19 @@ end
 Base.cconvert(::Type{CISLocalToGlobalMapping}, l2g::ISLocalToGlobalMapping) = l2g.ptr[]
 
 """
-    localToGlobalMappingCreate(
+    create(
         comm::MPI.Comm,
         bs::PetscInt,
         n::PetscInt,
         indices::Vector{PetscInt},
         mode::PetscCopyMode,
+    )
+
+    create(
+        ::Type{ISLocalToGlobalMapping},
+        comm::MPI.Comm,
+        indices::Vector{Integer},
+        mode::PetscCopyMode = PETSC_COPY_VALUES,
     )
 
 Wrapper to `ISLocalToGlobalMappingCreate`
@@ -51,6 +58,22 @@ function create(
     )
     @assert iszero(error)
     return l2g
+end
+
+function create(
+    ::Type{ISLocalToGlobalMapping},
+    comm::MPI.Comm,
+    indices::Vector{Integer},
+    mode::PetscCopyMode = PETSC_COPY_VALUES,
+)
+    return create(
+        ISLocalToGlobalMapping,
+        comm,
+        PetscIntOne,
+        PetscInt(length(indices)),
+        PetscInt.(indices),
+        mode,
+    )
 end
 
 """

@@ -25,8 +25,8 @@ n = 11
 Δx = 1.0 / (n - 1)
 
 # Create a matrix of size `(n,n)` and a vector of size `(n)`
-A = create_matrix(n, n)
-b = create_vector(n)
+A = create_matrix(; nrows_glo = n, ncols_glo = n)
+b = create_vector(; nrows_glo = n)
 
 # We can then use command line options to set our matrix/vectors.
 set_from_options!(A)
@@ -48,8 +48,8 @@ b[b_start:b_end] = 2 * ones(n_loc)
 
 # And here is the differentiation matrix. Rembember that PETSc.MatSetValues simply ignores negatives rows indices.
 A_start, A_end = get_range(A)
-for i in A_start:A_end
-    A[i, i-1:i] = [-1.0 1.0] / Δx
+for i = A_start:A_end
+    A[i, (i - 1):i] = [-1.0 1.0] / Δx
 end
 
 # Set boundary condition (only the proc handling index `1` is acting)
@@ -79,7 +79,7 @@ destroy!(b)
 destroy!(x)
 
 # Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
-M = create_matrix(3, 3; auto_setup=true)
+M = create_matrix(; nrows_glo = 3, ncols_glo = 3, auto_setup = true)
 M_start, M_end = get_range(M)
 I = [1, 1, 1, 2, 3]
 J = [1, 3, 1, 3, 2]
