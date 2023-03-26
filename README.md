@@ -32,9 +32,9 @@ Any contribution(s) and/or remark(s) are welcome! If you need a function that is
 
 Conventions to be applied in future versions ("fancy" stuff is not concerned):
 
-- all PETSc types should have the exact same name in Julia, but with the prefix `Petsc`. For instance : `Vec` becomes `PetscVec`. And `ISLocalToGlobalMapping` should be `PetscISLocalToGlobalMapping`. Alternatively, we could decide to avoid the `Petsc` prefix and not to export the names. Then the user could use something like `P.Vec` etc.
-- all PETSc functions should have the exact same name in julia, without the prefix `Petsc`. Hence, functions will start with a capital letter : `VecCreate`, `MatDestroy` etc;
-- all PETSc functions must have the same number of arguments in julia, except for out-of-place arguments.
+- all PETSc types should have the exact same name in Julia
+- all PETSc functions should have the exact same name in julia, but without the type prefix, and with a lower case for the first letter. `VecSetValues` becomes `setValues`;
+- all PETSc functions must have the same number of arguments and the same names in julia, except for out-of-place arguments.
 - functions arguments must all be typed. Additional functions, without type or with fewer args, can be defined if the original version is present.
 
 ## PETSc compat.
