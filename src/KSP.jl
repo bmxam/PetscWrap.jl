@@ -11,12 +11,12 @@ end
 Base.cconvert(::Type{CKSP}, ksp::KSP) = ksp.ptr[]
 
 """
-    create(::Type{KSP}, comm::MPI.Comm=MPI.COMM_WORLD)
+    create(::Type{KSP}, comm::MPI.Comm)
 
 Wrapper for `KSPCreate`
 https://petsc.org/release/docs/manualpages/KSP/KSPCreate/
 """
-function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
+function create(::Type{KSP}, comm::MPI.Comm)
     ksp = KSP(comm)
     error = ccall(
         (:KSPCreate, libpetsc),
