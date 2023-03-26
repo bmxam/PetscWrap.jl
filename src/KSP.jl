@@ -11,12 +11,12 @@ end
 Base.cconvert(::Type{CKSP}, ksp::KSP) = ksp.ptr[]
 
 """
-    create(::Type{KSP}, comm::MPI.Comm)
+    create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper for `KSPCreate`
 https://petsc.org/release/docs/manualpages/KSP/KSPCreate/
 """
-function create(::Type{KSP}, comm::MPI.Comm)
+function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
     ksp = KSP(comm)
     error = ccall(
         (:KSPCreate, libpetsc),
@@ -52,12 +52,12 @@ function setFromOptions(ksp::KSP)
 end
 
 """
-    setOperators(ksp::KSP, Amat::PetscMat, Pmat::PetscMat)
+    setOperators(ksp::KSP, Amat::Mat, Pmat::Mat)
 
 Wrapper for `KSPSetOperators``
 https://petsc.org/release/docs/manualpages/KSP/KSPSetOperators/
 """
-function setOperators(ksp::KSP, Amat::PetscMat, Pmat::PetscMat)
+function setOperators(ksp::KSP, Amat::Mat, Pmat::Mat)
     error = ccall(
         (:KSPSetOperators, libpetsc),
         PetscErrorCode,
@@ -81,12 +81,12 @@ function setUp(ksp::KSP)
 end
 
 """
-    solve(ksp::KSP, b::PetscVec, x::PetscVec)
+    solve(ksp::KSP, b::Vec, x::Vec)
 
 Wrapper for `KSPSolve`
 https://petsc.org/release/docs/manualpages/KSP/KSPSolve/
 """
-function solve(ksp::KSP, b::PetscVec, x::PetscVec)
+function solve(ksp::KSP, b::Vec, x::Vec)
     error = ccall((:KSPSolve, libpetsc), PetscErrorCode, (CKSP, CVec, CVec), ksp, b, x)
     @assert iszero(error)
 end

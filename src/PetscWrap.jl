@@ -82,6 +82,7 @@ include("KSP.jl")
 export KSP, CKSP, setOperators, solve
 
 # fancy
+include("fancy/common.jl")
 include("fancy/viewer.jl")
 export destroy!, push_format!, set_mode!, set_name!, set_type!
 

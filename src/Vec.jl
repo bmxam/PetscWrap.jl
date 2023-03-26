@@ -38,25 +38,27 @@ end
 
 Wrapper to `VecCopy`
 https://petsc.org/release/docs/manualpages/Vec/VecCopy/
+
+Not really sure if I should extend Base here...
 """
-function copy(x::Vec, y::Vec)
+function Base.copy(x::Vec, y::Vec)
     error = ccall((:VecCopy, libpetsc), PetscErrorCode, (CVec, CVec), x, y)
     @assert iszero(error)
 end
 
-function copy(x::Vec)
+function Base.copy(x::Vec)
     y = duplicate(x)
     copy(x, y)
     return y
 end
 
 """
-    create(::Type{Vec},comm::MPI.Comm)
+    create(::Type{Vec},comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper to `VecCreate`
 https://petsc.org/release/docs/manualpages/Vec/VecCreate/
 """
-function create(::Type{Vec}, comm::MPI.Comm)
+function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD)
     vec = Vec(comm)
     error = ccall(
         (:VecCreate, libpetsc),
@@ -250,6 +252,7 @@ end
 
 """
     setSizes(v::Vec, n::PetscInt, N::PetscInt)
+    setSizes(v::Vec, n::Integer, N::Integer)
 
 Wrapper to `VecSetSizes`
 https://petsc.org/release/docs/manualpages/Vec/VecSetSizes/
@@ -267,6 +270,8 @@ function setSizes(v::Vec, n::PetscInt, N::PetscInt)
     )
     @assert iszero(error)
 end
+
+setSizes(v::Vec, n::Integer, N::Integer) = setSizes(v, PetscInt(n), PetscInt(N))
 
 """
     setUp(vec::Vec)
@@ -353,12 +358,12 @@ function setValues(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
 end
 
 """
-    view(vec::Vec, viewer::PetscViewer = PetscViewerStdWorld())
+    view(vec::Vec, viewer::PetscViewer = StdWorld())
 
 Wrapper to `VecView`
 https://petsc.org/release/docs/manualpages/Vec/VecView/
 """
-function view(vec::Vec, viewer::PetscViewer = PetscViewerStdWorld())
+function view(vec::Vec, viewer::PetscViewer = StdWorld(vec.comm))
     error = ccall((:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer)
     @assert iszero(error)
 end

@@ -15,7 +15,7 @@ Base.cconvert(::Type{CViewer}, viewer::PetscViewer) = viewer.ptr[]
 Wrapper for `PetscViewerASCIIGetStdout`
 https://petsc.org/release/docs/manualpages/Viewer/PetscViewerASCIIGetStdout/
 """
-function ASCIIGetStdout(comm::MPI.Comm)
+function ASCIIGetStdout(comm::MPI.Comm = MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
     error = ccall(
         (:PetscViewerASCIIGetStdout, libpetsc),
@@ -51,12 +51,12 @@ function ASCIIOpen(comm::MPI.Comm, name::String)
 end
 
 """
-    create(::Type{PetscView}, comm::MPI.Comm)
+    create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper for `PetscViewerCreate`
 https://petsc.org/release/docs/manualpages/Viewer/PetscViewerCreate/
 """
-function create(::Type{PetscView}, comm::MPI.Comm)
+function create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
     error = ccall(
         (:PetscViewerCreate, libpetsc),

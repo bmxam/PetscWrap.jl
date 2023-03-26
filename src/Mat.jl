@@ -59,12 +59,13 @@ function compositeAddMat(mat::Mat, smat::Mat)
 end
 
 """
-    create(::Type{Mat}, comm::MPI.Comm)
+    create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
+    create(::Type{Mat})
 
 Wrapper to `MatCreate`
 https://petsc.org/release/docs/manualpages/Mat/MatCreate/
 """
-function create(::Type{Mat}, comm::MPI.Comm)
+function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
     mat = Mat(comm)
     error = ccall(
         (:MatCreate, libpetsc),
@@ -121,13 +122,13 @@ function createDense(
 end
 
 """
-    createVecs(mat::Mat, vecr::PetscVec, veci::PetscVec)
+    createVecs(mat::Mat, vecr::Vec, veci::Vec)
     createVecs(mat::Mat)
 
 Wrapper to `MatCreateVecs`
 https://petsc.org/release/docs/manualpages/Mat/MatCreateVecs/
 """
-function createVecs(mat::Mat, right::PetscVec, left::PetscVec)
+function createVecs(mat::Mat, right::Vec, left::Vec)
     error = ccall(
         (:MatCreateVecs, libpetsc),
         PetscErrorCode,
@@ -140,8 +141,8 @@ function createVecs(mat::Mat, right::PetscVec, left::PetscVec)
 end
 
 function createVecs(mat::Mat)
-    right = PetscVec(mat.comm)
-    left = PetscVec(mat.comm)
+    right = Vec(mat.comm)
+    left = Vec(mat.comm)
     createVecs(mat, right, left)
     return right, left
 end
@@ -349,27 +350,27 @@ function MPIAIJSetPreallocation(mat::Mat, dnz::PetscInt, onz::PetscInt)
 end
 
 """
-    mult(mat::Mat, x::PetscVec, y::PetscVec)
+    mult(mat::Mat, x::Vec, y::Vec)
 
 Wrapper to `MatMult`
 https://petsc.org/release/docs/manualpages/Mat/MatMult/
 
 Compute `y = Ax`
 """
-function mult(mat::Mat, x::PetscVec, y::PetscVec)
+function mult(mat::Mat, x::Vec, y::Vec)
     error = ccall((:MatMult, libpetsc), PetscErrorCode, (CMat, CVec, CVec), mat, x, y)
     @assert iszero(error)
 end
 
 """
-    multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+    multAdd(A::Mat, v1::Vec, v2::Vec, v3::Vec)
 
 Wrapper to `MatMultAdd`
 https://petsc.org/release/docs/manualpages/Mat/MatMultAdd/
 
 Compute `v3 = v2 + A * v1`.
 """
-function multAdd(A::Mat, v1::PetscVec, v2::PetscVec, v3::PetscVec)
+function multAdd(A::Mat, v1::Vec, v2::Vec, v3::Vec)
     error = ccall(
         (:MatMultAdd, libpetsc),
         PetscErrorCode,
@@ -628,12 +629,12 @@ function setValues(mat::Mat, I, J, V, mode::InsertMode)
 end
 
 """
-    view(mat::Mat, viewer::PetscViewer = PetscViewerStdWorld())
+    view(mat::Mat, viewer::PetscViewer = StdWorld())
 
 Wrapper to `MatView`
 https://petsc.org/release/docs/manualpages/Mat/MatView/
 """
-function view(mat::Mat, viewer::PetscViewer = PetscViewerStdWorld())
+function view(mat::Mat, viewer::PetscViewer = StdWorld(mat.comm))
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end
