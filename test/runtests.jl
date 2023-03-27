@@ -1,5 +1,6 @@
 using PetscWrap
 using Test
+using LinearAlgebra
 
 
 # from :

@@ -51,3 +51,32 @@
     destroy!.((A, B, C, x1, x2, y))
     PetscFinalize()
 end
+
+@testset "mapping" begin
+
+    PetscInitialize()
+
+    n = 10
+    x = create_vector(; nrows_glo = n, auto_setup = true)
+    y = create_vector(; nrows_glo = n, auto_setup = true)
+    l2g = reverse(collect(1:n))
+    set_local_to_global!(x, l2g)
+
+    set_value_local!(x, 1, 1.0)
+    set_value!(y, 1, 33)
+    set_value!(y, 10, 22)
+
+    assemble!.((x,y))
+
+    # @show dot(x,y)
+    @test dot(x,x) == 1.
+    @test dot(x,y) == 22.
+    @test sum(x) == 1.
+
+    _x = vec2array(x)
+    @test _x[end] == 1.
+
+    destroy!.((x,y))
+
+    PetscFinalize()
+end

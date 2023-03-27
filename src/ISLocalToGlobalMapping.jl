@@ -22,12 +22,14 @@ Base.cconvert(::Type{CISLocalToGlobalMapping}, l2g::ISLocalToGlobalMapping) = l2
     create(
         ::Type{ISLocalToGlobalMapping},
         comm::MPI.Comm,
-        indices::Vector{Integer},
+        indices::Vector{I},
         mode::PetscCopyMode = PETSC_COPY_VALUES,
-    )
+    ) where {I<:Integer}
 
 Wrapper to `ISLocalToGlobalMappingCreate`
 https://petsc.org/release/docs/manualpages/IS/ISLocalToGlobalMappingCreate/
+
+0-based indexing
 """
 function create(
     ::Type{ISLocalToGlobalMapping},
@@ -54,7 +56,7 @@ function create(
         n,
         indices,
         mode,
-        l2g,
+        l2g.ptr,
     )
     @assert iszero(error)
     return l2g
@@ -63,9 +65,9 @@ end
 function create(
     ::Type{ISLocalToGlobalMapping},
     comm::MPI.Comm,
-    indices::Vector{Integer},
+    indices::Vector{I},
     mode::PetscCopyMode = PETSC_COPY_VALUES,
-)
+) where {I<:Integer}
     return create(
         ISLocalToGlobalMapping,
         comm,

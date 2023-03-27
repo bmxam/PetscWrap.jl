@@ -82,6 +82,14 @@ function destroy(v::Vec)
     @assert iszero(error)
 end
 
+function LinearAlgebra.dot(x::Vec, y::Vec)
+    val = Ref{PetscScalar}()
+    error = ccall((:VecDot, libpetsc), PetscErrorCode, (CVec, CVec, Ref{PetscScalar}), x, y, val)
+    @assert iszero(error)
+
+    return val[]
+end
+
 """
     duplicate(v::Vec)
 
@@ -192,6 +200,42 @@ function getSize(x::Vec)
 end
 
 """
+    getValues(x::Vec, ni::PetscInt, ix::Vector{PetscInt})
+    getValues(x::Vec, ix::Vector{PetscInt})
+    getValues(x::Vec, ix::Vector{I}) where {I<:Integer}
+
+Wrapper for `VecGetValues`
+https://petsc.org/release/docs/manualpages/Vec/VecGetValues/
+"""
+function getValues(x::Vec, ni::PetscInt, ix::Vector{PetscInt})
+    y = zeros(PetscScalar, ni)
+
+    error = ccall(
+        (:VecGetValues, libpetsc),
+        PetscErrorCode,
+        (
+            CVec,
+            PetscInt,
+            Ptr{PetscInt},
+            Ptr{PetscScalar},
+        ),
+        x,
+        ni,
+        ix,
+        y,
+    )
+    @assert iszero(error)
+
+    return y
+end
+
+getValues(x::Vec, ix::Vector{PetscInt}) = getValues(x, PetscInt(length(ix)), ix)
+
+function getValues(x::Vec, ix::Vector{I}) where {I<:Integer}
+    return getValues(x, PetscInt.(ix))
+end
+
+"""
     restoreArray(x::Vec, array_ref)
 
 Wrapper for `VecRestoreArray`. `array_ref` is obtained from `VecGetArray`
@@ -238,6 +282,8 @@ end
 
 Wrapper to `VecSetLocalToGlobalMapping`
 https://petsc.org/release/docs/manualpages/Vec/VecSetLocalToGlobalMapping/
+
+0-based indexing
 """
 function setLocalToGlobalMapping(x::Vec, mapping::ISLocalToGlobalMapping)
     error = ccall(
@@ -355,6 +401,92 @@ end
 
 function setValues(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
     setValues(x, PetscInt.(I), PetscScalar.(V), mode)
+end
+
+"""
+    setValueLocal(v::Vec, row::PetscInt, value::PetscScalar, mode::InsertMode)
+    setValueLocal(v::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+
+Wrapper to `setValueLocal`. Indexing starts at 0 (as in PETSc).
+https://petsc.org/release/docs/manualpages/Vec/VecSetValueLocal/
+
+# Implementation
+
+For an unknow reason, calling PETSc.VecSetValue leads to an "undefined symbol: VecSetValue" error.
+So this wrapper directly call VecSetValues (anyway, this is what is done in PETSc...)
+"""
+function setValueLocal(v::Vec, row::PetscInt, value::PetscScalar, mode::InsertMode)
+    setValuesLocal(v, PetscIntOne, [row], [value], mode)
+end
+
+function setValueLocal(v::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+    setValueLocal(v, PetscInt(row), PetscScalar(value), mode)
+end
+
+"""
+    setValuesLocal(
+        x::Vec,
+        ni::PetscInt,
+        ix::Vector{PetscInt},
+        y::Vector{PetscScalar},
+        iora::InsertMode,
+    )
+
+    setValuesLocal(
+        x::Vec,
+        I::Vector{PetscInt},
+        V::Vector{PetscScalar},
+        mode::InsertMode = INSERT_VALUES,
+    )
+    setValues(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
+
+Wrapper to `VecSetValues`. Indexing starts at 0 (as in PETSc)
+https://petsc.org/release/docs/manualpages/Vec/VecSetValuesLocal/
+"""
+function setValuesLocal(
+    x::Vec,
+    ni::PetscInt,
+    ix::Vector{PetscInt},
+    y::Vector{PetscScalar},
+    iora::InsertMode,
+)
+    error = ccall(
+        (:VecSetValuesLocal, libpetsc),
+        PetscErrorCode,
+        (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}, InsertMode),
+        x,
+        ni,
+        ix,
+        y,
+        iora,
+    )
+    @assert iszero(error)
+end
+
+function setValuesLocal(
+    x::Vec,
+    I::Vector{PetscInt},
+    V::Vector{PetscScalar},
+    mode::InsertMode = INSERT_VALUES,
+)
+    setValuesLocal(x, PetscInt(length(I)), I, V, mode)
+end
+
+function setValuesLocal(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
+    setValuesLocal(x, PetscInt.(I), PetscScalar.(V), mode)
+end
+
+function Base.sum(x::Vec)
+    s = Ref{PetscScalar}()
+    error = ccall(
+        (:VecSum, libpetsc),
+        PetscErrorCode,
+        (CVec, Ref{PetscScalar}),
+        x,s,
+    )
+    @assert iszero(error)
+
+    return s[]
 end
 
 """

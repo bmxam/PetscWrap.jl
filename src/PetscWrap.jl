@@ -7,6 +7,7 @@ module PetscWrap
 
 using Libdl
 using MPI
+using LinearAlgebra
 
 include("const_arch_ind.jl")
 export PetscErrorCode, PETSC_DECIDE
@@ -56,13 +57,16 @@ export Vec,
     getLocalSize,
     getOwnershipRange,
     getSize,
+    getValues,
     restoreArray,
     scale,
     setFromOptions,
     setSizes,
     setUp,
     setValue,
+    setValueLocal,
     setValues,
+    setValuesLocal,
     view
 
 include("Mat.jl")
@@ -98,11 +102,15 @@ export assemble!,
     set_global_size!,
     set_from_options!,
     set_up!,
+    set_value!,
+    set_value_local!,
+    set_values!,
+    set_values_local!,
     vec2array,
     vec2file
 
 include("fancy/mat.jl")
-export create_composite_add, create_matrix, mat2file, preallocate!, set_value!, set_values!
+export create_composite_add, create_matrix, mat2file, preallocate!
 
 include("fancy/ksp.jl")
 export create_ksp, solve, solve!, set_operators!

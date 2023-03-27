@@ -1,14 +1,17 @@
-create_ksp() = KSPCreate()
-
-function create_ksp(A::Mat)
+function create_ksp(A::Mat; autosetup = false)
     ksp = create(KSP)
-    setOperators(ksp, A, A)
+    setOperators(ksp, A, A; autosetup)
     return ksp
 end
 
-function create_ksp(Amat::Mat, Pmat::Mat)
+function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false)
     ksp = create(KSP)
     setOperators(ksp, Amat, Pmat)
+
+    if autosetup
+        set_from_options!(ksp)
+        set_up!(ksp)
+    end
     return ksp
 end
 

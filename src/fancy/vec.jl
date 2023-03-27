@@ -88,13 +88,27 @@ end
 
 set_global_size!(vec::Vec, nrows) = setSizes(vec, PETSC_DECIDE, nrows)
 
-function set_local_to_global!(vec::Vec, lid2gid::Vector{Integer})
-    mapping = create(ISLocalToGlobalMapping, lid2gid)
+"""
+Wrapper to `ISSetLocalToGlobalMapping`
+
+1-based indexing
+"""
+function set_local_to_global!(vec::Vec, lid2gid::Vector{I}) where {I<:Integer}
+    mapping = create(ISLocalToGlobalMapping, vec.comm, lid2gid .- 1)
     setLocalToGlobalMapping(vec, mapping)
     destroy(mapping)
 end
 
 set_local_size!(vec::Vec, nrows) = setSizes(vec, nrows, PETSC_DECIDE)
+
+"""
+    set_value!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+
+Wrapper to `VecSetValue`, using julia 1-based indexing.
+"""
+function set_value!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+    setValue(vec, row - 1, value, mode)
+end
 
 """
     set_values!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
@@ -108,6 +122,30 @@ end
 
 function set_values!(vec::Vec, values)
     setValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
+end
+
+"""
+    set_value_local!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+
+Wrapper to `VecSetValueLocal`, using julia 1-based indexing.
+"""
+function set_value_local!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+    setValueLocal(vec, row - 1, value, mode)
+end
+
+"""
+    set_values_local!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    set_values_local!(vec::Vec, values)
+
+Wrapper to `VecSetValuesLocal`, using julia 1-based indexing.
+"""
+function set_values_local!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    setValuesLocal(vec, rows .- 1, values, mode)
+end
+
+function set_values_local!(vec::Vec, values)
+    # Since we are using the "local" numbering, we set element "1" to "nloc"
+    setValuesLocal(vec, collect(1:getLocalSize(vec)) .- 1, values, INSERT_VALUES)
 end
 
 Base.show(::IO, vec::Vec) = view(vec)

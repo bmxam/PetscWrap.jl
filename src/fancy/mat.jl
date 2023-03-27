@@ -60,7 +60,7 @@ function create_composite_add(matrices)
         nrows_loc = m,
         ncols_loc = n,
         nrows_glo = M,
-        nrows_glo = N,
+        ncols_glo = N,
         auto_setup = false,
     )
     setType(mat, "composite")
@@ -77,9 +77,9 @@ end
 
 function set_local_to_global!(
     mat::Mat,
-    rlid2gid::Vector{Integer},
-    clid2gid::Vector{Integer},
-)
+    rlid2gid::Vector{I},
+    clid2gid::Vector{I},
+) where {I<:Integer}
     rmapping = create(ISLocalToGlobalMapping, rlid2gid)
     cmapping = create(ISLocalToGlobalMapping, clid2gid)
     setLocalToGlobalMapping(mat, rmapping, cmapping)
@@ -127,6 +127,8 @@ end
 
 Set value of `mat`
 `mat[i, j] = v`.
+
+1-based indexing
 """
 function set_value!(mat::Mat, i::PetscInt, j::PetscInt, v::PetscScalar, mode = ADD_VALUES)
     setValue(mat, i - 1, j - 1, v, mode)
