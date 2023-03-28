@@ -2,8 +2,8 @@
     PetscInitialize()
 
     # Create two matrices
-    A = create_matrix(; nrows_glo = 2, ncols_glo = 2, auto_setup = true)
-    B = create_matrix(; nrows_glo = 2, ncols_glo = 2, auto_setup = true)
+    A = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
+    B = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
 
     # Fill
 
@@ -31,9 +31,9 @@
     C = create_composite_add([A, B])
 
     # Create vectors to check C (see below)
-    x1 = create_vector(; nrows_glo = 2, auto_setup = true)
-    x2 = create_vector(; nrows_glo = 2, auto_setup = true)
-    y = create_vector(; nrows_glo = 2, auto_setup = true)
+    x1 = create_vector(; nrows_glo = 2, autosetup = true)
+    x2 = create_vector(; nrows_glo = 2, autosetup = true)
+    y = create_vector(; nrows_glo = 2, autosetup = true)
     x1[1] = 1.0
     x1[2] = 0.0
     x2[1] = 0.0
@@ -53,12 +53,11 @@
 end
 
 @testset "mapping" begin
-
     PetscInitialize()
 
     n = 10
-    x = create_vector(; nrows_glo = n, auto_setup = true)
-    y = create_vector(; nrows_glo = n, auto_setup = true)
+    x = create_vector(; nrows_glo = n, autosetup = true)
+    y = create_vector(; nrows_glo = n, autosetup = true)
     l2g = reverse(collect(1:n))
     set_local_to_global!(x, l2g)
 
@@ -66,17 +65,17 @@ end
     set_value!(y, 1, 33)
     set_value!(y, 10, 22)
 
-    assemble!.((x,y))
+    assemble!.((x, y))
 
     # @show dot(x,y)
-    @test dot(x,x) == 1.
-    @test dot(x,y) == 22.
-    @test sum(x) == 1.
+    @test dot(x, x) == 1.0
+    @test dot(x, y) == 22.0
+    @test sum(x) == 1.0
 
     _x = vec2array(x)
-    @test _x[end] == 1.
+    @test _x[end] == 1.0
 
-    destroy!.((x,y))
+    destroy!.((x, y))
 
     PetscFinalize()
 end

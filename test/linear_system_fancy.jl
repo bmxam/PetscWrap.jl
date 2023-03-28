@@ -67,7 +67,7 @@
     destroy!(x)
 
     # Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
-    M = create_matrix(; nrows_glo = 3, ncols_glo = 3, auto_setup = true)
+    M = create_matrix(; nrows_glo = 3, ncols_glo = 3, autosetup = true)
     M_start, M_end = get_range(M)
     I = [1, 1, 1, 2, 3]
     J = [1, 3, 1, 3, 2]

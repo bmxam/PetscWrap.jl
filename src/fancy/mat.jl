@@ -26,10 +26,10 @@ Base.ndims(::Type{Mat}) = 2
         ncols_loc = PETSC_DECIDE,
         nrows_glo = PETSC_DECIDE,
         ncols_glo = PETSC_DECIDE,
-        auto_setup = false,
+        autosetup = false,
     )
 
-Use `auto_setup = true` to immediatly call `set_from_options!` and `set_up!`.
+Use `autosetup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
 function create_matrix(
     comm::MPI.Comm = MPI.COMM_WORLD;
@@ -37,12 +37,12 @@ function create_matrix(
     ncols_loc = PETSC_DECIDE,
     nrows_glo = PETSC_DECIDE,
     ncols_glo = PETSC_DECIDE,
-    auto_setup = false,
+    autosetup = false,
 )
     mat = create(Mat, comm)
     setSizes(mat, nrows_loc, ncols_loc, nrows_glo, ncols_glo)
 
-    if (auto_setup)
+    if (autosetup)
         set_from_options!(mat)
         set_up!(mat)
     end
@@ -61,7 +61,7 @@ function create_composite_add(matrices)
         ncols_loc = n,
         nrows_glo = M,
         ncols_glo = N,
-        auto_setup = false,
+        autosetup = false,
     )
     setType(mat, "composite")
     for _mat in matrices
