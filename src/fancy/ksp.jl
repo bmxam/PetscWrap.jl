@@ -1,10 +1,4 @@
-function create_ksp(A::Mat; autosetup = false)
-    ksp = create(KSP)
-    setOperators(ksp, A, A; autosetup)
-    return ksp
-end
-
-function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false)
+function create_ksp(Amat::Mat, Pmat::Mat; autosetup=false)
     ksp = create(KSP)
     setOperators(ksp, Amat, Pmat)
 
@@ -14,6 +8,8 @@ function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false)
     end
     return ksp
 end
+
+create_ksp(A::Mat; autosetup=false) = create_ksp(A, A; autosetup)
 
 set_operators!(ksp::KSP, Amat::Mat) = setOperators(ksp, Amat, Amat)
 set_operators!(ksp::KSP, Amat::Mat, Pmat::Mat) = setOperators(ksp, Amat, Pmat)
