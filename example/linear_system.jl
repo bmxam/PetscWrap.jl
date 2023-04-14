@@ -94,6 +94,6 @@ destroy(b)
 destroy(x)
 
 # Finalize Petsc
-PetscFinalize()
+PetscFinalize(true)
 
 end #hide

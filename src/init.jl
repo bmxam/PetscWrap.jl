@@ -55,9 +55,11 @@ end
 """
     Wrapper to PetscFinalize
 """
-function PetscFinalize()
+function PetscFinalize(finalizeMPI = false)
     error = ccall((:PetscFinalize, libpetsc), PetscErrorCode, ())
     @assert iszero(error)
+
+    finalizeMPI && MPI.Finalize()
 end
 
 """

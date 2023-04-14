@@ -93,6 +93,6 @@ destroy!(M)
 # at the last moment if you'd like to use `SparseArrays` or `PetscMat`.
 
 # Finalize Petsc
-PetscFinalize()
+PetscFinalize(true)
 
 end #hide
