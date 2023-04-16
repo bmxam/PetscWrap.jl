@@ -297,7 +297,7 @@ end
     MPIAIJSetPreallocation(mat::Mat, dnz::PetscInt, onz::PetscInt)
 
 Wrapper to `MatMPIAIJSetPreallocation`
-https://petsc.org/release/docs/manualpages/Mat/MatMPIAIJSetPreallocation/
+https://petsc.org/release//manualpages/Mat/MatMPIAIJSetPreallocation/
 
 # Warning
 

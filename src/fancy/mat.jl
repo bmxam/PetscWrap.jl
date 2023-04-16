@@ -190,7 +190,7 @@ end
 Dispatch preallocation according matrix type (seq or mpiaij for instance). TODO: should use kwargs.
 """
 function preallocate!(mat::Mat, dnz, onz, warn::Bool = true)
-    _preallocate!(mat, dnz, onz, Val(Symbol(MatGetType(mat))))
+    _preallocate!(mat, dnz, onz, Val(Symbol(getType(mat))))
     setOption(mat, MAT_NEW_NONZERO_ALLOCATION_ERR, warn)
 end
 

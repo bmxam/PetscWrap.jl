@@ -39,7 +39,7 @@ Conventions to be applied in future versions ("fancy" stuff is not concerned):
 
 ## PETSc compat.
 
-This version of PetscWrap.jl has been tested with petsc-3.13. Complex numbers are supported.
+This version of PetscWrap.jl has been tested with petsc-3.19. Complex numbers are supported.
 
 ## How to use it
 
