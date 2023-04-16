@@ -490,12 +490,12 @@ function Base.sum(x::Vec)
 end
 
 """
-    view(vec::Vec, viewer::PetscViewer = StdWorld())
+    vecView(vec::Vec, viewer::PetscViewer = StdWorld())
 
 Wrapper to `VecView`
 https://petsc.org/release/docs/manualpages/Vec/VecView/
 """
-function view(vec::Vec, viewer::PetscViewer = StdWorld(vec.comm))
+function vecView(vec::Vec, viewer::PetscViewer = StdWorld(vec.comm))
     error = ccall((:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer)
     @assert iszero(error)
 end

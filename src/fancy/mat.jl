@@ -206,8 +206,8 @@ function mat2file(
     type::String = "ascii",
 )
     viewer = PetscViewer(mat.comm, filename, format, type)
-    view(mat, viewer)
+    matView(mat, viewer)
     destroy!(viewer)
 end
 
-Base.show(::IO, mat::Mat) = view(mat)
+Base.show(::IO, mat::Mat) = matView(mat)

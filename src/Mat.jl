@@ -655,12 +655,12 @@ function setValues(mat::Mat, I, J, V, mode::InsertMode)
 end
 
 """
-    view(mat::Mat, viewer::PetscViewer = StdWorld())
+    matView(mat::Mat, viewer::PetscViewer = StdWorld())
 
 Wrapper to `MatView`
 https://petsc.org/release/docs/manualpages/Mat/MatView/
 """
-function view(mat::Mat, viewer::PetscViewer = StdWorld(mat.comm))
+function matView(mat::Mat, viewer::PetscViewer = StdWorld(mat.comm))
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end

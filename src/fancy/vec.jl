@@ -148,7 +148,7 @@ function set_values_local!(vec::Vec, values)
     setValuesLocal(vec, collect(1:getLocalSize(vec)) .- 1, values, INSERT_VALUES)
 end
 
-Base.show(::IO, vec::Vec) = view(vec)
+Base.show(::IO, vec::Vec) = vecView(vec)
 
 """
     vec2array(vec::Vec)
@@ -176,7 +176,7 @@ function vec2file(
     type::String = "ascii",
 )
     viewer = PetscViewer(vec.comm, filename, format, type)
-    view(vec, viewer)
+    vecView(vec, viewer)
     destroy!(viewer)
 end
 

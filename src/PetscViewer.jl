@@ -187,11 +187,11 @@ function setType(viewer::PetscViewer, type::String)
 end
 
 """
-    view(v::PetscViewer, viewer::PetscViewer)
+    viewerView(v::PetscViewer, viewer::PetscViewer)
 
 Wrapper to `PetscViewerView`
 """
-function view(v::PetscViewer, viewer::PetscViewer)
+function viewerView(v::PetscViewer, viewer::PetscViewer)
     error =
         ccall((:PetscViewerView, libpetsc), PetscErrorCode, (CViewer, CViewer), v, viewer)
     @assert iszero(error)

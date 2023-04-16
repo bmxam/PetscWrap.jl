@@ -43,7 +43,7 @@ export PetscViewer,
     pushFormat,
     setType,
     stdWorld,
-    view
+    viewerView
 
 include("ISLocalToGlobalMapping.jl")
 include("Vec.jl")
@@ -67,7 +67,7 @@ export Vec,
     setValueLocal,
     setValues,
     setValuesLocal,
-    view
+    vecView
 
 include("Mat.jl")
 export Mat,
@@ -80,7 +80,8 @@ export Mat,
     MPIAIJSetPreallocation,
     mult,
     multAdd,
-    SeqAIJSetPreallocation
+    SeqAIJSetPreallocation,
+    matView
 
 include("KSP.jl")
 export KSP, CKSP, setOperators, solve

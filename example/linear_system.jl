@@ -67,8 +67,8 @@ assemblyEnd(A, MAT_FINAL_ASSEMBLY)
 assemblyEnd(b)
 
 # At this point, you can inspect `A` or `b` using a viewer (stdout by default), simply call
-PetscWrap.view(A)
-PetscWrap.view(b)
+matView(A)
+vecView(b)
 
 # Set up the linear solver
 ksp = create(KSP)
@@ -81,7 +81,7 @@ x = duplicate(b)
 solve(ksp, b, x)
 
 # Print the solution
-PetscWrap.view(x)
+vecView(x)
 
 # Access the solution (this part is under development), getting a Julia array; and then restore it
 array, ref = getArray(x) # do something with array
