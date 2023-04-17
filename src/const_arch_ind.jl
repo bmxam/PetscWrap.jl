@@ -5,6 +5,7 @@ const PetscErrorCode = Cint
 
 const PETSC_DEFAULT = -2
 const PETSC_DECIDE = -1
+const PETSC_DETERMINE = PETSC_DECIDE
 
 """
     Macro to automatically export all items of an enum

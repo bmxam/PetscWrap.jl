@@ -35,8 +35,8 @@ function create_matrix(
     comm::MPI.Comm = MPI.COMM_WORLD;
     nrows_loc = PETSC_DECIDE,
     ncols_loc = PETSC_DECIDE,
-    nrows_glo = PETSC_DECIDE,
-    ncols_glo = PETSC_DECIDE,
+    nrows_glo = PETSC_DETERMINE,
+    ncols_glo = PETSC_DETERMINE,
     autosetup = false,
 )
     mat = create(Mat, comm)
