@@ -14,7 +14,7 @@ Base.cconvert(::Type{CKSP}, ksp::KSP) = ksp.ptr[]
     create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper for `KSPCreate`
-https://petsc.org/release/docs/manualpages/KSP/KSPCreate/
+https://petsc.org/release/manualpages/KSP/KSPCreate/
 """
 function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
     ksp = KSP(comm)
@@ -33,7 +33,7 @@ end
     destroy(ksp::KSP)
 
 Wrapper to `KSPDestroy`
-https://petsc.org/release/docs/manualpages/KSP/KSPDestroy/
+https://petsc.org/release/manualpages/KSP/KSPDestroy/
 """
 function destroy(ksp::KSP)
     error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
@@ -44,7 +44,7 @@ end
     setFromOptions(ksp::KSP)
 
 Wrapper to `KSPSetFromOptions`
-https://petsc.org/release/docs/manualpages/KSP/KSPSetFromOptions/
+https://petsc.org/release/manualpages/KSP/KSPSetFromOptions/
 """
 function setFromOptions(ksp::KSP)
     error = ccall((:KSPSetFromOptions, libpetsc), PetscErrorCode, (CKSP,), ksp)
@@ -55,7 +55,7 @@ end
     setOperators(ksp::KSP, Amat::Mat, Pmat::Mat)
 
 Wrapper for `KSPSetOperators``
-https://petsc.org/release/docs/manualpages/KSP/KSPSetOperators/
+https://petsc.org/release/manualpages/KSP/KSPSetOperators/
 """
 function setOperators(ksp::KSP, Amat::Mat, Pmat::Mat)
     error = ccall(
@@ -73,7 +73,7 @@ end
     KSPSetUp(ksp::KSP)
 
 Wrapper to `KSPSetUp`
-https://petsc.org/release/docs/manualpages/KSP/KSPSetUp/
+https://petsc.org/release/manualpages/KSP/KSPSetUp/
 """
 function setUp(ksp::KSP)
     error = ccall((:KSPSetUp, libpetsc), PetscErrorCode, (CKSP,), ksp)
@@ -84,7 +84,7 @@ end
     solve(ksp::KSP, b::Vec, x::Vec)
 
 Wrapper for `KSPSolve`
-https://petsc.org/release/docs/manualpages/KSP/KSPSolve/
+https://petsc.org/release/manualpages/KSP/KSPSolve/
 """
 function solve(ksp::KSP, b::Vec, x::Vec)
     error = ccall((:KSPSolve, libpetsc), PetscErrorCode, (CKSP, CVec, CVec), ksp, b, x)

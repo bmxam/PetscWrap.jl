@@ -13,7 +13,7 @@ Base.cconvert(::Type{CViewer}, viewer::PetscViewer) = viewer.ptr[]
     ASCIIGetStdout(comm::MPI.Comm)
 
 Wrapper for `PetscViewerASCIIGetStdout`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerASCIIGetStdout/
+https://petsc.org/release/manualpages/Viewer/PetscViewerASCIIGetStdout/
 """
 function ASCIIGetStdout(comm::MPI.Comm = MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
@@ -34,7 +34,7 @@ const StdWorld = ASCIIGetStdout
     ASCIIOpen(comm::MPI.Comm, name)
 
 Wrapper for `PetscViewerASCIIOpen`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerASCIIOpen/
+https://petsc.org/release/manualpages/Viewer/PetscViewerASCIIOpen/
 """
 function ASCIIOpen(comm::MPI.Comm, name::String)
     viewer = PetscViewer(comm)
@@ -54,7 +54,7 @@ end
     create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper for `PetscViewerCreate`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerCreate/
+https://petsc.org/release/manualpages/Viewer/PetscViewerCreate/
 """
 function create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
     viewer = PetscViewer(comm)
@@ -73,7 +73,7 @@ end
     destroy(viewer::PetscViewer)
 
 Wrapper for `PetscViewerDestroy`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerDestroy/
+https://petsc.org/release/manualpages/Viewer/PetscViewerDestroy/
 
 Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
 """
@@ -87,7 +87,7 @@ end
     fileSetMode(viewer::PetscViewer, mode::PetscFileMode)
 
 Wrapper for `PetscViewerFileSetMode`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerFileSetMode/
+https://petsc.org/release/manualpages/Viewer/PetscViewerFileSetMode/
 """
 function fileSetMode(viewer::PetscViewer, mode::PetscFileMode)
     error = ccall(
@@ -104,7 +104,7 @@ end
     fileSetName(viewer::PetscViewer, name::String)
 
 Wrapper for `PetscViewerFileSetName`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerFileSetName/
+https://petsc.org/release/manualpages/Viewer/PetscViewerFileSetName/
 """
 function fileSetName(viewer::PetscViewer, name::String)
     error = ccall(
@@ -121,7 +121,7 @@ end
     HDF5Open(comm::MPI.Comm, name::String, type::PetscFileMode)
 
 Wrapper for `PetscViewerHDF5Open`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerHDF5Open/
+https://petsc.org/release/manualpages/Viewer/PetscViewerHDF5Open/
 """
 function HDF5Open(comm::MPI.Comm, name::String, type::PetscFileMode)
     viewer = PetscViewer(comm)
@@ -142,7 +142,7 @@ end
     popFormat(viewer::PetscViewer)
 
 Wrapper for `PetscViewerPopFormat`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPopFormat/
+https://petsc.org/release/manualpages/Viewer/PetscViewerPopFormat/
 """
 function popFormat(viewer::PetscViewer)
     error = ccall((:PetscViewerPopFormat, libpetsc), PetscErrorCode, (CViewer,), viewer)
@@ -153,7 +153,7 @@ end
     pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
 
 Wrapper for `PetscViewerPushFormat`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerPushFormat/
+https://petsc.org/release/manualpages/Viewer/PetscViewerPushFormat/
 """
 function pushFormat(viewer::PetscViewer, format::PetscViewerFormat)
     error = ccall(
@@ -170,7 +170,7 @@ end
     setType(viewer::PetscViewer, type::String)
 
 Wrapper for `PetscViewerSetType`
-https://petsc.org/release/docs/manualpages/Viewer/PetscViewerSetType/
+https://petsc.org/release/manualpages/Viewer/PetscViewerSetType/
 
 Values for `type` alors available here:
 https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/Viewer/PetscViewerType.html#PetscViewerType

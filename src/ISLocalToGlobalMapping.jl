@@ -27,7 +27,7 @@ Base.cconvert(::Type{CISLocalToGlobalMapping}, l2g::ISLocalToGlobalMapping) = l2
     ) where {I<:Integer}
 
 Wrapper to `ISLocalToGlobalMappingCreate`
-https://petsc.org/release/docs/manualpages/IS/ISLocalToGlobalMappingCreate/
+https://petsc.org/release/manualpages/IS/ISLocalToGlobalMappingCreate/
 
 0-based indexing
 """
@@ -82,7 +82,7 @@ end
     destroy(mapping::ISLocalToGlobalMapping)
 
 Wrapper to `ISLocalToGlobalMappingDestroy`
-https://petsc.org/release/docs/manualpages/IS/ISLocalToGlobalMappingDestroy/
+https://petsc.org/release/manualpages/IS/ISLocalToGlobalMappingDestroy/
 """
 function destroy(mapping::ISLocalToGlobalMapping)
     error = ccall(

@@ -14,7 +14,7 @@ Base.cconvert(::Type{CVec}, vec::Vec) = vec.ptr[]
     assemblyBegin(vec::Vec)
 
 Wrapper to `VecAssemblyBegin`
-https://petsc.org/release/docs/manualpages/Vec/VecAssemblyBegin/
+https://petsc.org/release/manualpages/Vec/VecAssemblyBegin/
 """
 function assemblyBegin(vec::Vec)
     error = ccall((:VecAssemblyBegin, libpetsc), PetscErrorCode, (CVec,), vec)
@@ -25,7 +25,7 @@ end
     assemblyEnd(vec::Vec)
 
 Wrapper to `VecAssemblyEnd`
-https://petsc.org/release/docs/manualpages/Vec/VecAssemblyEnd/
+https://petsc.org/release/manualpages/Vec/VecAssemblyEnd/
 """
 function assemblyEnd(vec::Vec)
     error = ccall((:VecAssemblyEnd, libpetsc), PetscErrorCode, (CVec,), vec)
@@ -37,7 +37,7 @@ end
     copy(x::Vec)
 
 Wrapper to `VecCopy`
-https://petsc.org/release/docs/manualpages/Vec/VecCopy/
+https://petsc.org/release/manualpages/Vec/VecCopy/
 
 Not really sure if I should extend Base here...
 """
@@ -56,7 +56,7 @@ end
     create(::Type{Vec},comm::MPI.Comm = MPI.COMM_WORLD)
 
 Wrapper to `VecCreate`
-https://petsc.org/release/docs/manualpages/Vec/VecCreate/
+https://petsc.org/release/manualpages/Vec/VecCreate/
 """
 function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD)
     vec = Vec(comm)
@@ -75,7 +75,7 @@ end
     destroy(v::Vec)
 
 Wrapper to `VecDestroy`
-https://petsc.org/release/docs/manualpages/Vec/VecDestroy/
+https://petsc.org/release/manualpages/Vec/VecDestroy/
 """
 function destroy(v::Vec)
     error = ccall((:VecDestroy, libpetsc), PetscErrorCode, (Ptr{CVec},), v.ptr)
@@ -84,7 +84,14 @@ end
 
 function LinearAlgebra.dot(x::Vec, y::Vec)
     val = Ref{PetscScalar}()
-    error = ccall((:VecDot, libpetsc), PetscErrorCode, (CVec, CVec, Ref{PetscScalar}), x, y, val)
+    error = ccall(
+        (:VecDot, libpetsc),
+        PetscErrorCode,
+        (CVec, CVec, Ref{PetscScalar}),
+        x,
+        y,
+        val,
+    )
     @assert iszero(error)
 
     return val[]
@@ -94,7 +101,7 @@ end
     duplicate(v::Vec)
 
 Wrapper for `VecDuplicate`
-https://petsc.org/release/docs/manualpages/Vec/VecDuplicate/
+https://petsc.org/release/manualpages/Vec/VecDuplicate/
 """
 function duplicate(v::Vec)
     newv = Vec(v.comm)
@@ -108,7 +115,7 @@ end
     getArray(x::Vec, own::Bool = false)
 
 Wrapper for `VecGetArray`
-https://petsc.org/release/docs/manualpages/Vec/VecGetArray/
+https://petsc.org/release/manualpages/Vec/VecGetArray/
 
 # Warning
 
@@ -143,7 +150,7 @@ end
     getLocalSize(vec::Vec)
 
 Wrapper for `VecGetLocalSize`
-https://petsc.org/release/docs/manualpages/Vec/VecGetLocalSize/
+https://petsc.org/release/manualpages/Vec/VecGetLocalSize/
 """
 function getLocalSize(x::Vec)
     n = Ref{PetscInt}()
@@ -158,7 +165,7 @@ end
     getOwnershipRange(x::Vec)
 
 Wrapper to `VecGetOwnershipRange`
-https://petsc.org/release/docs/manualpages/Vec/VecGetOwnershipRange/
+https://petsc.org/release/manualpages/Vec/VecGetOwnershipRange/
 
 The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
 
@@ -188,7 +195,7 @@ end
     getSize(x::Vec)
 
 Wrapper for `VecGetSize`
-https://petsc.org/release/docs/manualpages/Vec/VecGetSize/
+https://petsc.org/release/manualpages/Vec/VecGetSize/
 """
 function getSize(x::Vec)
     n = Ref{PetscInt}()
@@ -205,7 +212,7 @@ end
     getValues(x::Vec, ix::Vector{I}) where {I<:Integer}
 
 Wrapper for `VecGetValues`
-https://petsc.org/release/docs/manualpages/Vec/VecGetValues/
+https://petsc.org/release/manualpages/Vec/VecGetValues/
 """
 function getValues(x::Vec, ni::PetscInt, ix::Vector{PetscInt})
     y = zeros(PetscScalar, ni)
@@ -213,12 +220,7 @@ function getValues(x::Vec, ni::PetscInt, ix::Vector{PetscInt})
     error = ccall(
         (:VecGetValues, libpetsc),
         PetscErrorCode,
-        (
-            CVec,
-            PetscInt,
-            Ptr{PetscInt},
-            Ptr{PetscScalar},
-        ),
+        (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}),
         x,
         ni,
         ix,
@@ -231,15 +233,13 @@ end
 
 getValues(x::Vec, ix::Vector{PetscInt}) = getValues(x, PetscInt(length(ix)), ix)
 
-function getValues(x::Vec, ix::Vector{I}) where {I<:Integer}
-    return getValues(x, PetscInt.(ix))
-end
+getValues(x::Vec, ix::Vector{I}) where {I<:Integer} = getValues(x, PetscInt.(ix))
 
 """
     restoreArray(x::Vec, array_ref)
 
 Wrapper for `VecRestoreArray`. `array_ref` is obtained from `VecGetArray`
-https://petsc.org/release/docs/manualpages/Vec/VecRestoreArray/
+https://petsc.org/release/manualpages/Vec/VecRestoreArray/
 """
 function restoreArray(x::Vec, array_ref)
     error = ccall(
@@ -257,7 +257,7 @@ end
     scale(x::Vec, alpha::Number)
 
 Wrapper for  `VecScale`
-https://petsc.org/release/docs/manualpages/Vec/VecScale/
+https://petsc.org/release/manualpages/Vec/VecScale/
 """
 function scale(x::Vec, alpha::PetscScalar)
     error = ccall((:VecScale, libpetsc), PetscErrorCode, (CVec, PetscScalar), x, alpha)
@@ -270,7 +270,7 @@ scale(x::Vec, alpha::Number) = scale(x, PetscScalar(alpha))
     setFromOptions(vec::Vec)
 
 Wrapper to `VecSetFromOptions`
-https://petsc.org/release/docs/manualpages/Vec/VecSetFromOptions/
+https://petsc.org/release/manualpages/Vec/VecSetFromOptions/
 """
 function setFromOptions(vec::Vec)
     error = ccall((:VecSetFromOptions, libpetsc), PetscErrorCode, (CVec,), vec)
@@ -281,7 +281,7 @@ end
     setLocalToGlobalMapping(x::Vec, mapping::ISLocalToGlobalMapping)
 
 Wrapper to `VecSetLocalToGlobalMapping`
-https://petsc.org/release/docs/manualpages/Vec/VecSetLocalToGlobalMapping/
+https://petsc.org/release/manualpages/Vec/VecSetLocalToGlobalMapping/
 
 0-based indexing
 """
@@ -301,7 +301,7 @@ end
     setSizes(v::Vec, n::Integer, N::Integer)
 
 Wrapper to `VecSetSizes`
-https://petsc.org/release/docs/manualpages/Vec/VecSetSizes/
+https://petsc.org/release/manualpages/Vec/VecSetSizes/
 """
 function setSizes(v::Vec, n::PetscInt, N::PetscInt)
     nr_loc = PetscInt(n)
@@ -323,7 +323,7 @@ setSizes(v::Vec, n::Integer, N::Integer) = setSizes(v, PetscInt(n), PetscInt(N))
     setUp(vec::Vec)
 
 Wrapper to `VecSetUp`
-https://petsc.org/release/docs/manualpages/Vec/VecSetUp/
+https://petsc.org/release/manualpages/Vec/VecSetUp/
 """
 function setUp(v::Vec)
     error = ccall((:VecSetUp, libpetsc), PetscErrorCode, (CVec,), v)
@@ -335,7 +335,7 @@ end
     setValue(v::Vec, row, value, mode::InsertMode = INSERT_VALUES)
 
 Wrapper to `setValue`. Indexing starts at 0 (as in PETSc).
-https://petsc.org/release/docs/manualpages/Vec/VecSetValue/
+https://petsc.org/release/manualpages/Vec/VecSetValue/
 
 # Implementation
 
@@ -368,7 +368,7 @@ end
     setValues(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
 
 Wrapper to `VecSetValues`. Indexing starts at 0 (as in PETSc)
-https://petsc.org/release/docs/manualpages/Vec/VecSetValues/
+https://petsc.org/release/manualpages/Vec/VecSetValues/
 """
 function setValues(
     x::Vec,
@@ -408,7 +408,7 @@ end
     setValueLocal(v::Vec, row, value, mode::InsertMode = INSERT_VALUES)
 
 Wrapper to `setValueLocal`. Indexing starts at 0 (as in PETSc).
-https://petsc.org/release/docs/manualpages/Vec/VecSetValueLocal/
+https://petsc.org/release/manualpages/Vec/VecSetValueLocal/
 
 # Implementation
 
@@ -441,7 +441,7 @@ end
     setValues(x::Vec, I, V, mode::InsertMode = INSERT_VALUES)
 
 Wrapper to `VecSetValues`. Indexing starts at 0 (as in PETSc)
-https://petsc.org/release/docs/manualpages/Vec/VecSetValuesLocal/
+https://petsc.org/release/manualpages/Vec/VecSetValuesLocal/
 """
 function setValuesLocal(
     x::Vec,
@@ -478,12 +478,7 @@ end
 
 function Base.sum(x::Vec)
     s = Ref{PetscScalar}()
-    error = ccall(
-        (:VecSum, libpetsc),
-        PetscErrorCode,
-        (CVec, Ref{PetscScalar}),
-        x,s,
-    )
+    error = ccall((:VecSum, libpetsc), PetscErrorCode, (CVec, Ref{PetscScalar}), x, s)
     @assert iszero(error)
 
     return s[]
@@ -493,7 +488,7 @@ end
     vecView(vec::Vec, viewer::PetscViewer = StdWorld())
 
 Wrapper to `VecView`
-https://petsc.org/release/docs/manualpages/Vec/VecView/
+https://petsc.org/release/manualpages/Vec/VecView/
 """
 function vecView(vec::Vec, viewer::PetscViewer = StdWorld(vec.comm))
     error = ccall((:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer)

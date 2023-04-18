@@ -17,7 +17,7 @@ Base.cconvert(::Type{CMat}, mat::Mat) = mat.ptr[]
     assemblyBegin(mat::Mat, type::MatAssemblyType)
 
 Wrapper to `MatAssemblyBegin`
-https://petsc.org/release/docs/manualpages/Mat/MatAssemblyBegin/
+https://petsc.org/release/manualpages/Mat/MatAssemblyBegin/
 """
 function assemblyBegin(mat::Mat, type::MatAssemblyType)
     error = ccall(
@@ -34,7 +34,7 @@ end
     assemblyEnd(mat::Mat, type::MatAssemblyType)
 
 Wrapper to `MatAssemblyEnd`
-https://petsc.org/release/docs/manualpages/Mat/MatAssemblyEnd/
+https://petsc.org/release/manualpages/Mat/MatAssemblyEnd/
 """
 function assemblyEnd(mat::Mat, type::MatAssemblyType)
     error = ccall(
@@ -51,7 +51,7 @@ end
     compositeAddMat(mat::Mat, smat::Mat)
 
 Wrapper to `MatCompositeAddMat`
-https://petsc.org/release/docs/manualpages/Mat/MatCompositeAddMat/
+https://petsc.org/release/manualpages/Mat/MatCompositeAddMat/
 """
 function compositeAddMat(mat::Mat, smat::Mat)
     error = ccall((:MatCompositeAddMat, libpetsc), PetscErrorCode, (CMat, CMat), mat, smat)
@@ -63,7 +63,7 @@ end
     create(::Type{Mat})
 
 Wrapper to `MatCreate`
-https://petsc.org/release/docs/manualpages/Mat/MatCreate/
+https://petsc.org/release/manualpages/Mat/MatCreate/
 """
 function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
     mat = Mat(comm)
@@ -89,7 +89,7 @@ end
     )
 
 Wrapper to `MatCreateDense`
-https://petsc.org/release/docs/manualpages/Mat/MatCreateDense/
+https://petsc.org/release/manualpages/Mat/MatCreateDense/
 
 Last argument `data` is not supported yet (NULL is passed).
 """
@@ -126,7 +126,7 @@ end
     createVecs(mat::Mat)
 
 Wrapper to `MatCreateVecs`
-https://petsc.org/release/docs/manualpages/Mat/MatCreateVecs/
+https://petsc.org/release/manualpages/Mat/MatCreateVecs/
 """
 function createVecs(mat::Mat, right::Vec, left::Vec)
     error = ccall(
@@ -151,7 +151,7 @@ end
     destroy(A::Mat)
 
 Wrapper to `MatDestroy`
-https://petsc.org/release/docs/manualpages/Mat/MatDestroy/
+https://petsc.org/release/manualpages/Mat/MatDestroy/
 """
 function destroy(A::Mat)
     error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), A.ptr)
@@ -162,7 +162,7 @@ end
     getLocalSize(mat::Mat)
 
 Wrapper to `MatGetLocalSize`
-https://petsc.org/release/docs/manualpages/Mat/MatGetLocalSize/
+https://petsc.org/release/manualpages/Mat/MatGetLocalSize/
 
 Return the number of local rows and cols of the matrix (i.e on the processor).
 """
@@ -187,7 +187,7 @@ end
     getOwnershipRange(mat::Mat)
 
 Wrapper to `MatGetOwnershipRange`
-https://petsc.org/release/docs/manualpages/Mat/MatGetOwnershipRange/
+https://petsc.org/release/manualpages/Mat/MatGetOwnershipRange/
 
 The result `(rstart, rend)` is a Tuple indicating the rows handled by the local processor.
 
@@ -217,7 +217,7 @@ end
     getOwnershipRangeColumn(mat::Mat)
 
 Wrapper to `MatGetOwnershipRangeColumn`
-https://petsc.org/release/docs/manualpages/Mat/MatGetOwnershipRangeColumn/
+https://petsc.org/release/manualpages/Mat/MatGetOwnershipRangeColumn/
 
 The result `(cstart, cend)` is a Tuple indicating the columns handled by the local processor.
 
@@ -247,7 +247,7 @@ end
     getSize(mat::Mat)
 
 Wrapper to `MatGetSize`
-https://petsc.org/release/docs/manualpages/Mat/MatGetSize/
+https://petsc.org/release/manualpages/Mat/MatGetSize/
 
 Return the number of rows and cols of the matrix (global number).
 """
@@ -272,10 +272,10 @@ end
     getType(mat::Mat)
 
 Wrapper to `MatGetType`
-https://petsc.org/release/docs/manualpages/Mat/MatType/
+https://petsc.org/release/manualpages/Mat/MatType/
 
 Return the matrix type as a string. See matrix types here:
-https://petsc.org/release/docs/manualpages/Mat/MatType.html
+https://petsc.org/release/manualpages/Mat/MatType.html
 """
 function getType(mat::Mat)
     type = Ref{Cstring}()
@@ -353,7 +353,7 @@ end
     mult(mat::Mat, x::Vec, y::Vec)
 
 Wrapper to `MatMult`
-https://petsc.org/release/docs/manualpages/Mat/MatMult/
+https://petsc.org/release/manualpages/Mat/MatMult/
 
 Compute `y = Ax`
 """
@@ -366,7 +366,7 @@ end
     multAdd(A::Mat, v1::Vec, v2::Vec, v3::Vec)
 
 Wrapper to `MatMultAdd`
-https://petsc.org/release/docs/manualpages/Mat/MatMultAdd/
+https://petsc.org/release/manualpages/Mat/MatMultAdd/
 
 Compute `v3 = v2 + A * v1`.
 """
@@ -388,7 +388,7 @@ end
     SeqAIJSetPreallocation(mat::Mat, nz::PetscInt)
 
 Wrapper to `MatSeqAIJSetPreallocation`
-https://petsc.org/release/docs/manualpages/Mat/MatSeqAIJSetPreallocation/
+https://petsc.org/release/manualpages/Mat/MatSeqAIJSetPreallocation/
 """
 function SeqAIJSetPreallocation(mat::Mat, nz::PetscInt, nnz::Vector{PetscInt})
     error = ccall(
@@ -418,7 +418,7 @@ end
     setFromOptions(mat::Mat)
 
 Wrapper to `MatSetFromOptions`
-https://petsc.org/release/docs/manualpages/Mat/MatSetFromOptions/
+https://petsc.org/release/manualpages/Mat/MatSetFromOptions/
 """
 function setFromOptions(mat::Mat)
     error = ccall((:MatSetFromOptions, libpetsc), PetscErrorCode, (CMat,), mat)
@@ -433,7 +433,7 @@ end
     )
 
 Wrapper to `MatSetLocalToGlobalMapping`
-https://petsc.org/release/docs/manualpages/Mat/MatSetLocalToGlobalMapping/
+https://petsc.org/release/manualpages/Mat/MatSetLocalToGlobalMapping/
 """
 function setLocalToGlobalMapping(
     x::Mat,
@@ -455,7 +455,7 @@ end
     setOption(mat::Mat, op::MatOption, flg::PetscBool)
 
 Wrapper for `MatSetOption`
-https://petsc.org/release/docs/manualpages/Mat/MatSetOption/
+https://petsc.org/release/manualpages/Mat/MatSetOption/
 """
 function setOption(mat::Mat, op::MatOption, flg::PetscBool)
     error = ccall(
@@ -482,7 +482,7 @@ setOption(mat::Mat, op::MatOption, flg::Bool) = setOption(mat, op, bool2petsc(fl
     )
 
 Wrapper to `MatSetSizes`
-https://petsc.org/release/docs/manualpages/Mat/MatSetSizes/
+https://petsc.org/release/manualpages/Mat/MatSetSizes/
 """
 function setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
     error = ccall(
@@ -518,10 +518,10 @@ end
     setType(mat::Mat, type::String)
 
 Wrapper for `MatSetType`
-https://petsc.org/release/docs/manualpages/Mat/MatSetType/
+https://petsc.org/release/manualpages/Mat/MatSetType/
 
 Values for `type` alors available here:
-https://petsc.org/release/docs/manualpages/Mat/MatType.html#MatType
+https://petsc.org/release/manualpages/Mat/MatType.html#MatType
 """
 function setType(mat::Mat, type::String)
     error = ccall((:MatSetType, libpetsc), PetscErrorCode, (CMat, Cstring), mat, type)
@@ -532,7 +532,7 @@ end
     setUp(mat::Mat)
 
 Wrapper to `MatSetUp`
-https://petsc.org/release/docs/manualpages/Mat/MatSetUp/
+https://petsc.org/release/manualpages/Mat/MatSetUp/
 """
 function setUp(mat::Mat)
     error = ccall((:MatSetUp, libpetsc), PetscErrorCode, (CMat,), mat)
@@ -555,7 +555,7 @@ const _vvec = zeros(PetscScalar, 1)
     setValue(m::Mat, row::Integer, col::Integer, value::Number, mode::InsertMode)
 
 Wrapper to `MatSetValue`
-https://petsc.org/release/docs/manualpages/Mat/MatSetValue/
+https://petsc.org/release/manualpages/Mat/MatSetValue/
 
 Indexing starts at 0 (as in PETSc).
 
@@ -604,7 +604,7 @@ end
     setValues(mat::Mat, I, J, V, mode::InsertMode)
 
 Wrapper to `MatSetValues`
-https://petsc.org/release/docs/manualpages/Mat/MatSetValues/
+https://petsc.org/release/manualpages/Mat/MatSetValues/
 
 Indexing starts at 0 (as in PETSc)
 """
@@ -658,7 +658,7 @@ end
     matView(mat::Mat, viewer::PetscViewer = StdWorld())
 
 Wrapper to `MatView`
-https://petsc.org/release/docs/manualpages/Mat/MatView/
+https://petsc.org/release/manualpages/Mat/MatView/
 """
 function matView(mat::Mat, viewer::PetscViewer = StdWorld(mat.comm))
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
