@@ -664,3 +664,14 @@ function matView(mat::Mat, viewer::PetscViewer = StdWorld(mat.comm))
     error = ccall((:MatView, libpetsc), PetscErrorCode, (CMat, CViewer), mat, viewer)
     @assert iszero(error)
 end
+
+"""
+    zeroEntries(mat::Mat)
+
+Wrapper to `MatZeroEntries`
+https://petsc.org/release/manualpages/Mat/MatZeroEntries/
+"""
+function zeroEntries(mat::Mat)
+    error = ccall((:MatZeroEntries, libpetsc), PetscErrorCode, (CMat,), mat)
+    @assert iszero(error)
+end

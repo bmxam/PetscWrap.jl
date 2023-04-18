@@ -81,7 +81,8 @@ export Mat,
     mult,
     multAdd,
     SeqAIJSetPreallocation,
-    matView
+    matView,
+    zeroEntries
 
 include("KSP.jl")
 export KSP, CKSP, setOperators, solve
