@@ -159,6 +159,27 @@ function destroy(A::Mat)
 end
 
 """
+    duplicate(mat::Mat, op::MatDuplicateOption)
+
+Wrapper for `MatDuplicate`
+https://petsc.org/release/manualpages/Mat/MatDuplicate/
+"""
+function duplicate(mat::Mat, op::MatDuplicateOption)
+    M = Mat(mat.comm)
+    error = ccall(
+        (:MatDuplicate, libpetsc),
+        PetscErrorCode,
+        (CMat, MatDuplicateOption, Ptr{CMat}),
+        mat,
+        op,
+        M.ptr,
+    )
+    @assert iszero(error)
+
+    return M
+end
+
+"""
     getLocalSize(mat::Mat)
 
 Wrapper to `MatGetLocalSize`

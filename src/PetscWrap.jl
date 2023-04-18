@@ -15,6 +15,8 @@ export PetscErrorCode, PETSC_DECIDE
 for item in Iterators.flatten((
     instances(InsertMode),
     instances(MatAssemblyType),
+    instances(MatOption),
+    instances(MatDuplicateOption),
     instances(PetscViewerFormat),
     instances(PetscFileMode),
 ))

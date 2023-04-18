@@ -117,6 +117,12 @@ end
     MAT_OPTION_MAX = 25
 end
 
+@enum MatDuplicateOption begin
+    MAT_DO_NOT_COPY_VALUES
+    MAT_COPY_VALUES
+    MAT_SHARE_NONZERO_PATTERN
+end
+
 @enum PetscViewerFormat begin
     PETSC_VIEWER_DEFAULT
     PETSC_VIEWER_ASCII_MATLAB
