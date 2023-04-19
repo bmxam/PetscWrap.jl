@@ -188,12 +188,12 @@ function destroy(A::Mat)
 end
 
 """
-    duplicate(mat::Mat, op::MatDuplicateOption)
+    duplicate(mat::Mat, op::MatDuplicateOption; add_finalizer = true)
 
 Wrapper for `MatDuplicate`
 https://petsc.org/release/manualpages/Mat/MatDuplicate/
 """
-function duplicate(mat::Mat, op::MatDuplicateOption)
+function duplicate(mat::Mat, op::MatDuplicateOption; add_finalizer = true)
     M = Mat(mat.comm)
     error = ccall(
         (:MatDuplicate, libpetsc),
@@ -204,6 +204,8 @@ function duplicate(mat::Mat, op::MatDuplicateOption)
         M,
     )
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, M)
 
     return M
 end
