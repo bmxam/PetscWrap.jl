@@ -14,6 +14,8 @@ The main differences with the two aformentionned projects are:
 
 Note that the primary objective of this project is to enable the wrapper of the SLEPc library through the [SlepcWrap.jl](https://github.com/bmxam/SlepcWrap.jl) project.
 
+This project is only a wrapper to PETSc functions, the purpose is not to deliver a julia `Array` (it maybe be one day the purpose of a package `PetscArrays.jl`).
+
 ## How to install it
 
 You must have installed the PETSc library on your computer and set the two following environment variables : `PETSC_DIR` and `PETSC_ARCH`.

@@ -89,6 +89,7 @@ array, ref = getArray(x) # do something with array
 restoreArray(x, ref)
 
 # Free memory
+destroy(ksp)
 destroy(A)
 destroy(b)
 destroy(x)
