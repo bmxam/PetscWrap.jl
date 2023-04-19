@@ -1,3 +1,6 @@
+# DEV NOTE : using `finalizer` for PetscViewer failed because for some reason I don't understand,
+# calling `PetscViewerDestroy` often fails (even outside the context of `finalizer`)
+
 const CViewer = Ptr{Cvoid}
 mutable struct PetscViewer
     ptr::CViewer

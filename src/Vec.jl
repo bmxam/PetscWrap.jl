@@ -34,7 +34,7 @@ end
 
 """
     copy(x::Vec, y::Vec)
-    copy(x::Vec)
+    copy(x::Vec; add_finalizer = true)
 
 Wrapper to `VecCopy`
 https://petsc.org/release/manualpages/Vec/VecCopy/
@@ -46,23 +46,27 @@ function Base.copy(x::Vec, y::Vec)
     @assert iszero(error)
 end
 
-function Base.copy(x::Vec)
+function Base.copy(x::Vec; add_finalizer = true)
     y = duplicate(x)
     copy(x, y)
+    add_finalizer && finalizer(destroy, y)
     return y
 end
 
 """
-    create(::Type{Vec},comm::MPI.Comm = MPI.COMM_WORLD)
+    create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
 
 Wrapper to `VecCreate`
 https://petsc.org/release/manualpages/Vec/VecCreate/
 """
-function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD)
+function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
     vec = Vec(comm)
     error =
         ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec)
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, vec)
+
     return vec
 end
 
@@ -93,15 +97,17 @@ function LinearAlgebra.dot(x::Vec, y::Vec)
 end
 
 """
-    duplicate(v::Vec)
+    duplicate(v::Vec; add_finalizer = true)
 
 Wrapper for `VecDuplicate`
 https://petsc.org/release/manualpages/Vec/VecDuplicate/
 """
-function duplicate(v::Vec)
+function duplicate(v::Vec; add_finalizer = true)
     newv = Vec(v.comm)
     error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), v, newv)
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, newv)
 
     return newv
 end

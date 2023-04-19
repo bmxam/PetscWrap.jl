@@ -11,16 +11,19 @@ Base.unsafe_convert(::Type{CKSP}, x::KSP) = x.ptr
 Base.unsafe_convert(::Type{Ptr{CKSP}}, x::KSP) = Ptr{CKSP}(pointer_from_objref(x))
 
 """
-    create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
+    create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
 
 Wrapper for `KSPCreate`
 https://petsc.org/release/manualpages/KSP/KSPCreate/
 """
-function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
+function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
     ksp = KSP(comm)
     error =
         ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp)
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, ksp)
+
     return ksp
 end
 

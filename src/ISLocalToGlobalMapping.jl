@@ -21,7 +21,8 @@ end
         bs::PetscInt,
         n::PetscInt,
         indices::Vector{PetscInt},
-        mode::PetscCopyMode,
+        mode::PetscCopyMode;
+        add_finalizer = true,
     )
 
     create(
@@ -29,6 +30,8 @@ end
         comm::MPI.Comm,
         indices::Vector{I},
         mode::PetscCopyMode = PETSC_COPY_VALUES,
+        mode::PetscCopyMode;
+        add_finalizer = true,
     ) where {I<:Integer}
 
 Wrapper to `ISLocalToGlobalMappingCreate`
@@ -42,7 +45,8 @@ function create(
     bs::PetscInt,
     n::PetscInt,
     indices::Vector{PetscInt},
-    mode::PetscCopyMode,
+    mode::PetscCopyMode;
+    add_finalizer = true,
 )
     l2g = ISLocalToGlobalMapping(comm)
     error = ccall(
@@ -64,6 +68,9 @@ function create(
         l2g,
     )
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, l2g)
+
     return l2g
 end
 
@@ -71,7 +78,8 @@ function create(
     ::Type{ISLocalToGlobalMapping},
     comm::MPI.Comm,
     indices::Vector{I},
-    mode::PetscCopyMode = PETSC_COPY_VALUES,
+    mode::PetscCopyMode = PETSC_COPY_VALUES;
+    add_finalizer = true,
 ) where {I<:Integer}
     return create(
         ISLocalToGlobalMapping,
@@ -79,7 +87,8 @@ function create(
         PetscIntOne,
         PetscInt(length(indices)),
         PetscInt.(indices),
-        mode,
+        mode;
+        add_finalizer,
     )
 end
 

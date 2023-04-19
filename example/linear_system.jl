@@ -88,13 +88,11 @@ array, ref = getArray(x) # do something with array
 @show array
 restoreArray(x, ref)
 
-# Free memory
-destroy(ksp)
-destroy(A)
-destroy(b)
-destroy(x)
+# Free memory. Note that this call is faculative since, by default,
+# the julia GC will trigger a call to Petsc `destroy` to each object
+destroy.((ksp, A, b, x))
 
-# Finalize Petsc
+# Finalize Petsc (and, optionally, MPI)
 PetscFinalize(true)
 
 end #hide

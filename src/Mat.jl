@@ -59,28 +59,38 @@ function compositeAddMat(mat::Mat, smat::Mat)
 end
 
 """
-    create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
-    create(::Type{Mat})
+    create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
 
 Wrapper to `MatCreate`
 https://petsc.org/release/manualpages/Mat/MatCreate/
 """
-function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
+function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
     mat = Mat(comm)
     error =
         ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat)
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, mat)
+
     return mat
 end
 
 """
-    createDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
+    createDense(
+        comm::MPI.Comm,
+        m::PetscInt,
+        n::PetscInt,
+        M::PetscInt,
+        N::PetscInt;
+        add_finalizer = true,
+    )
     createDense(
         comm::MPI.Comm,
         m::Integer = PETSC_DECIDE,
         n::Integer = PETSC_DECIDE,
         M::Integer = PETSC_DECIDE,
-        N::Integer = PETSC_DECIDE,
+        N::Integer = PETSC_DECIDE;
+        add_finalizer = true,
     )
 
 Wrapper to `MatCreateDense`
@@ -88,7 +98,14 @@ https://petsc.org/release/manualpages/Mat/MatCreateDense/
 
 Last argument `data` is not supported yet (NULL is passed).
 """
-function createDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
+function createDense(
+    comm::MPI.Comm,
+    m::PetscInt,
+    n::PetscInt,
+    M::PetscInt,
+    N::PetscInt;
+    add_finalizer = true,
+)
     mat = Mat(comm)
     error = ccall(
         (:MatCreateDense, libpetsc),
@@ -103,6 +120,9 @@ function createDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::P
         mat,
     )
     @assert iszero(error)
+
+    add_finalizer && finalizer(destroy, mat)
+
     return mat
 end
 
@@ -111,14 +131,22 @@ function createDense(
     m::Integer = PETSC_DECIDE,
     n::Integer = PETSC_DECIDE,
     M::Integer = PETSC_DECIDE,
-    N::Integer = PETSC_DECIDE,
+    N::Integer = PETSC_DECIDE;
+    add_finalizer = true,
 )
-    return createDense(comm, PetscInt(m), PetscInt(n), PetscInt(M), PetscInt(N))
+    return createDense(
+        comm,
+        PetscInt(m),
+        PetscInt(n),
+        PetscInt(M),
+        PetscInt(N);
+        add_finalizer,
+    )
 end
 
 """
     createVecs(mat::Mat, vecr::Vec, veci::Vec)
-    createVecs(mat::Mat)
+    createVecs(mat::Mat; add_finalizer = true)
 
 Wrapper to `MatCreateVecs`
 https://petsc.org/release/manualpages/Mat/MatCreateVecs/
@@ -135,10 +163,16 @@ function createVecs(mat::Mat, right::Vec, left::Vec)
     @assert iszero(error)
 end
 
-function createVecs(mat::Mat)
+function createVecs(mat::Mat; add_finalizer = true)
     right = Vec(mat.comm)
     left = Vec(mat.comm)
     createVecs(mat, right, left)
+
+    if add_finalizer
+        finalizer(destroy, right)
+        finalizer(destroy, left)
+    end
+
     return right, left
 end
 
