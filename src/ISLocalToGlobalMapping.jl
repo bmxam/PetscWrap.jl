@@ -1,14 +1,19 @@
 const CISLocalToGlobalMapping = Ptr{Cvoid}
 
-struct ISLocalToGlobalMapping
-    ptr::Ref{CISLocalToGlobalMapping}
+mutable struct ISLocalToGlobalMapping
+    ptr::CISLocalToGlobalMapping
     comm::MPI.Comm
 
-    ISLocalToGlobalMapping(comm::MPI.Comm) = new(Ref{Ptr{Cvoid}}(), comm)
+    ISLocalToGlobalMapping(comm::MPI.Comm) = new(CISLocalToGlobalMapping(), comm)
 end
 
-# allows us to pass ISLocalToGlobalMapping objects directly into CISLocalToGlobalMapping ccall signatures
-Base.cconvert(::Type{CISLocalToGlobalMapping}, l2g::ISLocalToGlobalMapping) = l2g.ptr[]
+Base.unsafe_convert(::Type{CISLocalToGlobalMapping}, x::ISLocalToGlobalMapping) = x.ptr
+function Base.unsafe_convert(
+    ::Type{Ptr{CISLocalToGlobalMapping}},
+    x::ISLocalToGlobalMapping,
+)
+    Ptr{CISLocalToGlobalMapping}(pointer_from_objref(x))
+end
 
 """
     create(
@@ -56,7 +61,7 @@ function create(
         n,
         indices,
         mode,
-        l2g.ptr,
+        l2g,
     )
     @assert iszero(error)
     return l2g
@@ -89,7 +94,7 @@ function destroy(mapping::ISLocalToGlobalMapping)
         (:ISLocalToGlobalMappingDestroy, libpetsc),
         PetscErrorCode,
         (Ptr{CISLocalToGlobalMapping},),
-        mapping.ptr,
+        mapping,
     )
     @assert iszero(error)
 end

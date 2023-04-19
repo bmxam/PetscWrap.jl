@@ -3,15 +3,15 @@ const CMat = Ptr{Cvoid}
 """
     A Petsc matrix, actually just a pointer to the actual C matrix
 """
-struct Mat
-    ptr::Ref{CMat}
+mutable struct Mat
+    ptr::CMat
     comm::MPI.Comm
 
-    Mat(comm::MPI.Comm) = new(Ref{CMat}(), comm)
+    Mat(comm::MPI.Comm) = new(CMat(), comm)
 end
 
-# allows us to pass Mat objects directly into CMat ccall signatures
-Base.cconvert(::Type{CMat}, mat::Mat) = mat.ptr[]
+Base.unsafe_convert(::Type{CMat}, x::Mat) = x.ptr
+Base.unsafe_convert(::Type{Ptr{CMat}}, x::Mat) = Ptr{CMat}(pointer_from_objref(x))
 
 """
     assemblyBegin(mat::Mat, type::MatAssemblyType)
@@ -67,13 +67,8 @@ https://petsc.org/release/manualpages/Mat/MatCreate/
 """
 function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD)
     mat = Mat(comm)
-    error = ccall(
-        (:MatCreate, libpetsc),
-        PetscErrorCode,
-        (MPI.MPI_Comm, Ptr{CMat}),
-        comm,
-        mat.ptr,
-    )
+    error =
+        ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat)
     @assert iszero(error)
     return mat
 end
@@ -105,7 +100,7 @@ function createDense(comm::MPI.Comm, m::PetscInt, n::PetscInt, M::PetscInt, N::P
         M,
         N,
         C_NULL,
-        mat.ptr,
+        mat,
     )
     @assert iszero(error)
     return mat
@@ -134,8 +129,8 @@ function createVecs(mat::Mat, right::Vec, left::Vec)
         PetscErrorCode,
         (CMat, Ptr{CVec}, Ptr{CVec}),
         mat,
-        right.ptr,
-        left.ptr,
+        right,
+        left,
     )
     @assert iszero(error)
 end
@@ -154,7 +149,7 @@ Wrapper to `MatDestroy`
 https://petsc.org/release/manualpages/Mat/MatDestroy/
 """
 function destroy(A::Mat)
-    error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), A.ptr)
+    error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), A)
     @assert iszero(error)
 end
 
@@ -172,7 +167,7 @@ function duplicate(mat::Mat, op::MatDuplicateOption)
         (CMat, MatDuplicateOption, Ptr{CMat}),
         mat,
         op,
-        M.ptr,
+        M,
     )
     @assert iszero(error)
 

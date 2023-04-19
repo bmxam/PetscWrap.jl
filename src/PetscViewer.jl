@@ -1,13 +1,15 @@
 const CViewer = Ptr{Cvoid}
-struct PetscViewer
-    ptr::Ref{CViewer}
+mutable struct PetscViewer
+    ptr::CViewer
     comm::MPI.Comm
 
-    PetscViewer(comm::MPI.Comm) = new(Ref{CViewer}(), comm)
+    PetscViewer(comm::MPI.Comm) = new(CViewer(), comm)
 end
 
-# allows us to pass PetscViewer objects directly into CViewer ccall signatures
-Base.cconvert(::Type{CViewer}, viewer::PetscViewer) = viewer.ptr[]
+Base.unsafe_convert(::Type{CViewer}, x::PetscViewer) = x.ptr
+function Base.unsafe_convert(::Type{Ptr{CViewer}}, x::PetscViewer)
+    Ptr{CViewer}(pointer_from_objref(x))
+end
 
 """
     ASCIIGetStdout(comm::MPI.Comm)
@@ -22,7 +24,7 @@ function ASCIIGetStdout(comm::MPI.Comm = MPI.COMM_WORLD)
         PetscErrorCode,
         (MPI.MPI_Comm, Ptr{CViewer}),
         comm,
-        viewer.ptr,
+        viewer,
     )
     @assert iszero(error)
     return viewer
@@ -44,7 +46,7 @@ function ASCIIOpen(comm::MPI.Comm, name::String)
         (MPI.MPI_Comm, Cstring, Ptr{CViewer}),
         comm,
         name,
-        viewer.ptr,
+        viewer,
     )
     @assert iszero(error)
     return viewer
@@ -63,7 +65,7 @@ function create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
         PetscErrorCode,
         (MPI.MPI_Comm, Ptr{CViewer}),
         comm,
-        viewer.ptr,
+        viewer,
     )
     @assert iszero(error)
     return viewer
@@ -78,8 +80,7 @@ https://petsc.org/release/manualpages/Viewer/PetscViewerDestroy/
 Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
 """
 function destroy(viewer::PetscViewer)
-    error =
-        ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer},), viewer.ptr)
+    error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer},), viewer)
     @assert iszero(error)
 end
 
@@ -132,7 +133,7 @@ function HDF5Open(comm::MPI.Comm, name::String, type::PetscFileMode)
         comm,
         name,
         type,
-        viewer.ptr,
+        viewer,
     )
     @assert iszero(error)
     return viewer

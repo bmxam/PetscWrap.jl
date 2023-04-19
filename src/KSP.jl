@@ -1,14 +1,14 @@
 const CKSP = Ptr{Cvoid}
 
-struct KSP
-    ptr::Ref{CKSP}
+mutable struct KSP
+    ptr::CKSP
     comm::MPI.Comm
 
-    KSP(comm::MPI.Comm) = new(Ref{CKSP}(), comm)
+    KSP(comm::MPI.Comm) = new(CKSP(), comm)
 end
 
-# allows us to pass KSP objects directly into CKSP ccall signatures
-Base.cconvert(::Type{CKSP}, ksp::KSP) = ksp.ptr[]
+Base.unsafe_convert(::Type{CKSP}, x::KSP) = x.ptr
+Base.unsafe_convert(::Type{Ptr{CKSP}}, x::KSP) = Ptr{CKSP}(pointer_from_objref(x))
 
 """
     create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
@@ -18,13 +18,8 @@ https://petsc.org/release/manualpages/KSP/KSPCreate/
 """
 function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD)
     ksp = KSP(comm)
-    error = ccall(
-        (:KSPCreate, libpetsc),
-        PetscErrorCode,
-        (MPI.MPI_Comm, Ptr{CKSP}),
-        comm,
-        ksp.ptr,
-    )
+    error =
+        ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp)
     @assert iszero(error)
     return ksp
 end
@@ -36,7 +31,7 @@ Wrapper to `KSPDestroy`
 https://petsc.org/release/manualpages/KSP/KSPDestroy/
 """
 function destroy(ksp::KSP)
-    error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp.ptr)
+    error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp)
     @assert iszero(error)
 end
 

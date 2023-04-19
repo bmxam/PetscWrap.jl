@@ -1,14 +1,14 @@
 const CVec = Ptr{Cvoid}
 
-struct Vec
-    ptr::Ref{CVec}
+mutable struct Vec
+    ptr::CVec
     comm::MPI.Comm
 
-    Vec(comm::MPI.Comm) = new(Ref{Ptr{Cvoid}}(), comm)
+    Vec(comm::MPI.Comm) = new(CVec(), comm)
 end
 
-# allows us to pass Vec objects directly into CVec ccall signatures
-Base.cconvert(::Type{CVec}, vec::Vec) = vec.ptr[]
+Base.unsafe_convert(::Type{CVec}, x::Vec) = x.ptr
+Base.unsafe_convert(::Type{Ptr{CVec}}, x::Vec) = Ptr{CVec}(pointer_from_objref(x))
 
 """
     assemblyBegin(vec::Vec)
@@ -60,13 +60,8 @@ https://petsc.org/release/manualpages/Vec/VecCreate/
 """
 function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD)
     vec = Vec(comm)
-    error = ccall(
-        (:VecCreate, libpetsc),
-        PetscErrorCode,
-        (MPI.MPI_Comm, Ptr{CVec}),
-        comm,
-        vec.ptr,
-    )
+    error =
+        ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec)
     @assert iszero(error)
     return vec
 end
@@ -78,7 +73,7 @@ Wrapper to `VecDestroy`
 https://petsc.org/release/manualpages/Vec/VecDestroy/
 """
 function destroy(v::Vec)
-    error = ccall((:VecDestroy, libpetsc), PetscErrorCode, (Ptr{CVec},), v.ptr)
+    error = ccall((:VecDestroy, libpetsc), PetscErrorCode, (Ptr{CVec},), v)
     @assert iszero(error)
 end
 
@@ -105,7 +100,7 @@ https://petsc.org/release/manualpages/Vec/VecDuplicate/
 """
 function duplicate(v::Vec)
     newv = Vec(v.comm)
-    error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), v, newv.ptr)
+    error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), v, newv)
     @assert iszero(error)
 
     return newv
