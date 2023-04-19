@@ -76,3 +76,23 @@ function PetscInitialized()
     @assert iszero(error)
     return Bool(isInitialized[])
 end
+
+"""
+    Wrapper to PetscFinalized
+
+Cmd line options:
+-options_view - Calls PetscOptionsView()
+-options_left - Prints unused options that remain in the database
+-objects_dump [all] - Prints list of objects allocated by the user that have not been freed, the option all cause all outstanding objects to be listed
+-mpidump - Calls PetscMPIDump()
+-malloc_dump - Calls PetscMallocDump(), displays all memory allocated that has not been freed
+-malloc_info - Prints total memory usage
+-malloc_view - Prints list of all memory allocated and where
+"""
+function PetscFinalized()
+    isFinalized = Ref{PetscBool}()
+    error =
+        ccall((:PetscFinalized, libpetsc), PetscErrorCode, (Ref{PetscBool},), isFinalized)
+    @assert iszero(error)
+    return Bool(isFinalized[])
+end
