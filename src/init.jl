@@ -5,7 +5,12 @@
 
 I don't know if I am supposed to use PetscInt or not...
 """
-function PetscInitialize(args::Vector{String}, filename::String, help::String)
+function PetscInitialize(
+    args::Vector{String},
+    filename::String,
+    help::String;
+    finalize_atexit = true,
+)
     args2 = ["julia"; args]
     nargs = Cint(length(args2))
     error = ccall(
@@ -18,22 +23,26 @@ function PetscInitialize(args::Vector{String}, filename::String, help::String)
         help,
     )
     @assert iszero(error)
+
+    finalize_atexit && atexit(PetscFinalize)
 end
 
 """
     Initialize PETSc with arguments stored in a vector of string
 """
-PetscInitialize(args::Vector{String}) = PetscInitialize(args, "", "")
+function PetscInitialize(args::Vector{String}; finalize_atexit = true)
+    PetscInitialize(args, "", ""; finalize_atexit)
+end
 
 """
     Initialize PETSc with arguments concatenated in a unique string.
 """
-function PetscInitialize(args::String)
-    PetscInitialize(convert(Vector{String}, split(args)), "", "")
+function PetscInitialize(args::String; finalize_atexit = true)
+    PetscInitialize(convert(Vector{String}, split(args)), "", ""; finalize_atexit)
 end
 
 """
-    PetscInitialize(cmd_line_args::Bool = true)
+    PetscInitialize(cmd_line_args::Bool = true; finalize_atexit = true)
 
 Initialize PETSc.
 
@@ -43,12 +52,14 @@ arguments for PETSc (leading to a call to `PetscInitializeNoPointers`).
 Otherwise, if `cmd_line_args == false`, initialize PETSc without arguments (leading
 to a call to `PetscInitializeNoArguments`).
 """
-function PetscInitialize(cmd_line_args::Bool = true)
+function PetscInitialize(cmd_line_args::Bool = true; finalize_atexit = true)
     if (cmd_line_args)
-        PetscInitialize(ARGS)
+        PetscInitialize(ARGS; finalize_atexit)
     else
         error = ccall((:PetscInitializeNoArguments, libpetsc), PetscErrorCode, ())
         @assert iszero(error)
+
+        finalize_atexit && atexit(PetscFinalize)
     end
 end
 
@@ -56,6 +67,8 @@ end
     Wrapper to PetscFinalize
 """
 function PetscFinalize(finalizeMPI = false)
+    PetscFinalized() && return
+
     GC.gc()
     if _NREFS[] != 0
         @warn "$(_NREFS[]) objects still not finalized before calling PetscWrap.Finalize()"

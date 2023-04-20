@@ -88,11 +88,7 @@ k = findall(x -> M_start <= x <= M_end, I) # just a trick to allow this example 
 set_values!(M, I[k], J[k], V[k], ADD_VALUES)
 assemble!(M)
 @show M
-destroy!(M)
 # This is very convenient in sequential since you can fill the three vectors I, J, V in your code and decide only
 # at the last moment if you'd like to use `SparseArrays` or `PetscMat`.
-
-# Finalize Petsc
-PetscFinalize(true)
 
 end #hide

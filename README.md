@@ -190,16 +190,12 @@ array, ref = getArray(x) # do something with array
 restoreArray(x, ref)
 ```
 
-Free memory
-
+Free memory. Note that this call is faculative since, by default, the julia GC will trigger a call to Petsc `destroy` to each object
 ```julia
-destroy(A)
-destroy(b)
-destroy(x)
+destroy.((ksp, A, b, x))
 ```
 
-Finalize Petsc
-
+Finalize Petsc (and, optionally, MPI): this is actually optional, it will be called automatically
 ```julia
 PetscFinalize()
 
