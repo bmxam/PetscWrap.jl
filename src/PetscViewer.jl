@@ -2,7 +2,7 @@
 # calling `PetscViewerDestroy` often fails (even outside the context of `finalizer`)
 
 const CViewer = Ptr{Cvoid}
-mutable struct PetscViewer
+mutable struct PetscViewer <: AbstractPetscObject
     ptr::CViewer
     comm::MPI.Comm
 

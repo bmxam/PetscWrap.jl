@@ -3,7 +3,7 @@ const CMat = Ptr{Cvoid}
 """
     A Petsc matrix, actually just a pointer to the actual C matrix
 """
-mutable struct Mat
+mutable struct Mat <: AbstractPetscObject
     ptr::CMat
     comm::MPI.Comm
 

@@ -1,6 +1,6 @@
 const CISLocalToGlobalMapping = Ptr{Cvoid}
 
-mutable struct ISLocalToGlobalMapping
+mutable struct ISLocalToGlobalMapping <: AbstractPetscObject
     ptr::CISLocalToGlobalMapping
     comm::MPI.Comm
 

@@ -1,6 +1,6 @@
 const CKSP = Ptr{Cvoid}
 
-mutable struct KSP
+mutable struct KSP <: AbstractPetscObject
     ptr::CKSP
     comm::MPI.Comm
 

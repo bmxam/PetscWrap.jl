@@ -1,6 +1,6 @@
 const CVec = Ptr{Cvoid}
 
-mutable struct Vec
+mutable struct Vec <: AbstractPetscObject
     ptr::CVec
     comm::MPI.Comm
 

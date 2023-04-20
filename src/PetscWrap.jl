@@ -32,6 +32,8 @@ export show_petsc_path
 include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
+include("common.jl")
+
 include("init.jl")
 export PetscInitialize, PetscInitialized, PetscFinalize
 
