@@ -22,6 +22,7 @@ function create(::Type{KSP}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = tr
         ccall((:KSPCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CKSP}), comm, ksp)
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, ksp)
 
     return ksp
@@ -36,6 +37,8 @@ https://petsc.org/release/manualpages/KSP/KSPDestroy/
 function destroy(ksp::KSP)
     error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp)
     @assert iszero(error)
+
+    _NREFS[] -= 1
 end
 
 """

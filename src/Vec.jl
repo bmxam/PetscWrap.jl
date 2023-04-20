@@ -49,6 +49,7 @@ end
 function Base.copy(x::Vec; add_finalizer = true)
     y = duplicate(x)
     copy(x, y)
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, y)
     return y
 end
@@ -65,6 +66,7 @@ function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = tr
         ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec)
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, vec)
 
     return vec
@@ -79,6 +81,8 @@ https://petsc.org/release/manualpages/Vec/VecDestroy/
 function destroy(v::Vec)
     error = ccall((:VecDestroy, libpetsc), PetscErrorCode, (Ptr{CVec},), v)
     @assert iszero(error)
+
+    _NREFS[] -= 1
 end
 
 function LinearAlgebra.dot(x::Vec, y::Vec)
@@ -107,6 +111,7 @@ function duplicate(v::Vec; add_finalizer = true)
     error = ccall((:VecDuplicate, libpetsc), PetscErrorCode, (CVec, Ptr{CVec}), v, newv)
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, newv)
 
     return newv

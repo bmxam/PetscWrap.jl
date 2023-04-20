@@ -56,6 +56,11 @@ end
     Wrapper to PetscFinalize
 """
 function PetscFinalize(finalizeMPI = false)
+    GC.gc()
+    if _NREFS[] != 0
+        @warn "$(_NREFS[]) objects still not finalized before calling PetscWrap.Finalize()"
+    end
+
     error = ccall((:PetscFinalize, libpetsc), PetscErrorCode, ())
     @assert iszero(error)
 

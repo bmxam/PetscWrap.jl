@@ -9,6 +9,9 @@ using Libdl
 using MPI
 using LinearAlgebra
 
+# GridapPETSc trick to track allocs/deallocs
+const _NREFS = Ref(0)
+
 include("const_arch_ind.jl")
 export PetscErrorCode, PETSC_DECIDE
 # export all items of some enums

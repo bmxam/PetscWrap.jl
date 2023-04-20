@@ -69,6 +69,7 @@ function create(
     )
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, l2g)
 
     return l2g
@@ -106,4 +107,6 @@ function destroy(mapping::ISLocalToGlobalMapping)
         mapping,
     )
     @assert iszero(error)
+
+    _NREFS[] -= 1
 end

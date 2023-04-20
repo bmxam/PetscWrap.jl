@@ -70,6 +70,7 @@ function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = tr
         ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat)
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, mat)
 
     return mat
@@ -121,6 +122,7 @@ function createDense(
     )
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, mat)
 
     return mat
@@ -168,6 +170,7 @@ function createVecs(mat::Mat; add_finalizer = true)
     left = Vec(mat.comm)
     createVecs(mat, right, left)
 
+    _NREFS[] += 2
     if add_finalizer
         finalizer(destroy, right)
         finalizer(destroy, left)
@@ -185,6 +188,8 @@ https://petsc.org/release/manualpages/Mat/MatDestroy/
 function destroy(A::Mat)
     error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), A)
     @assert iszero(error)
+
+    _NREFS[] -= 1
 end
 
 """
@@ -205,6 +210,7 @@ function duplicate(mat::Mat, op::MatDuplicateOption; add_finalizer = true)
     )
     @assert iszero(error)
 
+    _NREFS[] += 1
     add_finalizer && finalizer(destroy, M)
 
     return M
