@@ -170,7 +170,8 @@ function createVecs(mat::Mat; add_finalizer = true)
     left = Vec(mat.comm)
     createVecs(mat, right, left)
 
-    _NREFS[] += 2
+    _NREFS[] += 1
+    _NREFS[] += 1
     if add_finalizer
         finalizer(destroy, right)
         finalizer(destroy, left)
