@@ -197,8 +197,7 @@ the julia GC will trigger a call to Petsc `destroy` to each object
 destroy.((ksp, A, b, x))
 ```
 
-Finalize Petsc. This call is faculative : it will
-be triggered automatically at the end of the script.
+Finalize Petsc. This call is faculative : it will be triggered automatically at the end of the script.
 
 ```julia
 PetscFinalize()
