@@ -35,6 +35,8 @@ Wrapper to `KSPDestroy`
 https://petsc.org/release/manualpages/KSP/KSPDestroy/
 """
 function destroy(ksp::KSP)
+    _is_destroyed(ksp) && return
+
     error = ccall((:KSPDestroy, libpetsc), PetscErrorCode, (Ptr{CKSP},), ksp)
     @assert iszero(error)
 

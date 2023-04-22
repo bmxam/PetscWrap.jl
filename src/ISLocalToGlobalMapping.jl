@@ -100,6 +100,8 @@ Wrapper to `ISLocalToGlobalMappingDestroy`
 https://petsc.org/release/manualpages/IS/ISLocalToGlobalMappingDestroy/
 """
 function destroy(mapping::ISLocalToGlobalMapping)
+    _is_destroyed(mapping) && return
+
     error = ccall(
         (:ISLocalToGlobalMappingDestroy, libpetsc),
         PetscErrorCode,

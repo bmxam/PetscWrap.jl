@@ -81,7 +81,7 @@ function PetscFinalize(finalizeMPI = false)
         @warn "$(_NREFS[]) objects still not finalized after calling PetscWrap.Finalize()"
     end
 
-    _NREFS[] != 0
+    _NREFS[] = 0
 
     finalizeMPI && MPI.Finalize()
 end

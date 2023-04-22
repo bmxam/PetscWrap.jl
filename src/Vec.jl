@@ -79,6 +79,8 @@ Wrapper to `VecDestroy`
 https://petsc.org/release/manualpages/Vec/VecDestroy/
 """
 function destroy(v::Vec)
+    _is_destroyed(v) && return
+
     error = ccall((:VecDestroy, libpetsc), PetscErrorCode, (Ptr{CVec},), v)
     @assert iszero(error)
 

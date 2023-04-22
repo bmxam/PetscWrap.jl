@@ -83,6 +83,8 @@ https://petsc.org/release/manualpages/Viewer/PetscViewerDestroy/
 Warning : from what I understand, all viewers must not be destroyed explicitely using `PetscViewerDestroy`.
 """
 function destroy(viewer::PetscViewer)
+    _is_destroyed(viewer) && return
+
     error = ccall((:PetscViewerDestroy, libpetsc), PetscErrorCode, (Ptr{CViewer},), viewer)
     @assert iszero(error)
 end

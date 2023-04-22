@@ -187,6 +187,8 @@ Wrapper to `MatDestroy`
 https://petsc.org/release/manualpages/Mat/MatDestroy/
 """
 function destroy(A::Mat)
+    _is_destroyed(A) && return
+
     error = ccall((:MatDestroy, libpetsc), PetscErrorCode, (Ptr{CMat},), A)
     @assert iszero(error)
 
