@@ -1,27 +1,13 @@
 @testset "linear system fancy" begin
     # Only on one processor...
 
-    # Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
-    # also provide "command line arguments by defining them in a string, for instance
-    # `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
-    # separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
-    PetscInitialize()
-
     # Number of mesh points and mesh step
     n = 11
     Δx = 1.0 / (n - 1)
 
     # Create a matrix of size `(n,n)` and a vector of size `(n)`
-    A = create_matrix(; nrows_glo = n, ncols_glo = n)
-    b = create_vector(; nrows_glo = n)
-
-    # We can then use command line options to set our matrix/vectors.
-    set_from_options!(A)
-    set_from_options!(b)
-
-    # Finish the set up
-    set_up!(A)
-    set_up!(b)
+    A = create_matrix(; nrows_glo = n, ncols_glo = n, autosetup = true)
+    b = create_vector(; nrows_glo = n, autosetup = true)
 
     # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
     # The `rstart, rend = get_range(*)` methods differ a little bit from PETSc API since the two integers it
@@ -47,9 +33,7 @@
     assemble!(b)
 
     # Set up the linear solver
-    ksp = create_ksp(A)
-    set_from_options!(ksp)
-    set_up!(ksp)
+    ksp = create_ksp(A; autosetup = true)
 
     # Solve the system
     x = solve(ksp, b)
@@ -62,9 +46,7 @@
     @test isapprox(array, range(0.0, 2.0; length = n))
 
     # Free memory
-    destroy!(A)
-    destroy!(b)
-    destroy!(x)
+    destroy!(A, b, x)
 
     # Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
     M = create_matrix(; nrows_glo = 3, ncols_glo = 3, autosetup = true)
@@ -79,9 +61,6 @@
     destroy!(M)
     # This is very convenient in sequential since you can fill the three vectors I, J, V in your code and decide only
     # at the last moment if you'd like to use `SparseArrays` or `PetscMat`.
-
-    # Finalize Petsc
-    PetscFinalize()
 
     # Reach this point?
     @test true

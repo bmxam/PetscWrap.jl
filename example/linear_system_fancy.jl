@@ -12,11 +12,7 @@ module Example #hide
 # To run this example, execute : `mpirun -n your_favorite_positive_integer julia example2.jl`
 
 # Import package
-using MPI
 using PetscWrap
-
-# Initialize MPI
-MPI.Init()
 
 # Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
 # also provide "command line arguments by defining them in a string, for instance

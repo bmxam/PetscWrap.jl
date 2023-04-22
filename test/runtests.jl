@@ -1,7 +1,7 @@
 using PetscWrap
+using MPI
 using Test
 using LinearAlgebra
-
 
 # from :
 # https://discourse.julialang.org/t/what-general-purpose-commands-do-you-usually-end-up-adding-to-your-projects/4889
@@ -13,9 +13,25 @@ using LinearAlgebra
     end
 end
 
-
-@testset "PetscWrap.jl" begin
-    include("./linear_system.jl")
-    include("./linear_system_fancy.jl")
-    include("./misc.jl")
+"""
+Custom way to "include" a file to print infos.
+"""
+function custom_include(path)
+    filename = split(path, "/")[end]
+    print("Running test file " * filename * "...")
+    include(path)
+    println("done.")
 end
+
+MPI.Init()
+PetscInitialize()
+
+error("Bug : tests are not running anymore when using `test`")
+@testset "PetscWrap.jl" begin
+    custom_include("./linear_system.jl")
+    custom_include("./linear_system_fancy.jl")
+    custom_include("./misc.jl")
+end
+
+PetscFinalize()
+MPI.Finalize()

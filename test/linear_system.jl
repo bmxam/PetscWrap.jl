@@ -1,22 +1,16 @@
 @testset "linear system" begin
-    # Only on one processor...
-
-    # Import package
-    using PetscWrap
-
-    # Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
-    # also provide "command line arguments by defining them in a string, for instance
-    # `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
-    # separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
-    PetscInitialize()
-
     # Number of mesh points and mesh step
     n = 11
     Δx = 1.0 / (n - 1)
 
+    println("before create Mat")
+
     # Create a matrix and a vector
     A = create(Mat)
+    println("before create Vec")
     b = create(Vec)
+
+    println("before setSizes")
 
     # Set the size of the different objects, leaving PETSC to decide how to distribute. Note that we should
     # set the number of preallocated non-zeros to increase performance.
@@ -30,6 +24,8 @@
     # Finish the set up
     setUp(A)
     setUp(b)
+
+    println("before getOwnershipRange")
 
     # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
     # As in PETSc, the `rstart, rend = *GetOwnershipRange` methods indicate the first row handled by the local processor
@@ -56,6 +52,7 @@
     assemblyEnd(A, MAT_FINAL_ASSEMBLY)
     assemblyEnd(b)
 
+    println("before matview")
     # At this point, you can inspect `A` or `b` using a viewer (stdout by default), simply call
     matView(A)
     vecView(b)
@@ -70,6 +67,7 @@
     x = duplicate(b)
     solve(ksp, b, x)
 
+    println("before vecview")
     # Print the solution
     vecView(x)
 
@@ -82,9 +80,6 @@
     destroy(A)
     destroy(b)
     destroy(x)
-
-    # Finalize Petsc
-    PetscFinalize()
 
     # Reach this point?
     @test true

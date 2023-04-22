@@ -1,6 +1,4 @@
 @testset "composite" begin
-    PetscInitialize()
-
     # Create two matrices
     A = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
     B = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
@@ -48,13 +46,10 @@
     @test vec2array(y) == [3.0, 5.0]
 
     # Free memory
-    destroy!.((A, B, C, x1, x2, y))
-    PetscFinalize()
+    destroy!(A, B, C, x1, x2, y)
 end
 
 @testset "mapping" begin
-    PetscInitialize()
-
     n = 10
     x = create_vector(; nrows_glo = n, autosetup = true)
     y = create_vector(; nrows_glo = n, autosetup = true)
@@ -75,7 +70,5 @@ end
     _x = vec2array(x)
     @test _x[end] == 1.0
 
-    destroy!.((x, y))
-
-    PetscFinalize()
+    destroy!(x, y)
 end

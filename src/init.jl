@@ -11,6 +11,8 @@ function PetscInitialize(
     help::String;
     finalize_atexit = true,
 )
+    MPI.Initialized() || MPI.Init()
+
     args2 = ["julia"; args]
     nargs = Cint(length(args2))
     error = ccall(
@@ -56,6 +58,8 @@ function PetscInitialize(cmd_line_args::Bool = true; finalize_atexit = true)
     if (cmd_line_args)
         PetscInitialize(ARGS; finalize_atexit)
     else
+        MPI.Initialized() || MPI.Init()
+
         error = ccall((:PetscInitializeNoArguments, libpetsc), PetscErrorCode, ())
         @assert iszero(error)
 
@@ -66,7 +70,7 @@ end
 """
     Wrapper to PetscFinalize
 """
-function PetscFinalize(finalizeMPI = false)
+function PetscFinalize()
     PetscFinalized() && return
 
     GC.gc()
@@ -82,8 +86,6 @@ function PetscFinalize(finalizeMPI = false)
     end
 
     _NREFS[] = 0
-
-    finalizeMPI && MPI.Finalize()
 end
 
 """

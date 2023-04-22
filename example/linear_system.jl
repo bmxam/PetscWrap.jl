@@ -92,8 +92,8 @@ restoreArray(x, ref)
 # the julia GC will trigger a call to Petsc `destroy` to each object
 destroy.((ksp, A, b, x))
 
-# Finalize Petsc and MPI. If you initialized MPI yourself, this call is faculative : it will
+# Finalize Petsc. This call is faculative : it will
 # be triggered automatically at the end of the script.
-PetscFinalize(true)
+PetscFinalize()
 
 end #hide
