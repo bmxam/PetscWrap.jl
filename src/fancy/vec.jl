@@ -1,14 +1,36 @@
 
-"""
-    create_vector(nrows, nrows_loc = PETSC_DECIDE)
+function Base.:*(x::Vec, alpha::Number)
+    y = VecCopy(x)
+    scale!(y, alpha)
+    return y
+end
+Base.:*(alpha::Number, vec::Vec) = vec * alpha
 
-Create a `PetscVec` vector of global size `(nrows)`.
-"""
-function create_vector(nrows, nrows_loc = PETSC_DECIDE; auto_setup = false, comm::MPI.Comm = MPI.COMM_WORLD)
-    vec = VecCreate(comm)
-    VecSetSizes(vec::PetscVec, nrows_loc, nrows)
+function assemble!(vec::Vec)
+    assemblyBegin(vec)
+    assemblyEnd(vec)
+end
 
-    if (auto_setup)
+"""
+    create_vector(
+        comm::MPI.Comm = MPI.COMM_WORLD;
+        nrows_loc = PETSC_DECIDE,
+        nrows_glo = PETSC_DECIDE,
+        autosetup = false,
+    )
+
+Create a `Vec` vector of global size `(nrows_glo)`.
+"""
+function create_vector(
+    comm::MPI.Comm = MPI.COMM_WORLD;
+    nrows_loc = PETSC_DECIDE,
+    nrows_glo = PETSC_DECIDE,
+    autosetup = false,
+)
+    vec = create(Vec, comm)
+    setSizes(vec, nrows_loc, nrows_glo)
+
+    if autosetup
         set_from_options!(vec)
         set_up!(vec)
     end
@@ -16,34 +38,10 @@ function create_vector(nrows, nrows_loc = PETSC_DECIDE; auto_setup = false, comm
     return vec
 end
 
-Base.ndims(::Type{PetscVec}) = 1
+duplicate(vec::Vec, n::Int) = ntuple(i -> duplicate(vec), n)
 
 """
-    Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-
-`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
-
-# Implementation
-For some unkwnown reason, calling `VecSetValue` fails.
-"""
-function Base.setindex!(vec::PetscVec, value::Number, row::Integer)
-    VecSetValues(vec, PetscInt[row .- 1], PetscScalar[value], INSERT_VALUES)
-end
-
-
-# This is stupid but I don't know how to do better yet
-Base.setindex!(vec::PetscVec, values, rows) = VecSetValues(vec, collect(rows .- 1), values, INSERT_VALUES)
-
-
-set_global_size!(vec::PetscVec, nrows) = VecSetSizes(vec, PETSC_DECIDE, nrows)
-set_local_size!(vec::PetscVec, nrows) = VecSetSizes(vec, nrows, PETSC_DECIDE)
-
-set_from_options!(vec::PetscVec) = VecSetFromOptions(vec)
-
-set_up!(vec::PetscVec) = VecSetUp(vec)
-
-"""
-    get_range(vec::PetscVec)
+    get_range(vec::Vec)
 
 Wrapper to `VecGetOwnershipRange`
 
@@ -51,67 +49,137 @@ However, the result `(rstart, rend)` is such that `vec[rstart:rend]` are the row
 This is different from the default `PETSc.VecGetOwnershipRange` result where the indexing starts at zero and where
 `rend-1` is last row handled by the local processor.
 """
-function get_range(vec::PetscVec)
-    rstart, rend = VecGetOwnershipRange(vec)
+function get_range(vec::Vec)
+    rstart, rend = getOwnershipRange(vec)
     return (rstart + 1, rend)
 end
 
 """
-    get_urange(vec::PetscVec)
+    get_urange(vec::Vec)
 
 Provide a `UnitRange` from the method `get_range`.
 """
-function get_urange(vec::PetscVec)
-    rstart, rend = VecGetOwnershipRange(vec)
-    return rstart+1:rend
+function get_urange(vec::Vec)
+    rstart, rend = getOwnershipRange(vec)
+    return (rstart + 1):rend
 end
 
+Base.ndims(::Type{Vec}) = 1
 
-# Discutable choice
-Base.length(vec::PetscVec) = VecGetLocalSize(vec)
-Base.size(vec::PetscVec) = (length(vec),)
-
-function assemble!(vec::PetscVec)
-    VecAssemblyBegin(vec)
-    VecAssemblyEnd(vec)
-end
-
-duplicate(vec::PetscVec) = VecDuplicate(vec)
-
-set_values!(vec::PetscVec, values) = VecSetValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
+const scale! = scale
 
 """
+    Base.setindex!(vec::Vec, value::Number, row::Integer)
+
+`row` must be in [1,size(vec)], i.e indexing starts at 1 (Julia).
+
+# Implementation
+
+For some unkwnown reason, calling `VecSetValue` fails.
+"""
+function Base.setindex!(vec::Vec, value::Number, row::Integer)
+    setValues(vec, PetscInt[row .- 1], PetscScalar[value], INSERT_VALUES)
+end
+
+# This is stupid but I don't know how to do better yet
+function Base.setindex!(vec::Vec, values, rows)
+    setValues(vec, collect(rows .- 1), values, INSERT_VALUES)
+end
+
+set_global_size!(vec::Vec, nrows) = setSizes(vec, PETSC_DECIDE, nrows)
+
+"""
+Wrapper to `ISSetLocalToGlobalMapping`
+
+1-based indexing
+"""
+function set_local_to_global!(vec::Vec, lid2gid::Vector{I}) where {I<:Integer}
+    mapping = create(ISLocalToGlobalMapping, vec.comm, lid2gid .- 1)
+    setLocalToGlobalMapping(vec, mapping)
+    destroy(mapping)
+end
+
+set_local_size!(vec::Vec, nrows) = setSizes(vec, nrows, PETSC_DECIDE)
+
+"""
+    set_value!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+
+Wrapper to `VecSetValue`, using julia 1-based indexing.
+"""
+function set_value!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+    setValue(vec, row - 1, value, mode)
+end
+
+"""
+    set_values!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    set_values!(vec::Vec, values)
+
 Wrapper to `VecSetValues`, using julia 1-based indexing.
 """
-function set_values!(vec::PetscVec, rows::Vector{PetscInt}, values::Vector{PetscScalar}, mode::InsertMode = INSERT_VALUES)
-    VecSetValues(vec, rows .- PetscIntOne, values, mode)
+function set_values!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    setValues(vec, rows .- 1, values, mode)
+end
+
+function set_values!(vec::Vec, values)
+    setValues(vec, collect(get_urange(vec) .- 1), values, INSERT_VALUES)
 end
 
 """
-    vec2array(vec::PetscVec)
+    set_value_local!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
 
-Convert a `PetscVec` into a Julia `Array`. Allocation is involved in the process since the `PetscVec`
+Wrapper to `VecSetValueLocal`, using julia 1-based indexing.
+"""
+function set_value_local!(vec::Vec, row, value, mode::InsertMode = INSERT_VALUES)
+    setValueLocal(vec, row - 1, value, mode)
+end
+
+"""
+    set_values_local!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    set_values_local!(vec::Vec, values)
+
+Wrapper to `VecSetValuesLocal`, using julia 1-based indexing.
+"""
+function set_values_local!(vec::Vec, rows, values, mode::InsertMode = INSERT_VALUES)
+    setValuesLocal(vec, rows .- 1, values, mode)
+end
+
+function set_values_local!(vec::Vec, values)
+    # Since we are using the "local" numbering, we set element "1" to "nloc"
+    setValuesLocal(vec, collect(1:getLocalSize(vec)) .- 1, values, INSERT_VALUES)
+end
+
+Base.show(::IO, vec::Vec) = vecView(vec)
+
+"""
+    vec2array(vec::Vec)
+
+Convert a `Vec` into a Julia `Array`. Allocation is involved in the process since the `Vec`
 allocated by PETSC is copied into a freshly allocated array. If you prefer not to allocate memory,
 use `VectGetArray` and `VecRestoreArray`
 """
-function vec2array(vec::PetscVec)
-    arrayFromC, array_ref = VecGetArray(vec)
+function vec2array(vec::Vec)
+    arrayFromC, array_ref = getArray(vec)
     array = copy(arrayFromC)
-    VecRestoreArray(vec, array_ref)
+    restoreArray(vec, array_ref)
     return array
 end
 
 """
-    vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+    vec2file(vec::Vec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
 
-Write a PetscVec to a file.
+Write a Vec to a file.
 """
-function vec2file(vec::PetscVec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
+function vec2file(
+    vec::Vec,
+    filename::String,
+    format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV,
+    type::String = "ascii",
+)
     viewer = PetscViewer(vec.comm, filename, format, type)
-    VecView(vec, viewer)
+    vecView(vec, viewer)
     destroy!(viewer)
 end
 
-Base.show(::IO, vec::PetscVec) = VecView(vec)
-
-destroy!(vec::PetscVec) = VecDestroy(vec)
+# Discutable choice(s)
+Base.length(vec::Vec) = getLocalSize(vec)
+Base.size(vec::Vec) = (length(vec),)

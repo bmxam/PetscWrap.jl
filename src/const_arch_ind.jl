@@ -4,7 +4,8 @@
 const PetscErrorCode = Cint
 
 const PETSC_DEFAULT = -2
-const PETSC_DECIDE  = -1
+const PETSC_DECIDE = -1
+const PETSC_DETERMINE = PETSC_DECIDE
 
 """
     Macro to automatically export all items of an enum
@@ -14,34 +15,41 @@ macro exported_enum(name, args...)
         @enum($name, $(args...))
         export $name
         $([:(export $arg) for arg in args]...)
-        end)
+    end)
 end
-
 
 @enum PetscBool PETSC_FALSE PETSC_TRUE
+Base.Bool(x::PetscBool) = x == PETSC_TRUE
+bool2petsc(x::Bool) = x ? PETSC_TRUE : PETSC_FALSE
 
-@enum PetscDataType begin
-    PETSC_DATATYPE_UNKNOWN  = 0
-    PETSC_DOUBLE            = 1
-    PETSC_COMPLEX           = 2
-    PETSC_LONG              = 3
-    PETSC_SHORT             = 4
-    PETSC_FLOAT             = 5
-    PETSC_CHAR              = 6
-    PETSC_BIT_LOGICAL       = 7
-    PETSC_ENUM              = 8
-    PETSC_BOOL              = 9
-    PETSC_FLOAT128          = 10
-    PETSC_OBJECT            = 11
-    PETSC_FUNCTION          = 12
-    PETSC_STRING            = 13
-    PETSC___FP16            = 14
-    PETSC_STRUCT            = 15
-    PETSC_INT               = 16
-    PETSC_INT64             = 17
+@enum PetscCopyMode begin
+    PETSC_COPY_VALUES
+    PETSC_OWN_POINTER
+    PETSC_USE_POINTER
 end
 
-const Petsc64bitInt  = Int64
+@enum PetscDataType begin
+    PETSC_DATATYPE_UNKNOWN = 0
+    PETSC_DOUBLE = 1
+    PETSC_COMPLEX = 2
+    PETSC_LONG = 3
+    PETSC_SHORT = 4
+    PETSC_FLOAT = 5
+    PETSC_CHAR = 6
+    PETSC_BIT_LOGICAL = 7
+    PETSC_ENUM = 8
+    PETSC_BOOL = 9
+    PETSC_FLOAT128 = 10
+    PETSC_OBJECT = 11
+    PETSC_FUNCTION = 12
+    PETSC_STRING = 13
+    PETSC___FP16 = 14
+    PETSC_STRUCT = 15
+    PETSC_INT = 16
+    PETSC_INT64 = 17
+end
+
+const Petsc64bitInt = Int64
 const PetscLogDouble = Cdouble
 
 @enum InsertMode begin
@@ -70,12 +78,12 @@ end
 end
 
 @enum MatFactorType begin
-    MAT_FACTOR_NONE     = 0
-    MAT_FACTOR_LU       = 1
+    MAT_FACTOR_NONE = 0
+    MAT_FACTOR_LU = 1
     MAT_FACTOR_CHOLESKY = 2
-    MAT_FACTOR_ILU      = 3
-    MAT_FACTOR_ICC      = 4
-    MAT_FACTOR_ILUDT    = 5
+    MAT_FACTOR_ILU = 3
+    MAT_FACTOR_ICC = 4
+    MAT_FACTOR_ILUDT = 5
 end
 
 @enum MatOption begin
@@ -107,6 +115,12 @@ end
     MAT_SORTED_FULL = 23
     MAT_FORM_EXPLICIT_TRANSPOSE = 24
     MAT_OPTION_MAX = 25
+end
+
+@enum MatDuplicateOption begin
+    MAT_DO_NOT_COPY_VALUES
+    MAT_COPY_VALUES
+    MAT_SHARE_NONZERO_PATTERN
 end
 
 @enum PetscViewerFormat begin
@@ -159,15 +173,15 @@ end
 end
 
 @enum MatOperation begin
-    MATOP_SET_VALUES=0
-    MATOP_GET_ROW=1
-    MATOP_RESTORE_ROW=2
-    MATOP_MULT=3
-    MATOP_MULT_ADD=4
-    MATOP_MULT_TRANSPOSE=5
-    MATOP_MULT_TRANSPOSE_ADD=6
-    MATOP_SOLVE=7
-    MATOP_SOLVE_ADD=8
-    MATOP_SOLVE_TRANSPOSE=9
-    MATOP_SOLVE_TRANSPOSE_ADD=10
+    MATOP_SET_VALUES = 0
+    MATOP_GET_ROW = 1
+    MATOP_RESTORE_ROW = 2
+    MATOP_MULT = 3
+    MATOP_MULT_ADD = 4
+    MATOP_MULT_TRANSPOSE = 5
+    MATOP_MULT_TRANSPOSE_ADD = 6
+    MATOP_SOLVE = 7
+    MATOP_SOLVE_ADD = 8
+    MATOP_SOLVE_TRANSPOSE = 9
+    MATOP_SOLVE_TRANSPOSE_ADD = 10
 end

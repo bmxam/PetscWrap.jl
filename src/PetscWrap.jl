@@ -7,16 +7,22 @@ module PetscWrap
 
 using Libdl
 using MPI
+using LinearAlgebra
+
+# GridapPETSc trick to track allocs/deallocs
+const _NREFS = Ref(0)
 
 include("const_arch_ind.jl")
-export  PetscErrorCode, PETSC_DECIDE
+export PetscErrorCode, PETSC_DECIDE
 # export all items of some enums
 for item in Iterators.flatten((
     instances(InsertMode),
     instances(MatAssemblyType),
+    instances(MatOption),
+    instances(MatDuplicateOption),
     instances(PetscViewerFormat),
     instances(PetscFileMode),
-    ))
+))
     @eval export $(Symbol(item))
 end
 
@@ -26,108 +32,96 @@ export show_petsc_path
 include("const_arch_dep.jl")
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
+include("common.jl")
+
 include("init.jl")
-export PetscInitialize, PetscFinalize
+export PetscInitialize, PetscInitialized, PetscFinalize
 
-include("viewer.jl")
-export  PetscViewer, CViewer,
-        PetscViewerASCIIOpen,
-        PetscViewerCreate,
-        PetscViewerDestroy,
-        PetscViewerFileSetMode,
-        PetscViewerFileSetName,
-        PetscViewerHDF5Open,
-        PetscViewerPopFormat,
-        PetscViewerPushFormat,
-        PetscViewerSetType,
-        PetscViewerStdWorld,
-        PetscViewerView
+include("PetscViewer.jl")
+export PetscViewer,
+    CViewer,
+    ASCIIOpen,
+    create,
+    destroy,
+    fileSetMode,
+    fileSetName,
+    HDF5Open,
+    popFormat,
+    pushFormat,
+    setType,
+    stdWorld,
+    viewerView
 
-include("vec.jl")
-export  PetscVec, CVec,
-        VecAssemble,
-        VecAssemblyBegin,
-        VecAssemblyEnd,
-        VecCreate,
-        VecDestroy,
-        VecDuplicate,
-        VecGetArray,
-        VecGetLocalSize,
-        VecGetOwnershipRange,
-        VecGetSize,
-        VecRestoreArray,
-        VecSetFromOptions,
-        VecSetSizes,
-        VecSetUp,
-        VecSetValue,
-        VecSetValues,
-        VecView
+include("ISLocalToGlobalMapping.jl")
+include("Vec.jl")
+export Vec,
+    CVec,
+    assemblyBegin,
+    assemblyEnd,
+    copy,
+    duplicate,
+    getArray,
+    getLocalSize,
+    getOwnershipRange,
+    getSize,
+    getValues,
+    restoreArray,
+    scale,
+    setFromOptions,
+    setSizes,
+    setUp,
+    setValue,
+    setValueLocal,
+    setValues,
+    setValuesLocal,
+    vecView
 
-include("mat.jl")
-export  PetscMat, CMat,
-        MatAssemble,
-        MatAssemblyBegin,
-        MatAssemblyEnd,
-        MatCreate,
-        MatCreateComposite,
-        MatCreateDense,
-        MatCreateVecs,
-        MatDestroy,
-        MatGetLocalSize,
-        MatGetOwnershipRange,
-        MatGetOwnershipRangeColumn,
-        MatGetSize,
-        MatGetType,
-        MatMPIAIJSetPreallocation,
-        MatMult,
-        MatSeqAIJSetPreallocation,
-        MatSetFromOptions,
-        MatSetSizes,
-        MatSetUp,
-        MatSetValue,
-        MatSetValues,
-        MatView
+include("Mat.jl")
+export Mat,
+    CMat,
+    createComposite,
+    createDense,
+    createVecs,
+    getOwnershipRangeColumn,
+    getType,
+    MPIAIJSetPreallocation,
+    mult,
+    multAdd,
+    SeqAIJSetPreallocation,
+    matView,
+    zeroEntries
 
-include("ksp.jl")
-export  PetscKSP, CKSP,
-        KSPCreate,
-        KSPDestroy,
-        KSPSetFromOptions,
-        KSPSetOperators,
-        KSPSetUp,
-        KSPSolve
+include("KSP.jl")
+export KSP, CKSP, setOperators, solve
 
 # fancy
+include("fancy/common.jl")
 include("fancy/viewer.jl")
-export  destroy!,
-        push_format!,
-        set_mode!,
-        set_name!,
-        set_type!
+export destroy!, push_format!, set_mode!, set_name!, set_type!
 
 include("fancy/vec.jl")
-export  assemble!,
-        create_vector,
-        destroy!,
-        duplicate,
-        get_range,
-        get_urange,
-        set_local_size!, set_global_size!,
-        set_from_options!,
-        set_up!,
-        vec2array,
-        vec2file
+export assemble!,
+    create_vector,
+    destroy!,
+    duplicate,
+    get_range,
+    get_urange,
+    set_local_size!,
+    set_local_to_global!,
+    set_global_size!,
+    set_from_options!,
+    set_up!,
+    set_value!,
+    set_value_local!,
+    set_values!,
+    set_values_local!,
+    vec2array,
+    vec2file
 
 include("fancy/mat.jl")
-export  create_composite_add,
-        create_matrix,
-        mat2file,
-        preallocate!,
-        set_values!
+export create_composite_add, create_matrix, mat2file, preallocate!
 
 include("fancy/ksp.jl")
-export  create_ksp,
-        solve, solve!,
-        set_operators!
+export create_ksp, solve, solve!, set_operators!
 
 end

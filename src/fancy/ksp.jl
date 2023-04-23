@@ -1,34 +1,25 @@
-create_ksp() = KSPCreate()
+function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false)
+    ksp = create(KSP)
+    setOperators(ksp, Amat, Pmat)
 
-function create_ksp(A::PetscMat)
-    ksp = KSPCreate()
-    KSPSetOperators(ksp, A, A)
+    if autosetup
+        set_from_options!(ksp)
+        set_up!(ksp)
+    end
     return ksp
 end
 
-function create_ksp(Amat::PetscMat, Pmat::PetscMat)
-    ksp = KSPCreate()
-    KSPSetOperators(ksp, Amat, Pmat)
-    return ksp
-end
+create_ksp(A::Mat; autosetup = false) = create_ksp(A, A; autosetup)
 
-set_operators!(ksp::PetscKSP, Amat::PetscMat) = KSPSetOperators(ksp, Amat, Amat)
-set_operators!(ksp::PetscKSP, Amat::PetscMat, Pmat::PetscMat) = KSPSetOperators(ksp, Amat, Pmat)
+set_operators!(ksp::KSP, Amat::Mat) = setOperators(ksp, Amat, Amat)
+set_operators!(ksp::KSP, Amat::Mat, Pmat::Mat) = setOperators(ksp, Amat, Pmat)
 
+solve!(ksp::KSP, b::Vec, x::Vec) = solve(ksp, b, x)
 
-solve!(ksp::PetscKSP, b::PetscVec, x::PetscVec) = KSPSolve(ksp, b, x)
-
-function solve(ksp::PetscKSP, b::PetscVec)
-    x = VecDuplicate(b)
-    KSPSolve(ksp, b, x)
+function solve(ksp::KSP, b::Vec)
+    x = duplicate(b)
+    solve(ksp, b, x)
     return x
 end
 
-set_up!(ksp::PetscKSP) = KSPSetUp(ksp)
-
-set_from_options!(ksp::PetscKSP) = KSPSetFromOptions(ksp)
-
-
-Base.show(::IO, ksp::PetscKSP) = KSPView(ksp)
-
-destroy!(ksp::PetscKSP) = KSPDestroy(ksp)
+Base.show(::IO, ksp::KSP) = KSPView(ksp)
