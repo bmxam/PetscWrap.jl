@@ -26,10 +26,8 @@ for item in Iterators.flatten((
     @eval export $(Symbol(item))
 end
 
-include("load.jl")
-export show_petsc_path
-
-include("const_arch_dep.jl")
+# Find PETSc lib path and set number types
+include(joinpath(@__DIR__, "..", "deps", "deps.jl"))
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
 include("common.jl")
