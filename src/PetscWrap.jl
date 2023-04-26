@@ -86,6 +86,8 @@ export Mat,
     mult,
     multAdd,
     SeqAIJSetPreallocation,
+    setPreallocationCOO,
+    setValuesCOO,
     matView,
     zeroEntries
 
