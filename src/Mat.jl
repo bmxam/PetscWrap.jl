@@ -534,6 +534,7 @@ setOption(mat::Mat, op::MatOption, flg::Bool) = setOption(mat, op, bool2petsc(fl
 
 """
     setPreallocationCOO(A::Mat, ncoo::Cptrdiff_t, coo_i::Vector{PetscInt}, coo_j::Vector{PetscInt})
+    setPreallocationCOO(A::Mat, coo_i, coo_j)
 
 Wrapper for `MatSetPreallocationCOO`
 https://petsc.org/release/manualpages/Mat/MatSetPreallocationCOO/
@@ -556,6 +557,10 @@ function setPreallocationCOO(
         coo_j,
     )
     @assert iszero(error)
+end
+
+function setPreallocationCOO(A::Mat, coo_i, coo_j)
+    setPreallocationCOO(A, length(coo_i), PetscInt.(coo_i), PetscInt.(coo_j))
 end
 
 """
