@@ -27,25 +27,23 @@ for item in Iterators.flatten((
 end
 
 # Find PETSc lib path and set number types
-let deps_jl = joinpath(@__DIR__,"..","deps","deps.jl")
-
+let deps_jl = joinpath(@__DIR__, "..", "deps", "deps.jl")
     if (haskey(ENV, "JULIA_REGISTRYCI_AUTOMERGE") || haskey(ENV, "DOC_DEPLOYMENT"))
         return
     end
 
     if !isfile(deps_jl)
-      msg = """
-      PetscWrap needs to be configured before use. Type
+        msg = """
+        PetscWrap needs to be configured before use. Type
 
-      pkg> build
+        pkg> build
 
-      and try again.
-      """
-      error(msg)
+        and try again.
+        """
+        error(msg)
     end
 
     include(deps_jl)
-  end
 end
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
