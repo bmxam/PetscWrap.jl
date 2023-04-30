@@ -502,3 +502,14 @@ function vecView(vec::Vec, viewer::PetscViewer = StdWorld(vec.comm))
     error = ccall((:VecView, libpetsc), PetscErrorCode, (CVec, CViewer), vec, viewer)
     @assert iszero(error)
 end
+
+"""
+    zeroEntries(vec::Vec)
+
+Wrapper to `VecZeroEntries`
+https://petsc.org/release/manualpages/Vec/VecZeroEntries/
+"""
+function zeroEntries(vec::Vec)
+    error = ccall((:VecZeroEntries, libpetsc), PetscErrorCode, (CVec,), vec)
+    @assert iszero(error)
+end

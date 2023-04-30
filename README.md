@@ -5,27 +5,24 @@
 
 PetscWrap.jl is a parallel Julia wrapper for the (awesome) [PETSc](https://www.mcs.anl.gov/petsc/) library. It can be considered as a fork from the [GridapPetsc.jl](https://github.com/gridap/GridapPETSc.jl) and [Petsc.jl](https://github.com/JuliaParallel/PETSc.jl) projects : these two projects have extensively inspired this project, and some code has even been directly copied.
 
-The main differences with the two aformentionned projects are:
-
-- parallel support : you can solve linear systems on multiple core with `mpirun -n 4 julia foo.jl`;
-- no dependance to other Julia packages except `MPI.jl`;
-- possibility to switch from one PETSc "arch" to another;
-- less PETSc API functions wrappers for now.
-
 Note that the primary objective of this project is to enable the wrapper of the SLEPc library through the [SlepcWrap.jl](https://github.com/bmxam/SlepcWrap.jl) project.
 
 This project is only a wrapper to PETSc functions, the purpose is not to deliver a julia `Array` (it maybe be one day the purpose of a package `PetscArrays.jl`).
 
 ## How to install it
 
-You must have installed the PETSc library on your computer and set the two following environment variables : `PETSC_DIR` and `PETSC_ARCH`.
-
-At run time, PetscWrap.jl looks for the `libpetsc.so` using these environment variables and "load" the library.
-
 To install the package, use the Julia package manager:
 
 ```Julia
 pkg> add PetscWrap
+```
+
+If PETSc is not installed on your machine, it will be installed by the Julia package manager. Alternatively, if you already have a PETSc installation, `PetscWrap.jl` will select the install designated by `PETSC_DIR` and `PETSC_ARCH` environment variables.
+
+If you want, at any time, to modify the PETSc install used by the wrapper, just type
+
+```Julia
+pkg> build PetscWrap
 ```
 
 ## Contribute

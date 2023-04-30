@@ -533,6 +533,37 @@ end
 setOption(mat::Mat, op::MatOption, flg::Bool) = setOption(mat, op, bool2petsc(flg))
 
 """
+    setPreallocationCOO(A::Mat, ncoo::Cptrdiff_t, coo_i::Vector{PetscInt}, coo_j::Vector{PetscInt})
+    setPreallocationCOO(A::Mat, coo_i, coo_j)
+
+Wrapper for `MatSetPreallocationCOO`
+https://petsc.org/release/manualpages/Mat/MatSetPreallocationCOO/
+
+Indexing starts at 0 (as in PETSc)
+"""
+function setPreallocationCOO(
+    A::Mat,
+    ncoo::Cptrdiff_t,
+    coo_i::Vector{PetscInt},
+    coo_j::Vector{PetscInt},
+)
+    error = ccall(
+        (:MatSetPreallocationCOO, libpetsc),
+        PetscErrorCode,
+        (CMat, Cptrdiff_t, Ptr{PetscInt}, Ptr{PetscInt}),
+        A,
+        ncoo,
+        coo_i,
+        coo_j,
+    )
+    @assert iszero(error)
+end
+
+function setPreallocationCOO(A::Mat, coo_i, coo_j)
+    setPreallocationCOO(A, length(coo_i), PetscInt.(coo_i), PetscInt.(coo_j))
+end
+
+"""
     setSizes(mat::Mat, m::PetscInt, n::PetscInt, M::PetscInt, N::PetscInt)
     setSizes(
         mat::Mat,
@@ -713,6 +744,30 @@ end
 
 function setValues(mat::Mat, I, J, V, mode::InsertMode)
     setValues(mat, PetscInt.(I), PetscInt.(collect(J)), PetscScalar.(V), mode)
+end
+
+"""
+    setValuesCOO(
+        A::Mat,
+        coo_v::Vector{PetscScalar},
+        imode::InsertMode,
+    )
+
+Wrapper to `MatSetValuesCOO`
+https://petsc.org/release/manualpages/Mat/MatSetValuesCOO/
+
+Indexing starts at 0 (as in PETSc)
+"""
+function setValuesCOO(A::Mat, coo_v::Vector{PetscScalar}, imode::InsertMode)
+    error = ccall(
+        (:MatSetValuesCOO, libpetsc),
+        PetscErrorCode,
+        (CMat, Ptr{PetscScalar}, InsertMode),
+        A,
+        coo_v,
+        imode,
+    )
+    @assert iszero(error)
 end
 
 """

@@ -165,6 +165,26 @@ function vec2array(vec::Vec)
 end
 
 """
+In construction
+"""
+function get_values!(y::AbstractVector{PetscScalar}, x::Vec)
+    ni = length(y)
+    rstart, rend = getOwnershipRange(x)
+    ix = collect(rstart:(rend - 1))
+
+    error = ccall(
+        (:VecGetValues, libpetsc),
+        PetscErrorCode,
+        (CVec, PetscInt, Ptr{PetscInt}, Ptr{PetscScalar}),
+        x,
+        ni,
+        ix,
+        y,
+    )
+    @assert iszero(error)
+end
+
+"""
     vec2file(vec::Vec, filename::String, format::PetscViewerFormat = PETSC_VIEWER_ASCII_CSV, type::String = "ascii")
 
 Write a Vec to a file.

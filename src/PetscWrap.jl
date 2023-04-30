@@ -26,10 +26,22 @@ for item in Iterators.flatten((
     @eval export $(Symbol(item))
 end
 
-include("load.jl")
-export show_petsc_path
+# Find PETSc lib path and set number types
+const _deps_jl = joinpath(@__DIR__, "..", "deps", "deps.jl")
+if (haskey(ENV, "JULIA_REGISTRYCI_AUTOMERGE") || haskey(ENV, "DOC_DEPLOYMENT"))
+    include(joinpath(@__DIR__, "..", "deps", "fake_deps.jl"))
+elseif !isfile(_deps_jl)
+    msg = """
+    PetscWrap needs to be configured before use. Type
 
-include("const_arch_dep.jl")
+    pkg> build
+
+    and try again.
+    """
+    error(msg)
+else
+    include(_deps_jl)
+end
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
 include("common.jl")
@@ -88,6 +100,9 @@ export Mat,
     mult,
     multAdd,
     SeqAIJSetPreallocation,
+    setOption,
+    setPreallocationCOO,
+    setValuesCOO,
     matView,
     zeroEntries
 
