@@ -122,3 +122,5 @@ function PetscFinalized()
     @assert iszero(error)
     return Bool(isFinalized[])
 end
+
+get_PETSC_COMM_WORLD() = cglobal((:PETSC_COMM_WORLD, libpetsc), PetscInt)

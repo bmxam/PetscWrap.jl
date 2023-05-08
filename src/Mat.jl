@@ -59,12 +59,12 @@ function compositeAddMat(mat::Mat, smat::Mat)
 end
 
 """
-    create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
+    create(::Type{Mat}, comm::MPI.Comm; add_finalizer = true)
 
 Wrapper to `MatCreate`
 https://petsc.org/release/manualpages/Mat/MatCreate/
 """
-function create(::Type{Mat}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
+function create(::Type{Mat}, comm::MPI.Comm; add_finalizer = true)
     mat = Mat(comm)
     error =
         ccall((:MatCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CMat}), comm, mat)
