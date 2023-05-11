@@ -21,7 +21,7 @@ Base.ndims(::Type{Mat}) = 2
 
 """
     create_matrix(
-        comm::MPI.Comm = MPI.COMM_WORLD;
+        comm::MPI.Comm;
         nrows_loc = PETSC_DECIDE,
         ncols_loc = PETSC_DECIDE,
         nrows_glo = PETSC_DECIDE,
@@ -32,7 +32,7 @@ Base.ndims(::Type{Mat}) = 2
 Use `autosetup = true` to immediatly call `set_from_options!` and `set_up!`.
 """
 function create_matrix(
-    comm::MPI.Comm = MPI.COMM_WORLD;
+    comm::MPI.Comm;
     nrows_loc = PETSC_DECIDE,
     ncols_loc = PETSC_DECIDE,
     nrows_glo = PETSC_DETERMINE,

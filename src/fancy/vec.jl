@@ -13,7 +13,7 @@ end
 
 """
     create_vector(
-        comm::MPI.Comm = MPI.COMM_WORLD;
+        comm::MPI.Comm;
         nrows_loc = PETSC_DECIDE,
         nrows_glo = PETSC_DECIDE,
         autosetup = false,
@@ -22,7 +22,7 @@ end
 Create a `Vec` vector of global size `(nrows_glo)`.
 """
 function create_vector(
-    comm::MPI.Comm = MPI.COMM_WORLD;
+    comm::MPI.Comm;
     nrows_loc = PETSC_DECIDE,
     nrows_glo = PETSC_DECIDE,
     autosetup = false,

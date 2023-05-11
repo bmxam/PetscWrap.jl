@@ -1,5 +1,5 @@
 function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false)
-    ksp = create(KSP)
+    ksp = create(KSP, _get_comm(Amat))
     setOperators(ksp, Amat, Pmat)
 
     if autosetup
