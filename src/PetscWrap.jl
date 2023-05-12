@@ -41,6 +41,12 @@ elseif !isfile(_deps_jl)
     error(msg)
 else
     include(_deps_jl)
+    if libpetsc_provider == "PETSc_jll"
+        using PETSc_jll
+        const libpetsc = PETSc_jll.libpetsc_path
+    else
+        const libpetsc = _libpetsc_path
+    end
 end
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 

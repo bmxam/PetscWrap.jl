@@ -124,7 +124,7 @@ open(joinpath(@__DIR__, "deps.jl"), "w") do f
     println(f)
     println(f, :(const libpetsc_found = $(libpetsc_found)))
     println(f, :(const libpetsc_provider = $(libpetsc_provider)))
-    println(f, :(const libpetsc = $(libpetsc)))
+    println(f, :(const _libpetsc_path = $(libpetsc)))
     println(f)
     println(f, :("\"\"\""))
     println(f, "Julia alias for `PetscReal` C type.\n")
@@ -154,6 +154,4 @@ open(joinpath(@__DIR__, "deps.jl"), "w") do f
     println(f, :(const PetscInt = $(PetscInt)))
     println(f)
     println(f, :(const PetscIntOne = PetscInt(1)))
-    println(f)
-    println(f, :(show_petsc_path() = return $libpetsc))
 end
