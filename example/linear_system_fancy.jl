@@ -12,6 +12,7 @@ module Example #hide
 # To run this example, execute : `mpirun -n your_favorite_positive_integer julia example2.jl`
 
 # Import package
+using MPI
 using PetscWrap
 
 # Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
@@ -19,6 +20,7 @@ using PetscWrap
 # `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
 # separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
 PetscInitialize()
+comm = MPI.COMM_WORLD
 
 # Number of mesh points and mesh step
 n = 11
@@ -26,8 +28,8 @@ n = 11
 
 # Create a matrix of size `(n,n)` and a vector of size `(n)`. The `autosetup` option
 # triggers a call to `setFromOptions` and `setUp`
-A = create_matrix(; nrows_glo = n, ncols_glo = n, autosetup = true)
-b = create_vector(; nrows_glo = n, autosetup = true)
+A = create_matrix(comm; nrows_glo = n, ncols_glo = n, autosetup = true)
+b = create_vector(comm; nrows_glo = n, autosetup = true)
 
 # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
 # The `rstart, rend = get_range(*)` methods differ a little bit from PETSc API since the two integers it
@@ -68,7 +70,7 @@ array = vec2array(x)
 destroy!(A, b, x, ksp)
 
 # Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
-M = create_matrix(; nrows_glo = 3, ncols_glo = 3, autosetup = true)
+M = create_matrix(comm; nrows_glo = 3, ncols_glo = 3, autosetup = true)
 M_start, M_end = get_range(M)
 I = [1, 1, 1, 2, 3]
 J = [1, 3, 1, 3, 2]
