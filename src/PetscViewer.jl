@@ -20,7 +20,7 @@ end
 Wrapper for `PetscViewerASCIIGetStdout`
 https://petsc.org/release/manualpages/Viewer/PetscViewerASCIIGetStdout/
 """
-function ASCIIGetStdout(comm::MPI.Comm = MPI.COMM_WORLD)
+function ASCIIGetStdout(comm::MPI.Comm)
     viewer = PetscViewer(comm)
     error = ccall(
         (:PetscViewerASCIIGetStdout, libpetsc),
@@ -56,12 +56,12 @@ function ASCIIOpen(comm::MPI.Comm, name::String)
 end
 
 """
-    create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
+    create(::Type{PetscViewer}, comm::MPI.Comm)
 
 Wrapper for `PetscViewerCreate`
 https://petsc.org/release/manualpages/Viewer/PetscViewerCreate/
 """
-function create(::Type{PetscViewer}, comm::MPI.Comm = MPI.COMM_WORLD)
+function create(::Type{PetscViewer}, comm::MPI.Comm)
     viewer = PetscViewer(comm)
     error = ccall(
         (:PetscViewerCreate, libpetsc),

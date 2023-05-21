@@ -1,7 +1,10 @@
+comm = MPI.COMM_WORLD
+
 @testset "composite" begin
+
     # Create two matrices
-    A = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
-    B = create_matrix(; nrows_glo = 2, ncols_glo = 2, autosetup = true)
+    A = create_matrix(comm; nrows_glo = 2, ncols_glo = 2, autosetup = true)
+    B = create_matrix(comm; nrows_glo = 2, ncols_glo = 2, autosetup = true)
 
     # Fill
 
@@ -29,9 +32,9 @@
     C = create_composite_add([A, B])
 
     # Create vectors to check C (see below)
-    x1 = create_vector(; nrows_glo = 2, autosetup = true)
-    x2 = create_vector(; nrows_glo = 2, autosetup = true)
-    y = create_vector(; nrows_glo = 2, autosetup = true)
+    x1 = create_vector(comm; nrows_glo = 2, autosetup = true)
+    x2 = create_vector(comm; nrows_glo = 2, autosetup = true)
+    y = create_vector(comm; nrows_glo = 2, autosetup = true)
     x1[1] = 1.0
     x1[2] = 0.0
     x2[1] = 0.0
@@ -51,8 +54,8 @@ end
 
 @testset "mapping" begin
     n = 10
-    x = create_vector(; nrows_glo = n, autosetup = true)
-    y = create_vector(; nrows_glo = n, autosetup = true)
+    x = create_vector(comm; nrows_glo = n, autosetup = true)
+    y = create_vector(comm; nrows_glo = n, autosetup = true)
     l2g = reverse(collect(1:n))
     set_local_to_global!(x, l2g)
 

@@ -1,3 +1,6 @@
+
+comm = MPI.COMM_WORLD
+
 @testset "linear system fancy" begin
     # Only on one processor...
 
@@ -6,8 +9,8 @@
     Δx = 1.0 / (n - 1)
 
     # Create a matrix of size `(n,n)` and a vector of size `(n)`
-    A = create_matrix(; nrows_glo = n, ncols_glo = n, autosetup = true)
-    b = create_vector(; nrows_glo = n, autosetup = true)
+    A = create_matrix(comm; nrows_glo = n, ncols_glo = n, autosetup = true)
+    b = create_vector(comm; nrows_glo = n, autosetup = true)
 
     # Let's build the right hand side vector. We first get the range of rows of `b` handled by the local processor.
     # The `rstart, rend = get_range(*)` methods differ a little bit from PETSc API since the two integers it
@@ -49,7 +52,7 @@
     destroy!(A, b, x)
 
     # Note that it's also possible to build a matrix using the COO format as in `SparseArrays`:
-    M = create_matrix(; nrows_glo = 3, ncols_glo = 3, autosetup = true)
+    M = create_matrix(comm; nrows_glo = 3, ncols_glo = 3, autosetup = true)
     M_start, M_end = get_range(M)
     I = [1, 1, 1, 2, 3]
     J = [1, 3, 1, 3, 2]

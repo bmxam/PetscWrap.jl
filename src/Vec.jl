@@ -55,12 +55,12 @@ function Base.copy(x::Vec; add_finalizer = true)
 end
 
 """
-    create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
+    create(::Type{Vec}, comm::MPI.Comm; add_finalizer = true)
 
 Wrapper to `VecCreate`
 https://petsc.org/release/manualpages/Vec/VecCreate/
 """
-function create(::Type{Vec}, comm::MPI.Comm = MPI.COMM_WORLD; add_finalizer = true)
+function create(::Type{Vec}, comm::MPI.Comm; add_finalizer = true)
     vec = Vec(comm)
     error =
         ccall((:VecCreate, libpetsc), PetscErrorCode, (MPI.MPI_Comm, Ptr{CVec}), comm, vec)

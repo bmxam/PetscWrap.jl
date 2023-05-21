@@ -11,22 +11,25 @@ module Example #hide
 #
 # To run this example, execute : `mpirun -n your_favorite_positive_integer julia example1.jl`
 
-# Import package
+# Import necessary packages
+using MPI
 using PetscWrap
 
 # Initialize PETSc. Command line arguments passed to Julia are parsed by PETSc. Alternatively, you can
 # also provide "command line arguments by defining them in a string, for instance
 # `PetscInitialize("-ksp_monitor_short -ksp_gmres_cgs_refinement_type refine_always")` or by providing each argument in
 # separate strings : `PetscInitialize(["-ksp_monitor_short", "-ksp_gmres_cgs_refinement_type", "refine_always")`
+# Note that if you don't initialize `MPI` before this call, `PetscWrap`` will do it for you.
 PetscInitialize()
+comm = MPI.COMM_WORLD
 
 # Number of mesh points and mesh step
 n = 11
 Δx = 1.0 / (n - 1)
 
-# Create a matrix and a vector (you can specify the MPI communicator if you want)
-A = create(Mat)
-b = create(Vec)
+# Create a matrix and a vector
+A = create(Mat, comm)
+b = create(Vec, comm)
 
 # Set the size of the different objects, leaving PETSC to decide how to distribute. Note that we should
 # set the number of preallocated non-zeros to increase performance.
@@ -71,7 +74,7 @@ matView(A)
 vecView(b)
 
 # Set up the linear solver
-ksp = create(KSP)
+ksp = create(KSP, comm)
 setOperators(ksp, A, A)
 setFromOptions(ksp)
 setUp(ksp)

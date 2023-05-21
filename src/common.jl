@@ -1,5 +1,6 @@
 abstract type AbstractPetscObject end
 _get_ptr(obj::AbstractPetscObject) = obj.ptr
+_get_comm(obj::AbstractPetscObject) = obj.comm
 
 const CPetscObject = Ptr{Cvoid}
 
