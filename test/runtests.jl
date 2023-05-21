@@ -26,7 +26,7 @@ end
 MPI.Init()
 PetscInitialize()
 
-error("Bug : tests are not running anymore when using `test`")
+# error("Bug : tests are not running anymore when using `test`")
 @testset "PetscWrap.jl" begin
     custom_include("./linear_system.jl")
     custom_include("./linear_system_fancy.jl")
