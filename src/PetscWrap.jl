@@ -50,6 +50,10 @@ else
 end
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
+const PETSC_DEFAULT = PetscInt(-2)
+const PETSC_DECIDE = PetscInt(-1)
+const PETSC_DETERMINE = PETSC_DECIDE
+
 include("common.jl")
 
 include("init.jl")

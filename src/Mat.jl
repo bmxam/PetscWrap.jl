@@ -7,7 +7,7 @@ mutable struct Mat <: AbstractPetscObject
     ptr::CMat
     comm::MPI.Comm
 
-    Mat(comm::MPI.Comm) = new(CMat(), comm)
+    Mat(comm::MPI.Comm, ptr = CMat()) = new(ptr, comm)
 end
 
 Base.unsafe_convert(::Type{CMat}, x::Mat) = x.ptr
@@ -79,18 +79,10 @@ end
 """
     createDense(
         comm::MPI.Comm,
-        m::PetscInt,
-        n::PetscInt,
-        M::PetscInt,
-        N::PetscInt;
-        add_finalizer = true,
-    )
-    createDense(
-        comm::MPI.Comm,
-        m::Integer = PETSC_DECIDE,
-        n::Integer = PETSC_DECIDE,
-        M::Integer = PETSC_DECIDE,
-        N::Integer = PETSC_DECIDE;
+        m::PetscInt = PETSC_DECIDE,
+        n::PetscInt = PETSC_DECIDE,
+        M::PetscInt = PETSC_DECIDE,
+        N::PetscInt = PETSC_DECIDE;
         add_finalizer = true,
     )
 
@@ -101,10 +93,10 @@ Last argument `data` is not supported yet (NULL is passed).
 """
 function createDense(
     comm::MPI.Comm,
-    m::PetscInt,
-    n::PetscInt,
-    M::PetscInt,
-    N::PetscInt;
+    m::PetscInt = PETSC_DECIDE,
+    n::PetscInt = PETSC_DECIDE,
+    M::PetscInt = PETSC_DECIDE,
+    N::PetscInt = PETSC_DECIDE;
     add_finalizer = true,
 )
     mat = Mat(comm)
@@ -128,22 +120,48 @@ function createDense(
     return mat
 end
 
-function createDense(
+"""
+    createShell(
+        comm::MPI.Comm,
+        m::PetscInt,
+        n::PetscInt,
+        M::PetscInt = PETSC_DETERMINE,
+        N::PetscInt = PETSC_DETERMINE;
+        add_finalizer = true,
+    )
+
+Wrapper to `MatCreateShell`
+https://petsc.org/release/manualpages/Mat/MatCreateShell/
+
+Last argument `ctx` is not supported yet (NULL is passed).
+"""
+function createShell(
     comm::MPI.Comm,
-    m::Integer = PETSC_DECIDE,
-    n::Integer = PETSC_DECIDE,
-    M::Integer = PETSC_DECIDE,
-    N::Integer = PETSC_DECIDE;
+    m::PetscInt,
+    n::PetscInt,
+    M::PetscInt = PETSC_DETERMINE,
+    N::PetscInt = PETSC_DETERMINE;
     add_finalizer = true,
 )
-    return createDense(
+    mat = Mat(comm)
+    error = ccall(
+        (:MatCreateShell, libpetsc),
+        PetscErrorCode,
+        (MPI.MPI_Comm, PetscInt, PetscInt, PetscInt, PetscInt, Ptr{Cvoid}, Ptr{CMat}),
         comm,
-        PetscInt(m),
-        PetscInt(n),
-        PetscInt(M),
-        PetscInt(N);
-        add_finalizer,
+        m,
+        n,
+        M,
+        N,
+        C_NULL,
+        mat,
     )
+    @assert iszero(error)
+
+    _NREFS[] += 1
+    add_finalizer && finalizer(destroy, mat)
+
+    return mat
 end
 
 """
@@ -766,6 +784,27 @@ function setValuesCOO(A::Mat, coo_v::Vector{PetscScalar}, imode::InsertMode)
         A,
         coo_v,
         imode,
+    )
+    @assert iszero(error)
+end
+
+"""
+    shellSetOperation(mat::Mat, op::MatOperation, g)
+
+`g` must have been built with `@cfunction`. For a more convenient API,
+see `src/fancy/mat.jl->set_shell_mul!`.
+
+Wrapper to `MatShellSetOperation`
+https://petsc.org/release/manualpages/Mat/MatShellSetOperation/
+"""
+function shellSetOperation(mat::Mat, op::MatOperation, g)
+    error = ccall(
+        (:MatShellSetOperation, libpetsc),
+        PetscErrorCode,
+        (CMat, MatOperation, Ptr{Cvoid}),
+        mat,
+        op,
+        g,
     )
     @assert iszero(error)
 end
