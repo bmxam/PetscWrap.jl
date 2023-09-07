@@ -173,11 +173,11 @@ c_func = set_shell_mul!(mat, f!)
 function set_shell_mul!(mat, f!)
     function _f!(A::CMat, x::CVec, y::CVec)::Cint
         comm = _get_comm(mat)
+        # we don't add finalizers since vectors come from Petsc
         f!(Vec(comm, y), Vec(comm, x))
         return PetscErrorCode(0) # return "success" (mandatory)
     end
     shell_mul_c = @cfunction($_f!, Cint, (CMat, CVec, CVec))
-    # shell_mul_c = @cfunction($f, Cvoid, (Mat, Vec, Vec))
     shellSetOperation(mat, MATOP_MULT, shell_mul_c)
     return shell_mul_c
 end

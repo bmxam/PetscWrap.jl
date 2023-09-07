@@ -57,7 +57,7 @@ function f!(y, x)
 
     # Update Petsc values `y` with the HauntedVector values (`y_h`)
     println("Updating Petsc vector...")
-    HauntedArrays2PetscWrap.update!(y, y_h, get_cache(y_h).oid2pid0)
+    HauntedArrays2PetscWrap.update!(y, y_h)
 
     # MPI.Barrier(PetscWrap._get_comm(y))
     println("done ! ")
