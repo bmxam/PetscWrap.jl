@@ -9,7 +9,7 @@ function create_ksp(Amat::Mat, Pmat::Mat; autosetup = false, add_finalizer = tru
     return ksp
 end
 
-create_ksp(A::Mat; kwargs...) = create_ksp(A, A; kwargs)
+create_ksp(A::Mat; kwargs...) = create_ksp(A, A; kwargs...)
 
 set_operators!(ksp::KSP, Amat::Mat) = setOperators(ksp, Amat, Amat)
 set_operators!(ksp::KSP, Amat::Mat, Pmat::Mat) = setOperators(ksp, Amat, Pmat)
