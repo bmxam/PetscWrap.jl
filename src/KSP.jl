@@ -4,7 +4,7 @@ mutable struct KSP <: AbstractPetscObject
     ptr::CKSP
     comm::MPI.Comm
 
-    KSP(comm::MPI.Comm) = new(CKSP(), comm)
+    KSP(comm::MPI.Comm, ptr = CKSP()) = new(ptr, comm)
 end
 
 Base.unsafe_convert(::Type{CKSP}, x::KSP) = x.ptr

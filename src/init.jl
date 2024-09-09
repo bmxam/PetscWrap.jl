@@ -81,10 +81,6 @@ function PetscFinalize()
     error = ccall((:PetscFinalize, libpetsc), PetscErrorCode, ())
     @assert iszero(error)
 
-    if _NREFS[] != 0
-        @warn "$(_NREFS[]) objects still not finalized after calling PetscWrap.Finalize()"
-    end
-
     _NREFS[] = 0
 end
 

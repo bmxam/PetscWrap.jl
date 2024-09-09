@@ -50,6 +50,10 @@ else
 end
 export PetscReal, PetscScalar, PetscInt, PetscIntOne
 
+const PETSC_DEFAULT = PetscInt(-2)
+const PETSC_DECIDE = PetscInt(-1)
+const PETSC_DETERMINE = PETSC_DECIDE
+
 include("common.jl")
 
 include("init.jl")
@@ -99,6 +103,7 @@ export Mat,
     CMat,
     createComposite,
     createDense,
+    createShell,
     createVecs,
     getOwnershipRangeColumn,
     getType,
@@ -109,6 +114,7 @@ export Mat,
     setOption,
     setPreallocationCOO,
     setValuesCOO,
+    shellSetOperation,
     matView,
     zeroEntries
 
@@ -140,7 +146,7 @@ export assemble!,
     vec2file
 
 include("fancy/mat.jl")
-export create_composite_add, create_matrix, mat2file, preallocate!
+export create_composite_add, create_matrix, mat2file, preallocate!, set_shell_mul!
 
 include("fancy/ksp.jl")
 export create_ksp, solve, solve!, set_operators!

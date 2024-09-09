@@ -159,6 +159,29 @@ function set_values!(mat, I, J, V, mode = ADD_VALUES)
     set_values!(mat, PetscInt.(I), PetscInt.(J), PetscScalar.(V), mode)
 end
 
+"""
+Wrapper for MatShellSetOperation for MATOP_MULT operation. `f!` signature
+must be f!(y::Vec, x::Vec) and must perform mul!(y, A, x).
+
+Warning : to prevent the garbage collector from freeing the `@cfunction`, the latter
+is returned and you must store it in a variable:
+
+```
+c_func = set_shell_mul!(mat, f!)
+```
+"""
+function set_shell_mul!(mat, f!)
+    function _f!(A::CMat, x::CVec, y::CVec)::Cint
+        comm = _get_comm(mat)
+        # we don't add finalizers since vectors come from Petsc
+        f!(Vec(comm, y), Vec(comm, x))
+        return PetscErrorCode(0) # return "success" (mandatory)
+    end
+    shell_mul_c = @cfunction($_f!, Cint, (CMat, CVec, CVec))
+    shellSetOperation(mat, MATOP_MULT, shell_mul_c)
+    return shell_mul_c
+end
+
 # Warning : cannot use Vector{Integer} because `[1, 2] isa Vector{Integer}` is `false`
 function _preallocate!(mat::Mat, dnz::Integer, onz::Integer, ::Val{:mpiaij})
     MPIAIJSetPreallocation(mat, PetscInt(dnz), PetscInt(onz))

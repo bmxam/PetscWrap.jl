@@ -4,7 +4,7 @@ mutable struct Vec <: AbstractPetscObject
     ptr::CVec
     comm::MPI.Comm
 
-    Vec(comm::MPI.Comm) = new(CVec(), comm)
+    Vec(comm::MPI.Comm, ptr = CVec()) = new(ptr, comm)
 end
 
 Base.unsafe_convert(::Type{CVec}, x::Vec) = x.ptr
